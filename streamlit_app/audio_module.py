@@ -12,9 +12,9 @@ try:
     import sounddevice as sd
     import soundfile as sf
     AUDIO_AVAILABLE = True
-except ImportError:
+except (ImportError, OSError) as e:
     AUDIO_AVAILABLE = False
-    st.warning("Audio recording libraries not available. Install with: pip install sounddevice soundfile")
+    # Don't show warning here as it will show on every import
 
 try:
     import whisper
@@ -25,6 +25,40 @@ except ImportError:
 def audio_page():
     st.markdown("## 🎙️ Audio Capture & Transcription")
     st.markdown("Record folk songs, stories, and oral traditions in your language.")
+    
+    # Check if audio libraries are available
+    if not AUDIO_AVAILABLE:
+        st.error("🚫 Audio recording is not available on this system.")
+        st.info("""
+        **To enable audio recording, you need to install:**
+        - PortAudio library (system dependency)
+        - Python audio packages: `pip install sounddevice soundfile`
+        
+        **For now, you can:**
+        - Upload pre-recorded audio files
+        - Use the text and image modules
+        - Explore other features of BharatVerse
+        """)
+        
+        # Show file upload as alternative
+        st.markdown("---")
+        st.markdown("### 📁 Upload Audio File")
+        uploaded_file = st.file_uploader(
+            "Choose an audio file", 
+            type=['wav', 'mp3', 'ogg', 'm4a'],
+            help="Upload a pre-recorded audio file for transcription"
+        )
+        
+        if uploaded_file is not None:
+            st.audio(uploaded_file, format='audio/wav')
+            st.success("Audio file uploaded successfully!")
+            
+            # Show mock transcription interface
+            if st.button("🔤 Transcribe Audio"):
+                with st.spinner("Transcribing audio..."):
+                    st.info("Transcription feature would process the uploaded audio here.")
+        
+        return
     
     # Language selection
     col1, col2 = st.columns(2)

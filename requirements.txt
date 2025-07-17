@@ -11,11 +11,11 @@ streamlit-option-menu>=0.3.6
 streamlit-lottie>=0.0.5
 streamlit-aggrid>=0.3.4
 
-# Audio processing
-sounddevice>=0.4.6
-soundfile>=0.12.1
-librosa>=0.10.0
-pydub>=0.25.1
+# Audio processing (optional - requires system PortAudio library)
+# sounddevice>=0.4.6
+# soundfile>=0.12.1
+# librosa>=0.10.0
+# pydub>=0.25.1
 
 # ML/AI dependencies
 transformers>=4.36.0
