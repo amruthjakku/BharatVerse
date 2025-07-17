@@ -19,8 +19,8 @@ def init_db():
                 "image": [],
                 "metadata": {
                     "total_contributions": 0,
-                    "languages": set(),
-                    "regions": set(),
+                    "languages": [],
+                    "regions": [],
                     "last_updated": datetime.now().isoformat()
                 }
             }, f, indent=2)

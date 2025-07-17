@@ -45,8 +45,9 @@ def story_section():
     title = st.text_input("Title", "A Journey to the Village Fair")
     content = st.text_area(
         "Story Content",
-        "It was a bright sunny morning when we decided to go to the village fair...
-        The fair was bustling with people, vibrant colors, and the smell of delicious food in the air.")
+        "It was a bright sunny morning when we decided to go to the village fair... "
+        "The fair was bustling with people, vibrant colors, and the smell of delicious food in the air.",
+        height=200)
 
     # Translation option
     if st.checkbox("Translate to English"):
