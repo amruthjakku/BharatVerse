@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: teluguverse
+      POSTGRES_DB: bharatverse
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: secure_password
     volumes:

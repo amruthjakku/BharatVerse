@@ -1,5 +1,5 @@
 """
-Database connection and management for TeluguVerse
+Database connection and management for BharatVerse
 Handles PostgreSQL (metadata), MinIO (files), and Redis (cache)
 """
 
@@ -30,7 +30,7 @@ class DatabaseConfig:
     # PostgreSQL
     POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-    POSTGRES_DB = os.getenv("POSTGRES_DB", "teluguverse")
+    POSTGRES_DB = os.getenv("POSTGRES_DB", "bharatverse")
     POSTGRES_USER = os.getenv("POSTGRES_USER", "admin")
     POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "secure_password")
     
@@ -47,10 +47,10 @@ class DatabaseConfig:
     REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
     
     # Buckets
-    AUDIO_BUCKET = "teluguverse-audio"
-    VIDEO_BUCKET = "teluguverse-video"
-    IMAGE_BUCKET = "teluguverse-images"
-    DOCUMENT_BUCKET = "teluguverse-documents"
+    AUDIO_BUCKET = "bharatverse-audio"
+    VIDEO_BUCKET = "bharatverse-video"
+    IMAGE_BUCKET = "bharatverse-images"
+    DOCUMENT_BUCKET = "bharatverse-documents"
 
 
 class DatabaseManager:
