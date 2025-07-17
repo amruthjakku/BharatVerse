@@ -17,24 +17,24 @@ streamlit-aggrid>=0.3.4
 # librosa>=0.10.0
 # pydub>=0.25.1
 
-# ML/AI dependencies
-transformers>=4.36.0
-torch>=2.1.0
-torchvision>=0.16.0
-sentence-transformers>=2.2.2
+# ML/AI dependencies (optional - large downloads)
+# transformers>=4.36.0
+# torch>=2.1.0
+# torchvision>=0.16.0
+# sentence-transformers>=2.2.2
 
-# Text processing and NLP
-langdetect>=1.0.9
-textstat>=0.7.3
-spacy>=3.7.0
+# Text processing and NLP (optional)
+# langdetect>=1.0.9
+# textstat>=0.7.3
+# spacy>=3.7.0
 
-# Indian language support
-indic-nlp-library>=0.92
-polyglot>=16.7.4
+# Indian language support (optional)
+# indic-nlp-library>=0.92
+# polyglot>=16.7.4
 
-# Image processing
-opencv-python>=4.8.0
-scikit-image>=0.21.0
+# Image processing (optional - requires system libraries)
+# opencv-python>=4.8.0
+# scikit-image>=0.21.0
 
 # API framework
 fastapi>=0.104.1

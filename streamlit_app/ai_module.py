@@ -5,14 +5,28 @@ from datetime import datetime
 import json
 import plotly.express as px
 import plotly.graph_objects as go
-from textstat import flesch_reading_ease, flesch_kincaid_grade
-from langdetect import detect, DetectorFactory
-import cv2
 from PIL import Image
 import matplotlib.pyplot as plt
 
-# Set seed for consistent language detection
-DetectorFactory.seed = 0
+# Optional imports with fallbacks
+try:
+    from textstat import flesch_reading_ease, flesch_kincaid_grade
+    TEXTSTAT_AVAILABLE = True
+except ImportError:
+    TEXTSTAT_AVAILABLE = False
+
+try:
+    from langdetect import detect, DetectorFactory
+    DetectorFactory.seed = 0
+    LANGDETECT_AVAILABLE = True
+except ImportError:
+    LANGDETECT_AVAILABLE = False
+
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
 
 def ai_insights_page():
     st.markdown("## 🤖 AI-Powered Cultural Insights")
@@ -77,25 +91,30 @@ def content_analysis_section():
             
             with metrics_col2:
                 # Language detection
-                try:
-                    detected_lang = detect(content_text)
-                    lang_names = {
-                        'hi': 'Hindi', 'bn': 'Bengali', 'ta': 'Tamil', 
-                        'te': 'Telugu', 'mr': 'Marathi', 'gu': 'Gujarati',
-                        'kn': 'Kannada', 'ml': 'Malayalam', 'pa': 'Punjabi',
-                        'or': 'Odia', 'as': 'Assamese', 'en': 'English'
-                    }
-                    st.metric("Detected Language", lang_names.get(detected_lang, detected_lang))
-                except:
-                    st.metric("Detected Language", "Unknown")
+                if LANGDETECT_AVAILABLE:
+                    try:
+                        detected_lang = detect(content_text)
+                        lang_names = {
+                            'hi': 'Hindi', 'bn': 'Bengali', 'ta': 'Tamil', 
+                            'te': 'Telugu', 'mr': 'Marathi', 'gu': 'Gujarati',
+                            'kn': 'Kannada', 'ml': 'Malayalam', 'pa': 'Punjabi',
+                            'or': 'Odia', 'as': 'Assamese', 'en': 'English'
+                        }
+                        st.metric("Detected Language", lang_names.get(detected_lang, detected_lang))
+                    except:
+                        st.metric("Detected Language", "Unknown")
+                else:
+                    st.metric("Detected Language", "Not Available")
                 
                 # Readability (for English content)
-                if 'english' in selected_content.lower():
+                if TEXTSTAT_AVAILABLE and 'english' in selected_content.lower():
                     try:
                         readability = flesch_reading_ease(content_text)
                         st.metric("Readability Score", f"{readability:.1f}")
                     except:
                         st.metric("Readability Score", "N/A")
+                else:
+                    st.metric("Readability Score", "Not Available")
         
         with col2:
             st.markdown("#### 🎯 AI Analysis Results")

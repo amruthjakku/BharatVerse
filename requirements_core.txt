@@ -8,16 +8,16 @@ Pillow>=10.0.0
 plotly>=5.17.0
 altair>=5.0.0
 
-# Audio processing (basic)
-soundfile>=0.12.1
-librosa>=0.10.0
+# Audio processing (basic) - commented out due to system dependencies
+# soundfile>=0.12.1
+# librosa>=0.10.0
 
-# Text processing and NLP
-langdetect>=1.0.9
-textstat>=0.7.3
+# Text processing and NLP - commented out for compatibility
+# langdetect>=1.0.9
+# textstat>=0.7.3
 
-# Image processing
-opencv-python>=4.8.0
+# Image processing - commented out due to system dependencies
+# opencv-python>=4.8.0
 
 # File handling and utilities
 python-multipart>=0.0.6
