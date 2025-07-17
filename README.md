@@ -42,10 +42,10 @@
 ## 🚀 Live Demo
 
 <div align="center">
-  <a href="https://huggingface.co/spaces/teluguverse/demo">
+  <a href="https://huggingface.co/spaces/bharatverse/demo">
     <img src="https://img.shields.io/badge/🤗_Hugging_Face-Demo-yellow?style=for-the-badge" alt="Hugging Face Demo">
   </a>
-  <a href="https://teluguverse.streamlit.app">
+  <a href="https://bharatverse.streamlit.app">
     <img src="https://img.shields.io/badge/Streamlit-Demo-red?style=for-the-badge" alt="Streamlit Demo">
   </a>
 </div>
