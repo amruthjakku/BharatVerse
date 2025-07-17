@@ -42,6 +42,7 @@ uvicorn>=0.24.0
 
 # Database enhancements
 sqlalchemy>=2.0.23
+psycopg2-binary
 
 # File handling and utilities
 python-multipart>=0.0.6
@@ -56,9 +57,12 @@ matplotlib>=3.7.0
 wordcloud>=1.9.0
 
 # Performance and caching
-redis>=5.0.0
+redis
 diskcache>=5.6.0
 
 # Security and validation
 pydantic>=2.5.0
 cryptography>=41.0.0
+
+# Cloud storage
+minio
