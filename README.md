@@ -41,10 +41,10 @@
 ## 🌟 Live Demo
 
 <div align="center">
-  <a href="https://bharatverse.streamlit.app">
+  <a href="https://amruthjakku-bharatverse.streamlit.app">
     <img src="https://img.shields.io/badge/🌐_Live_Demo-Streamlit_Cloud-FF4B4B?style=for-the-badge&logo=streamlit" alt="Live Demo">
   </a>
-  <a href="https://bharatverse.streamlit.app">
+  <a href="https://amruthjakku-bharatverse.streamlit.app">
     <img src="https://img.shields.io/badge/🚀_Try_Now-bharatverse.streamlit.app-blue?style=for-the-badge" alt="Try Now">
   </a>
 </div>
