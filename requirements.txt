@@ -1,68 +1,121 @@
-# Core dependencies
+# BharatVerse - Complete Requirements
+# Cultural Heritage Preservation Platform
+
+#=============================================================================
+# CORE DEPENDENCIES (Required)
+#=============================================================================
 streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
 Pillow>=10.0.0
 
-# Enhanced UI/UX
+#=============================================================================
+# WEB FRAMEWORK & API
+#=============================================================================
+fastapi>=0.104.1
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
+#=============================================================================
+# DATABASE & STORAGE
+#=============================================================================
+# PostgreSQL database adapter
+psycopg2-binary
+
+# Redis caching
+redis
+
+# MinIO object storage (S3-compatible)
+minio
+
+# SQL toolkit and ORM
+sqlalchemy>=2.0.23
+
+# Environment configuration
+python-dotenv>=1.0.0
+
+#=============================================================================
+# DATA VISUALIZATION & UI
+#=============================================================================
 plotly>=5.17.0
 altair>=5.0.0
 streamlit-option-menu>=0.3.6
 streamlit-lottie>=0.0.5
 streamlit-aggrid>=0.3.4
 
-# Audio processing (optional - requires system PortAudio library)
+# Charts and graphs
+seaborn>=0.12.0
+matplotlib>=3.7.0
+wordcloud>=1.9.0
+
+#=============================================================================
+# UTILITY LIBRARIES
+#=============================================================================
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+markdown>=3.5.0
+
+# Data validation and security
+pydantic>=2.5.0
+cryptography>=41.0.0
+
+# Performance and caching
+diskcache>=5.6.0
+
+#=============================================================================
+# AUDIO PROCESSING (Optional - requires system PortAudio library)
+#=============================================================================
+# Uncomment if you need audio recording features
 # sounddevice>=0.4.6
 # soundfile>=0.12.1
 # librosa>=0.10.0
 # pydub>=0.25.1
 
-# ML/AI dependencies (optional - large downloads)
+#=============================================================================
+# MACHINE LEARNING & AI (Optional - large downloads)
+#=============================================================================
+# Uncomment if you need AI-powered features
 # transformers>=4.36.0
 # torch>=2.1.0
 # torchvision>=0.16.0
 # sentence-transformers>=2.2.2
 
-# Text processing and NLP (optional)
+#=============================================================================
+# TEXT PROCESSING & NLP (Optional)
+#=============================================================================
+# Uncomment if you need advanced text analysis
 # langdetect>=1.0.9
 # textstat>=0.7.3
 # spacy>=3.7.0
 
-# Indian language support (optional)
+#=============================================================================
+# INDIAN LANGUAGE SUPPORT (Optional)
+#=============================================================================
+# Uncomment if you need Indian language processing
 # indic-nlp-library>=0.92
 # polyglot>=16.7.4
 
-# Image processing (optional - requires system libraries)
+#=============================================================================
+# IMAGE PROCESSING (Optional - requires system libraries)
+#=============================================================================
+# Uncomment if you need advanced image processing
 # opencv-python>=4.8.0
 # scikit-image>=0.21.0
 
-# API framework
-fastapi>=0.104.1
-uvicorn>=0.24.0
-
-# Database enhancements
-sqlalchemy>=2.0.23
-psycopg2-binary
-
-# File handling and utilities
-python-multipart>=0.0.6
-python-dotenv>=1.0.0
-requests>=2.31.0
-beautifulsoup4>=4.12.0
-markdown>=3.5.0
-
-# Data visualization and analytics
-seaborn>=0.12.0
-matplotlib>=3.7.0
-wordcloud>=1.9.0
-
-# Performance and caching
-redis
-diskcache>=5.6.0
-
-# Security and validation
-pydantic>=2.5.0
-cryptography>=41.0.0
-
-# Cloud storage
-minio
+#=============================================================================
+# INSTALLATION NOTES
+#=============================================================================
+# 1. Basic installation (core features only):
+#    pip install streamlit pandas numpy Pillow plotly altair psycopg2-binary redis minio
+#
+# 2. Full installation (all features):
+#    pip install -r requirements.txt
+#
+# 3. Development installation (with optional packages):
+#    Uncomment the optional sections above before installing
+#
+# 4. Production installation:
+#    Use the basic installation for minimal dependencies
+#
+# 5. Docker installation:
+#    All dependencies are included in the Docker image
