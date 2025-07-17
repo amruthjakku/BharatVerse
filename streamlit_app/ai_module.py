@@ -320,12 +320,39 @@ def language_insights_section():
     
     df_complexity = pd.DataFrame(complexity_data)
     
-    fig_complexity = px.radar(
-        df_complexity,
-        r='Vocabulary Richness',
-        theta='Language',
-        title='Language Complexity Analysis'
+    # Create a radar chart using plotly.graph_objects
+    fig_complexity = go.Figure()
+    
+    categories = ['Vocabulary Richness', 'Grammatical Complexity', 'Cultural Depth']
+    
+    for i, lang in enumerate(df_complexity['Language']):
+        values = [
+            df_complexity.iloc[i]['Vocabulary Richness'],
+            df_complexity.iloc[i]['Grammatical Complexity'], 
+            df_complexity.iloc[i]['Cultural Depth']
+        ]
+        # Close the radar chart by adding the first value at the end
+        values += values[:1]
+        categories_closed = categories + categories[:1]
+        
+        fig_complexity.add_trace(go.Scatterpolar(
+            r=values,
+            theta=categories_closed,
+            fill='toself',
+            name=lang,
+            opacity=0.6
+        ))
+    
+    fig_complexity.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100]
+            )),
+        showlegend=True,
+        title="Language Complexity Analysis"
     )
+    
     st.plotly_chart(fig_complexity, use_container_width=True)
     
     # Endangered languages alert
