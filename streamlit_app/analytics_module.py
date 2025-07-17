@@ -8,8 +8,14 @@ from datetime import datetime, timedelta
 import json
 from pathlib import Path
 from streamlit_app.utils.database import get_contributions, get_statistics
-from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+
+# Optional imports
+try:
+    from wordcloud import WordCloud
+    WORDCLOUD_AVAILABLE = True
+except ImportError:
+    WORDCLOUD_AVAILABLE = False
 
 def analytics_page():
     st.markdown("## 📊 Analytics Dashboard")
