@@ -1,4 +1,4 @@
-# Database Comparison for TeluguVerse
+# Database Comparison for BharatVerse
 
 ## Overview
 Comparison of free, open-source databases for storing audio, video, and text data at scale.
@@ -21,7 +21,7 @@ Comparison of free, open-source databases for storing audio, video, and text dat
 | **MinIO** | No limit (disk space) | Object storage (S3-compatible) | • S3 API compatible<br>• Built for large files<br>• Distributed storage | • Not a database<br>• Needs separate metadata DB | Excellent - designed for multimedia |
 | **Cassandra** | No limit (disk space) | Time-series, high write | • Linear scalability<br>• No single point of failure | • Complex setup<br>• Eventually consistent | Via file paths + external storage |
 
-## Recommended Architecture for TeluguVerse
+## Recommended Architecture for BharatVerse
 
 ### 🏆 Best Solution: Hybrid Approach
 
@@ -59,7 +59,7 @@ Comparison of free, open-source databases for storing audio, video, and text dat
 class MultimediaStorage:
     def __init__(self):
         self.db = PostgreSQL()
-        self.storage_path = "/data/teluguverse"
+        self.storage_path = "/data/bharatverse"
     
     def save_audio(self, file, metadata):
         # Save file to disk
@@ -88,7 +88,7 @@ from pymongo import MongoClient
 import gridfs
 
 client = MongoClient('mongodb://localhost:27017/')
-db = client['teluguverse']
+db = client['bharatverse']
 fs = gridfs.GridFS(db)
 
 # Store large audio file
@@ -121,7 +121,7 @@ minio_client = Minio('localhost:9000',
                      secure=False)
 
 # PostgreSQL for metadata
-conn = psycopg2.connect("dbname=teluguverse")
+conn = psycopg2.connect("dbname=bharatverse")
 
 # Upload file to MinIO
 minio_client.fput_object('audio-bucket', 'folk-song.mp3', '/path/to/audio.mp3')
@@ -165,7 +165,7 @@ cursor.execute("""
 - **Good for**: Backup/Archive
 - **Limits**: API call limits
 
-## 🎯 Recommendation for TeluguVerse
+## 🎯 Recommendation for BharatVerse
 
 ### For Development/MVP:
 ```bash
@@ -202,7 +202,7 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: teluguverse
+      POSTGRES_DB: bharatverse
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: secure_password
     volumes:
@@ -237,7 +237,7 @@ volumes:
 
 ## Storage Calculation
 
-For TeluguVerse with multimedia content:
+For BharatVerse with multimedia content:
 
 ### Estimated Storage Needs:
 - **Audio files**: ~10MB per file (3-5 min recordings)
@@ -254,7 +254,7 @@ For TeluguVerse with multimedia content:
 
 ## Final Recommendation
 
-**For TeluguVerse, use this stack:**
+**For BharatVerse, use this stack:**
 
 1. **PostgreSQL** - Metadata, search, user data
 2. **MinIO** - Audio/video/image files (or local filesystem initially)
