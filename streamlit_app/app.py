@@ -16,7 +16,7 @@ from streamlit_app.community_module import community_page
 from streamlit_app.ai_module import ai_insights_page
 from streamlit_app.collaboration_module import collaboration_page
 from streamlit_app.utils.database import init_db, get_statistics
-from streamlit_app.utils.clean_styling import load_clean_css
+from streamlit_app.utils.theme_styling import load_theme_css
 from streamlit_app.utils.cache_manager import cache_manager
 
 # Page configuration
@@ -30,14 +30,18 @@ st.set_page_config(
 # Initialize database
 init_db()
 
-# Load clean CSS with proper contrast
-load_clean_css()
+# Load theme-based CSS after getting theme selection
+# This will be loaded after the sidebar is created
 
-# Sidebar navigation
+# Sidebar theme toggle and navigation
 with st.sidebar:
     st.markdown("# 🇮🇳 BharatVerse")
     st.markdown("---")
-    
+
+    # Theme toggle
+    theme = st.selectbox("Select Theme:", ["Light", "Dark"])
+    st.markdown("---")
+
     # Navigation
     page = st.radio(
         "Navigate to:",
@@ -68,6 +72,9 @@ with st.sidebar:
     st.markdown("[🤗 API Access](https://api.bharatverse.org)")
     st.markdown("[📧 Contact Us](mailto:team@bharatverse.org)")
 
+# Load theme CSS based on selection
+load_theme_css(theme)
+
 # Main content
 if page == "Home":
     # Enhanced Hero section
@@ -88,32 +95,32 @@ if page == "Home":
     with col1:
         st.markdown("""
         <div class='info-card'>
-            <h2 style='color: #3b82f6 !important;'>{}</h2>
-            <p style='color: #6b7280 !important;'>Total Contributions</p>
+            <h2>{}</h2>
+            <p>Total Contributions</p>
         </div>
         """.format(stats['total_contributions']), unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-            <h2 style='color: #f093fb; margin: 0;'>{}</h2>
-            <p style='margin: 0.5rem 0 0 0; color: #666;'>Languages</p>
+        <div class='info-card'>
+            <h2>{}</h2>
+            <p>Languages</p>
         </div>
         """.format(stats['unique_languages']), unsafe_allow_html=True)
     
     with col3:
         st.markdown("""
-        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-            <h2 style='color: #4facfe; margin: 0;'>2,847</h2>
-            <p style='margin: 0.5rem 0 0 0; color: #666;'>Active Contributors</p>
+        <div class='info-card'>
+            <h2>2,847</h2>
+            <p>Active Contributors</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
-        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-            <h2 style='color: #43e97b; margin: 0;'>{}</h2>
-            <p style='margin: 0.5rem 0 0 0; color: #666;'>Regions Covered</p>
+        <div class='info-card'>
+            <h2>{}</h2>
+            <p>Regions Covered</p>
         </div>
         """.format(stats['unique_regions']), unsafe_allow_html=True)
     
@@ -124,9 +131,9 @@ if page == "Home":
     
     with col1:
         st.markdown("""
-        <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 10px; color: white; height: 200px;'>
-            <h3>🎙️ Audio Magic</h3>
-            <p>Record and transcribe folk songs, stories, and oral traditions in 22+ Indian languages.</p>
+        <div class='feature-card-1'>
+            <h3 style='color: white !important;'>🎙️ Audio Magic</h3>
+            <p style='color: white !important;'>Record and transcribe folk songs, stories, and oral traditions in 22+ Indian languages.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Start Recording", key="audio_btn", use_container_width=True):
@@ -135,9 +142,9 @@ if page == "Home":
     
     with col2:
         st.markdown("""
-        <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 2rem; border-radius: 10px; color: white; height: 200px;'>
-            <h3>📝 Story Keeper</h3>
-            <p>Document local customs, proverbs, recipes, and wisdom passed down through generations.</p>
+        <div class='feature-card-2'>
+            <h3 style='color: white !important;'>📝 Story Keeper</h3>
+            <p style='color: white !important;'>Document local customs, proverbs, recipes, and wisdom passed down through generations.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Write Story", key="text_btn", use_container_width=True):
@@ -146,9 +153,9 @@ if page == "Home":
     
     with col3:
         st.markdown("""
-        <div style='background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 2rem; border-radius: 10px; color: white; height: 200px;'>
-            <h3>📷 Visual Heritage</h3>
-            <p>Upload and caption images of festivals, art, architecture, and cultural symbols.</p>
+        <div class='feature-card-3'>
+            <h3 style='color: white !important;'>📷 Visual Heritage</h3>
+            <p style='color: white !important;'>Upload and caption images of festivals, art, architecture, and cultural symbols.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Upload Image", key="image_btn", use_container_width=True):
@@ -170,10 +177,10 @@ if page == "Home":
     for i, (col, contrib) in enumerate(zip(recent_cols, contributions)):
         with col:
             st.markdown(f"""
-            <div style='background: #f0f2f6; padding: 1rem; border-radius: 8px; text-align: center;'>
+            <div class='contribution-card'>
                 <h2>{contrib['type']}</h2>
                 <h5>{contrib['title']}</h5>
-                <p style='color: #666; font-size: 0.9rem;'>{contrib['lang']} • {contrib['time']}</p>
+                <p>{contrib['lang']} • {contrib['time']}</p>
             </div>
             """, unsafe_allow_html=True)
     
