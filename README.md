@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/BharatVerse-Preserving_Culture-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADMSURBVCiRY/z//z8DOgACxohYRgYGhv8MDAwMTAxoAAWjAiyKwIr+MzAwMLy/yLDl6SWG/0yMDIwMjAz/mRgZGBn+MzIy/P/PwPCfgYGBgeE/I8N/RgYGhv+MDKzPrzBsAXGQNYLV/Qcqhmv6z8Rw5/xFBgYmBgaG/0wMd85fYmBg+M/AwPCfieE/yG0gzeBAEDgLxJcYwBb8/88Acfp/iFP+MzH8hzsVGTC9PMdwnYmBgeE/iBBN/Gf4D2HBiP9QISYGBgYGJnSJUQAAktVBBr7hPVQAAAAASUVORK5CYII=" alt="BharatVerse">
+  <img src="https://img.shields.io/badge/TeluguVerse-Preserving_Culture-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADMSURBVCiRY/z//z8DOgACxohYRgYGhv8MDAwMTAxoAAWjAiyKwIr+MzAwMLy/yLDl6SWG/0yMDIwMjAz/mRgZGBn+MzIy/P/PwPCfgYGBgeE/I8N/RgYGhv+MDKzPrzBsAXGQNYLV/Qcqhmv6z8Rw5/xFBgYmBgaG/0wMd85fYmBg+M/AwPCfieE/yG0gzeBAEDgLxJcYwBb8/88Acfp/iFP+MzH8hzsVGTC9PMdwnYmBgeE/iBBN/Gf4D2HBiP9QISYGBgYGJnSJUQAAktVBBr7hPVQAAAAASUVORK5CYII=" alt="TeluguVerse">
   
-  # 🇮🇳 BharatVerse
+  # 🇮🇳 TeluguVerse
   
   ### **Capture, Create, Contribute**
   
   <p align="center">
-    <strong>Preserving India's Culture, One Voice at a Time</strong>
+    <strong>Preserving Telugu Culture, One Voice at a Time</strong>
   </p>
   
   <p align="center">
@@ -16,10 +16,10 @@
   </p>
   
   <p align="center">
-    <img src="https://img.shields.io/github/license/yourusername/bharatverse?style=flat-square" alt="License">
-    <img src="https://img.shields.io/github/stars/yourusername/bharatverse?style=flat-square" alt="Stars">
-    <img src="https://img.shields.io/github/forks/yourusername/bharatverse?style=flat-square" alt="Forks">
-    <img src="https://img.shields.io/github/issues/yourusername/bharatverse?style=flat-square" alt="Issues">
+    <img src="https://img.shields.io/github/license/yourusername/teluguverse?style=flat-square" alt="License">
+    <img src="https://img.shields.io/github/stars/yourusername/teluguverse?style=flat-square" alt="Stars">
+    <img src="https://img.shields.io/github/forks/yourusername/teluguverse?style=flat-square" alt="Forks">
+    <img src="https://img.shields.io/github/issues/yourusername/teluguverse?style=flat-square" alt="Issues">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
   </p>
 </div>
@@ -42,10 +42,10 @@
 ## 🚀 Live Demo
 
 <div align="center">
-  <a href="https://huggingface.co/spaces/bharatverse/demo">
+  <a href="https://huggingface.co/spaces/teluguverse/demo">
     <img src="https://img.shields.io/badge/🤗_Hugging_Face-Demo-yellow?style=for-the-badge" alt="Hugging Face Demo">
   </a>
-  <a href="https://bharatverse.streamlit.app">
+  <a href="https://teluguverse.streamlit.app">
     <img src="https://img.shields.io/badge/Streamlit-Demo-red?style=for-the-badge" alt="Streamlit Demo">
   </a>
 </div>
@@ -55,7 +55,7 @@
 <details>
 <summary><b>📹 Video Demo</b> (Click to expand)</summary>
 
-[![BharatVerse Demo](https://img.youtube.com/vi/DEMO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=DEMO_VIDEO_ID)
+[![TeluguVerse Demo](https://img.youtube.com/vi/DEMO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=DEMO_VIDEO_ID)
 
 </details>
 
@@ -68,9 +68,9 @@
 
 </details>
 
-## 💡 What is BharatVerse?
+## 💡 What is TeluguVerse?
 
-BharatVerse is an **open-source cultural preservation platform** that empowers communities to:
+TeluguVerse is an **open-source cultural preservation platform** that empowers Telugu communities to:
 
 <table>
 <tr>
@@ -99,14 +99,14 @@ BharatVerse is an **open-source cultural preservation platform** that empowers c
 <summary><b>Try it yourself!</b> (Click to explore)</summary>
 
 ```python
-# Example: Transcribe a Marathi folk song
-from bharatverse import AudioProcessor
+# Example: Transcribe a Telugu folk song
+from teluguverse import AudioProcessor
 
 audio = AudioProcessor()
-result = audio.transcribe("marathi_folk_song.mp3")
-print(result.text)  # "पाऊस आला पाऊस आला..."
+result = audio.transcribe("telugu_folk_song.mp3")
+print(result.text)  # "వర్షం వచ్చింది వర్షం వచ్చింది..."
 print(result.translation)  # "The rain has come, the rain has come..."
-print(result.tags)  # ['Marathi', 'Folk Song', 'Monsoon', 'Maharashtra']
+print(result.tags)  # ['Telugu', 'Folk Song', 'Monsoon', 'Andhra Pradesh']
 ```
 
 </details>
@@ -128,7 +128,7 @@ print(result.tags)  # ['Marathi', 'Folk Song', 'Monsoon', 'Maharashtra']
 <summary>Code Example</summary>
 
 ```python
-from bharatverse import record_audio
+from teluguverse import record_audio
 
 audio = record_audio(duration=30)
 transcript = audio.transcribe(
@@ -153,11 +153,11 @@ transcript = audio.transcribe(
 <summary>Code Example</summary>
 
 ```python
-from bharatverse import StoryTeller
+from teluguverse import StoryTeller
 
 story = StoryTeller()
 story.add_content(
-    text="पाणी रे पाणी तेरा रंग कैसा",
+    text="నీరు రే నీరు నీ రంగు ఎలా",
     category="folk_song"
 )
 ```
@@ -178,11 +178,11 @@ story.add_content(
 <summary>Code Example</summary>
 
 ```python
-from bharatverse import ImageProcessor
+from teluguverse import ImageProcessor
 
 img = ImageProcessor()
 result = img.analyze(
-    "holi_celebration.jpg",
+    "ugadi_celebration.jpg",
     generate_caption=True
 )
 ```
@@ -219,9 +219,9 @@ result = img.analyze(
 
 ```bash
 # Export formats available
-bharatverse export --format json --filter "language:hindi"
-bharatverse export --format csv --filter "region:rajasthan"
-bharatverse export --format parquet --filter "type:folk_song"
+teluguverse export --format json --filter "language:telugu"
+teluguverse export --format csv --filter "region:andhra_pradesh"
+teluguverse export --format parquet --filter "type:folk_song"
 ```
 
 </details>
@@ -276,17 +276,17 @@ numpy==1.24.0           # Numerical computing
 <table>
 <tr>
 <td align="center">
-<a href="https://huggingface.co/spaces/bharatverse/demo?duplicate=true">
+<a href="https://huggingface.co/spaces/teluguverse/demo?duplicate=true">
 <img src="https://img.shields.io/badge/Deploy%20on-HuggingFace-yellow?style=for-the-badge&logo=huggingface" alt="Deploy on HuggingFace">
 </a>
 </td>
 <td align="center">
-<a href="https://share.streamlit.io/deploy?repository=bharatverse/bharatverse">
+<a href="https://share.streamlit.io/deploy?repository=teluguverse/teluguverse">
 <img src="https://img.shields.io/badge/Deploy%20on-Streamlit-red?style=for-the-badge&logo=streamlit" alt="Deploy on Streamlit">
 </a>
 </td>
 <td align="center">
-<a href="https://colab.research.google.com/github/bharatverse/bharatverse/blob/main/notebooks/quickstart.ipynb">
+<a href="https://colab.research.google.com/github/teluguverse/teluguverse/blob/main/notebooks/quickstart.ipynb">
 <img src="https://img.shields.io/badge/Open%20in-Colab-orange?style=for-the-badge&logo=googlecolab" alt="Open in Colab">
 </a>
 </td>
@@ -300,11 +300,11 @@ numpy==1.24.0           # Numerical computing
 
 ```bash
 # Clone and setup in one command
-curl -sSL https://raw.githubusercontent.com/bharatverse/bharatverse/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/teluguverse/teluguverse/main/install.sh | bash
 
 # Or using Python
-pip install bharatverse
-bharatverse run
+pip install teluguverse
+teluguverse run
 ```
 
 </details>
@@ -314,8 +314,8 @@ bharatverse run
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/bharatverse.git
-cd bharatverse
+git clone https://github.com/yourusername/teluguverse.git
+cd teluguverse
 
 # 2. Create virtual environment
 python -m venv venv
@@ -341,8 +341,8 @@ streamlit run app.py
 docker-compose up
 
 # Or build manually
-docker build -t bharatverse .
-docker run -p 8501:8501 bharatverse
+docker build -t teluguverse .
+docker run -p 8501:8501 teluguverse
 ```
 
 </details>
@@ -378,17 +378,17 @@ curl -X POST "http://localhost:8000/api/v1/audio/transcribe" \
 
 ```python
 # Python SDK Example
-from bharatverse import BharatVerseAPI
+from teluguverse import TeluguVerseAPI
 
-api = BharatVerseAPI(api_key="your_key")
+api = TeluguVerseAPI(api_key="your_key")
 
 # Submit text content
 response = api.text.create(
-    content="सत्यमेव जयते",
+    content="సత్యమేవ జయతే",
     metadata={
         "type": "proverb",
         "region": "national",
-        "language": "sanskrit"
+        "language": "telugu"
     }
 )
 ```
@@ -431,7 +431,7 @@ response = api.text.create(
 </table>
 🗂️ GitHub Repo Layout (Ready to Scaffold)
 
-bharatverse/
+teluguverse/
 ├── streamlit_app/
 │   ├── app.py
 │   ├── audio_module.py

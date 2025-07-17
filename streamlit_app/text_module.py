@@ -77,7 +77,7 @@ def story_section():
     # Submit button
     if consent:
         if st.button("📤 Submit Contribution", type="primary", use_container_width=True):
-            st.success("🎉 Thank you for your contribution! Your story has been added to BharatVerse.")
+            st.success("🎉 Thank you for your contribution! Your story has been added to TeluguVerse.")
             st.balloons()
             
             # Show contribution summary

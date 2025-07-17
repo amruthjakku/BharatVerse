@@ -1,1 +1,1 @@
-# Utils module for BharatVerse
+# Utils module for TeluguVerse

@@ -12,8 +12,8 @@ from pathlib import Path
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="BharatVerse API",
-    description="API for preserving and accessing India's cultural heritage",
+    title="TeluguVerse API",
+    description="API for preserving and accessing Telugu cultural heritage",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -68,7 +68,7 @@ class AnalyticsResponse(BaseModel):
 # Database helper functions
 def get_db_connection():
     """Get database connection"""
-    db_path = Path(__file__).parent.parent / "data" / "bharatverse.db"
+    db_path = Path(__file__).parent.parent / "data" / "teluguverse.db"
     db_path.parent.mkdir(exist_ok=True)
     return sqlite3.connect(str(db_path))
 
@@ -122,7 +122,7 @@ async def validate_api_key(api_key: str = None):
 @app.get("/")
 async def root():
     return {
-        "message": "Welcome to BharatVerse API",
+        "message": "Welcome to TeluguVerse API",
         "version": "1.0.0",
         "documentation": "/docs",
         "status": "active"

@@ -153,7 +153,7 @@ def audio_page():
                 # Submit button
                 if consent:
                     if st.button("📤 Submit Contribution", type="primary", use_container_width=True):
-                        st.success("🎉 Thank you for your contribution! Your audio has been added to BharatVerse.")
+                        st.success("🎉 Thank you for your contribution! Your audio has been added to TeluguVerse.")
                         st.balloons()
                         
                         # Show contribution summary

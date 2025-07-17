@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Enhanced BharatVerse Launcher
+Enhanced TeluguVerse Launcher
 Starts both the Streamlit app and FastAPI server
 """
 
@@ -102,9 +102,9 @@ def show_banner():
     banner = """
     ╔══════════════════════════════════════════════════════════════╗
     ║                                                              ║
-    ║                    🇮🇳 BharatVerse Enhanced                    ║
+    ║                    🇮🇳 TeluguVerse Enhanced                    ║
     ║                                                              ║
-    ║              Preserving India's Culture with AI             ║
+    ║              Preserving Telugu Culture with AI             ║
     ║                                                              ║
     ╚══════════════════════════════════════════════════════════════╝
     
@@ -134,8 +134,8 @@ def show_urls():
 
 def signal_handler(signum, frame):
     """Handle Ctrl+C gracefully"""
-    print("\n\n🛑 Shutting down BharatVerse Enhanced...")
-    print("Thank you for preserving India's cultural heritage! 🙏")
+    print("\n\n🛑 Shutting down TeluguVerse Enhanced...")
+    print("Thank you for preserving Telugu cultural heritage! 🙏")
     sys.exit(0)
 
 def main():
@@ -161,7 +161,7 @@ def main():
     # Show URLs
     show_urls()
     
-    print("🚀 Starting BharatVerse Enhanced...")
+    print("🚀 Starting TeluguVerse Enhanced...")
     print("Press Ctrl+C to stop all services")
     print("-" * 60)
     

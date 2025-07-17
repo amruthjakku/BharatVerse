@@ -106,7 +106,7 @@ def image_page():
         # Submit
         if consent:
             if st.button("📤 Submit Image", type="primary", use_container_width=True):
-                st.success("🎉 Thank you! Your image has been added to BharatVerse.")
+                st.success("🎉 Thank you! Your image has been added to TeluguVerse.")
                 st.balloons()
                 
                 # Show summary

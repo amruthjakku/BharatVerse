@@ -21,7 +21,7 @@ from streamlit_app.utils.cache_manager import cache_manager
 
 # Page configuration
 st.set_page_config(
-    page_title="BharatVerse - Preserving India's Culture",
+    page_title="TeluguVerse - Preserving Telugu Culture",
     page_icon="🇮🇳",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -35,7 +35,7 @@ init_db()
 
 # Sidebar theme toggle and navigation
 with st.sidebar:
-    st.markdown("# 🇮🇳 BharatVerse")
+    st.markdown("# 🇮🇳 TeluguVerse")
     st.markdown("---")
 
     # Theme toggle
@@ -68,9 +68,9 @@ with st.sidebar:
     
     st.markdown("---")
     st.markdown("### 🌐 Resources")
-    st.markdown("[📚 Documentation](https://github.com/bharatverse/bharatverse)")
-    st.markdown("[🤗 API Access](https://api.bharatverse.org)")
-    st.markdown("[📧 Contact Us](mailto:team@bharatverse.org)")
+    st.markdown("[📚 Documentation](https://github.com/teluguverse/teluguverse)")
+    st.markdown("[🤗 API Access](https://api.teluguverse.org)")
+    st.markdown("[📧 Contact Us](mailto:team@teluguverse.org)")
 
 # Load theme CSS based on selection
 load_theme_css(theme)
@@ -80,10 +80,10 @@ if page == "Home":
     # Enhanced Hero section
     st.markdown("""
     <div class='hero-gradient'>
-        <h1 style='font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700; color: white !important;'>🇮🇳 BharatVerse</h1>
-        <h2 style='font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400; color: white !important; opacity: 0.95;'>Preserving India's Culture, One Voice at a Time</h2>
+        <h1 style='font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700; color: white !important;'>🇮🇳 TeluguVerse</h1>
+        <h2 style='font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400; color: white !important; opacity: 0.95;'>Preserving Telugu Culture, One Voice at a Time</h2>
         <p style='font-size: 1.1rem; color: white !important; opacity: 0.9; max-width: 600px; margin: 0 auto;'>
-            Join thousands of contributors in documenting and preserving India's rich cultural heritage through stories, songs, recipes, and traditions.
+            Join thousands of contributors in documenting and preserving Telugu cultural heritage through stories, songs, recipes, and traditions.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -133,7 +133,7 @@ if page == "Home":
         st.markdown("""
         <div class='feature-card-1'>
             <h3 style='color: white !important;'>🎙️ Audio Magic</h3>
-            <p style='color: white !important;'>Record and transcribe folk songs, stories, and oral traditions in 22+ Indian languages.</p>
+            <p style='color: white !important;'>Record and transcribe Telugu folk songs, stories, and oral traditions.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Start Recording", key="audio_btn", use_container_width=True):
@@ -155,7 +155,7 @@ if page == "Home":
         st.markdown("""
         <div class='feature-card-3'>
             <h3 style='color: white !important;'>📷 Visual Heritage</h3>
-            <p style='color: white !important;'>Upload and caption images of festivals, art, architecture, and cultural symbols.</p>
+            <p style='color: white !important;'>Upload and caption images of Telugu festivals, art, architecture, and cultural symbols.</p>
         </div>
         """, unsafe_allow_html=True)
         if st.button("Upload Image", key="image_btn", use_container_width=True):
@@ -269,28 +269,28 @@ elif page == "Browse Contributions":
 
 elif page == "About":
     st.markdown("""
-    ## 🎆 About BharatVerse
+    ## 🎆 About TeluguVerse
     
-    BharatVerse is an open-source platform dedicated to preserving and celebrating India's rich cultural heritage. 
-    Our mission is to create a comprehensive digital archive of India's diverse traditions, languages, and customs.
+    TeluguVerse is an open-source platform dedicated to preserving and celebrating Telugu cultural heritage. 
+    Our mission is to create a comprehensive digital archive of Telugu traditions, language, and customs.
     
     ### 🎯 Our Mission
-    - **Preserve** endangered languages and oral traditions
-    - **Document** cultural practices before they're lost
+    - **Preserve** Telugu language and oral traditions
+    - **Document** Telugu cultural practices before they're lost
     - **Share** knowledge across generations and communities
-    - **Empower** communities to tell their own stories
+    - **Empower** Telugu communities to tell their own stories
     
     ### 🤝 How to Contribute
-    1. **Record** audio of folk songs, stories, or local traditions
-    2. **Write** about customs, recipes, or cultural practices
-    3. **Upload** images of festivals, art, or cultural symbols
+    1. **Record** audio of Telugu folk songs, stories, or local traditions
+    2. **Write** about Telugu customs, recipes, or cultural practices
+    3. **Upload** images of Telugu festivals, art, or cultural symbols
     4. **Tag** content appropriately for easy discovery
     5. **Share** with your community and invite others
     
     ### 📞 Contact Us
-    - **Email:** team@bharatverse.org
-    - **GitHub:** [github.com/bharatverse](https://github.com/bharatverse)
-    - **Twitter:** [@bharatverse](https://twitter.com/bharatverse)
+    - **Email:** team@teluguverse.org
+    - **GitHub:** [github.com/teluguverse](https://github.com/teluguverse)
+    - **Twitter:** [@teluguverse](https://twitter.com/teluguverse)
     
     ### 📜 License
     - **Code:** MIT License
@@ -299,6 +299,6 @@ elif page == "About":
     ---
     
     <div style='text-align: center; padding: 2rem;'>
-        <p>Made with ❤️ for India's cultural heritage</p>
+        <p>Made with ❤️ for Telugu cultural heritage</p>
     </div>
     """, unsafe_allow_html=True)
