@@ -1,39 +1,24 @@
+# 🇮🇳 BharatVerse - Preserving India's Cultural Heritage
+
 <div align="center">
-  <img src="https://img.shields.io/badge/BharatVerse-Preserving_Culture-orange?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAADMSURBVCiRY/z//z8DOgACxohYRgYGhv8MDAwMTAxoAAWjAiyKwIr+MzAwMLy/yLDl6SWG/0yMDIwMjAz/mRgZGBn+MzIy/P/PwPCfgYGBgeE/I8N/RgYGhv+MDKzPrzBsAXGQNYLV/Qcqhmv6z8Rw5/xFBgYmBgaG/0wMd85fYmBg+M/AwPCfieE/yG0gzeBAEDgLxJcYwBb8/88Acfp/iFP+MzH8hzsVGTC9PMdwnYmBgeE/iBBN/Gf4D2HBiP9QISYGBgYGJnSJUQAAktVBBr7hPVQAAAAASUVORK5CYII=" alt="BharatVerse">
-  
-  # 🇮🇳 BharatVerse
+  <img src="https://img.shields.io/badge/BharatVerse-Preserving_Culture-orange?style=for-the-badge" alt="BharatVerse">
   
   ### **Capture, Create, Contribute**
   
-  <p align="center">
-    <strong>Preserving India's Cultural Heritage, One Story at a Time</strong>
-  </p>
+  <strong>Preserving India's Cultural Heritage, One Story at a Time</strong>
   
-  <p align="center">
+  <p>
     <a href="#-quick-start"><img src="https://img.shields.io/badge/Quick_Start-→-brightgreen?style=for-the-badge" alt="Quick Start"></a>
-    <a href="#-live-demo"><img src="https://img.shields.io/badge/Live_Demo-→-blue?style=for-the-badge" alt="Live Demo"></a>
-    <a href="#-contribute"><img src="https://img.shields.io/badge/Contribute-→-orange?style=for-the-badge" alt="Contribute"></a>
+    <a href="#-features"><img src="https://img.shields.io/badge/Features-→-blue?style=for-the-badge" alt="Features"></a>
+    <a href="#-contributing"><img src="https://img.shields.io/badge/Contribute-→-orange?style=for-the-badge" alt="Contribute"></a>
   </p>
   
-  <p align="center">
+  <p>
     <img src="https://img.shields.io/github/license/bharatverse/bharatverse?style=flat-square" alt="License">
     <img src="https://img.shields.io/github/stars/bharatverse/bharatverse?style=flat-square" alt="Stars">
     <img src="https://img.shields.io/github/forks/bharatverse/bharatverse?style=flat-square" alt="Forks">
-    <img src="https://img.shields.io/github/issues/bharatverse/bharatverse?style=flat-square" alt="Issues">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
   </p>
-</div>
-
----
-
-<div align="center">
-  <h3>
-    🎯 <a href="#-features">Features</a> •
-    🚀 <a href="#-quick-start">Quick Start</a> •
-    📖 <a href="#-documentation">Documentation</a> •
-    🤝 <a href="#-contributing">Contributing</a> •
-    💬 <a href="#-community">Community</a>
-  </h3>
 </div>
 
 ---
@@ -48,14 +33,6 @@
     <img src="https://img.shields.io/badge/🚀_Try_Now-bharatverse.streamlit.app-blue?style=for-the-badge" alt="Try Now">
   </a>
 </div>
-
----
-
-## 📺 Demo Video
-
-[![BharatVerse Demo](https://img.youtube.com/vi/demo_video_id/0.jpg)](https://www.youtube.com/watch?v=demo_video_id)
-
-*Click to watch the demo video*
 
 ---
 
@@ -106,19 +83,16 @@ BharatVerse is an **open-source cultural preservation platform** that empowers I
 
 ## 🚀 Quick Start
 
-### Option 1: One-Click Deploy
+### Prerequisites
+- Python 3.8+
+- Git
+- Docker (optional, for infrastructure services)
 
-<div align="center">
-  <a href="https://app.streamlit.io/deploy?repository=bharatverse/bharatverse">
-    <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Deploy on Streamlit">
-  </a>
-</div>
-
-### Option 2: Local Installation
+### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/bharatverse/bharatverse.git
+git clone https://code.swecha.org/amruth_jakku/bharatverse.git
 cd bharatverse
 
 # Create virtual environment
@@ -127,6 +101,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Start infrastructure services (optional)
+docker-compose up -d
 
 # Run the application
 streamlit run streamlit_app/app.py
@@ -139,57 +116,68 @@ streamlit run streamlit_app/app.py
 ## ✨ Features
 
 ### 🎙️ Audio Capture & Transcription
-```python
-from bharatverse import AudioProcessor
-
-# Record and transcribe audio
-processor = AudioProcessor()
-audio_data = processor.record(duration=60)
-transcription = processor.transcribe(audio_data, language="hindi")
-```
-
-**Capabilities:**
 - 🎤 Real-time audio recording
 - 🔤 Multi-language transcription (22+ Indian languages)
 - 🎵 Music and speech separation
 - 📊 Audio quality analysis
 
 ### 📝 Story Documentation
-```python
-from bharatverse import StoryTeller
-
-# Document cultural stories
-story = StoryTeller()
-story.add_content("Traditional wedding ceremony in Punjab...")
-story.set_metadata(language="punjabi", region="punjab", category="wedding")
-story.save()
-```
-
-**Features:**
 - ✍️ Rich text editor with formatting
 - 🏷️ Automatic tagging and categorization
 - 🌍 Multi-language support
 - 📚 Version control for stories
 
 ### 📷 Visual Heritage
-```python
-from bharatverse import ImageProcessor
-
-# Process cultural images
-processor = ImageProcessor()
-result = processor.analyze_image("festival_photo.jpg")
-print(f"Detected: {result.cultural_elements}")
-```
-
-**Capabilities:**
 - 🖼️ Image upload and processing
 - 🤖 AI-powered cultural element detection
 - 🏛️ Architecture and art form recognition
 - 📍 Geo-tagging and location mapping
 
+### 🔍 Advanced Search & Discovery
+- Intelligent search across all content types
+- Filter by language, region, content type
+- Featured collections and recommendations
+- Trending cultural content
+
+### 📊 Analytics Dashboard
+- Real-time contribution statistics
+- Language and regional distribution
+- Content trends and insights
+- Community engagement metrics
+
+### 🤝 Community Features
+- Contributor leaderboards
+- Achievement badges and rewards
+- Community challenges
+- Discussion forums
+
+### 🤖 AI Insights
+- Content quality analysis
+- Sentiment analysis of cultural content
+- Trend predictions
+- Automated content recommendations
+
+### 👥 Collaboration Tools
+- Project management for cultural initiatives
+- Team workflows and task tracking
+- Review and approval processes
+- Collaborative editing
+
 ---
 
 ## 🛠️ Advanced Usage
+
+### Infrastructure Setup
+```bash
+# Start all services (PostgreSQL, Redis, MinIO)
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+```
 
 ### Data Export
 ```bash
@@ -206,15 +194,6 @@ import requests
 response = requests.get("https://api.bharatverse.org/stories", 
                        params={"language": "tamil", "limit": 10})
 stories = response.json()
-```
-
-### Batch Processing
-```python
-from bharatverse import BatchProcessor
-
-# Process multiple files
-processor = BatchProcessor()
-results = processor.process_directory("/path/to/cultural/content")
 ```
 
 ---
@@ -240,46 +219,54 @@ results = processor.process_directory("/path/to/cultural/content")
 
 ---
 
-## 🎯 Deployment Options
+## 🏗️ Technical Architecture
 
-### Cloud Platforms
+### Infrastructure Stack
+- **Frontend**: Streamlit with custom CSS/JS
+- **Backend**: FastAPI with SQLite/PostgreSQL database
+- **AI/ML**: Transformers, Whisper, Computer Vision
+- **Caching**: Redis + Disk caching
+- **Storage**: MinIO (S3-compatible) + Local filesystem
+- **Containerization**: Docker Compose
 
-<div align="center">
-  <a href="https://app.streamlit.io/deploy?repository=bharatverse/bharatverse">
-    <img src="https://img.shields.io/badge/Deploy_on-Streamlit_Cloud-FF4B4B?style=for-the-badge&logo=streamlit" alt="Deploy on Streamlit">
-  </a>
-  <a href="https://colab.research.google.com/github/bharatverse/bharatverse/blob/main/notebooks/quickstart.ipynb">
-    <img src="https://img.shields.io/badge/Try_in-Google_Colab-F9AB00?style=for-the-badge&logo=googlecolab" alt="Try in Colab">
-  </a>
-</div>
+### Database Architecture
+- **PostgreSQL**: Metadata and structured data
+- **MinIO**: File storage (audio, video, images)
+- **Redis**: Caching and session management
+- **SQLite**: Development and fallback database
 
-### Self-Hosted
-```bash
-# Docker deployment
-docker-compose up -d
-
-# Kubernetes deployment
-kubectl apply -f k8s/
-```
+### Services
+- **PostgreSQL**: Port 5432
+- **Redis**: Port 6379
+- **MinIO**: Port 9000 (API), 9001 (Console)
 
 ---
 
-## 🏗️ Architecture
+## 📁 Project Structure
 
-```mermaid
-graph TB
-    A[User Interface] --> B[Streamlit Frontend]
-    B --> C[FastAPI Backend]
-    C --> D[Database Layer]
-    C --> E[AI/ML Services]
-    C --> F[File Storage]
-    
-    D --> D1[SQLite/PostgreSQL]
-    E --> E1[Whisper ASR]
-    E --> E2[Language Detection]
-    E --> E3[Image Analysis]
-    F --> F1[Local Storage]
-    F --> F2[Cloud Storage]
+```
+bharatverse/
+├── streamlit_app/           # Streamlit frontend
+│   ├── app.py              # Main application
+│   ├── audio_module.py     # Audio recording & transcription
+│   ├── text_module.py      # Text story documentation
+│   ├── image_module.py     # Visual heritage upload
+│   ├── analytics_module.py # Analytics dashboard
+│   ├── search_module.py    # Search & discovery
+│   ├── community_module.py # Community features
+│   ├── ai_module.py        # AI insights
+│   ├── collaboration_module.py # Collaboration tools
+│   └── utils/              # Utility modules
+├── api/                    # FastAPI backend
+├── core/                   # Core database management
+│   └── database.py         # Database connections & operations
+├── data/                   # Data storage
+│   └── bharatverse.db     # SQLite database
+├── .env                    # Environment configuration
+├── docker-compose.yml      # Infrastructure services
+├── requirements.txt        # Python dependencies
+├── requirements_core.txt   # Core dependencies
+└── README.md              # This file
 ```
 
 ---
@@ -316,27 +303,10 @@ We welcome contributions from the community! Here's how you can help:
 ### 🚀 Getting Started
 
 1. **Fork** the repository
-2. **Clone** your fork: `git clone https://github.com/yourusername/bharatverse.git`
+2. **Clone** your fork: `git clone https://code.swecha.org/yourusername/bharatverse.git`
 3. **Create** a branch: `git checkout -b feature-name`
 4. **Make** your changes and test thoroughly
 5. **Submit** a pull request with detailed description
-
-### 📋 Development Setup
-
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-pytest tests/
-
-# Format code
-black bharatverse/
-flake8 bharatverse/
-
-# Run pre-commit hooks
-pre-commit run --all-files
-```
 
 ---
 
@@ -346,7 +316,6 @@ pre-commit run --all-files
 - 🔧 **[API Reference](https://bharatverse.readthedocs.io/api/)** - Complete API documentation
 - 🏗️ **[Developer Guide](https://bharatverse.readthedocs.io/dev-guide/)** - Contributing and development
 - 🎓 **[Tutorials](https://bharatverse.readthedocs.io/tutorials/)** - Step-by-step tutorials
-- ❓ **[FAQ](https://bharatverse.readthedocs.io/faq/)** - Frequently asked questions
 
 ---
 
@@ -359,90 +328,15 @@ pre-commit run --all-files
   <a href="https://twitter.com/bharatverse">
     <img src="https://img.shields.io/badge/Twitter-Follow_Us-1DA1F2?style=for-the-badge&logo=twitter" alt="Twitter">
   </a>
-  <a href="https://www.linkedin.com/company/bharatverse">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin" alt="LinkedIn">
-  </a>
-</div>
-
-### 🌟 Join Our Community
-
-- 💬 **[Discord Server](https://discord.gg/bharatverse)** - Real-time chat and support
-- 🐦 **[Twitter](https://twitter.com/bharatverse)** - Latest updates and news
-- 📧 **[Newsletter](https://bharatverse.substack.com)** - Monthly cultural insights
-- 📺 **[YouTube](https://youtube.com/bharatverse)** - Tutorials and demos
-
----
-
-## 🏆 Recognition & Awards
-
-<div align="center">
-  <img src="https://img.shields.io/badge/🏆_Winner-Digital_India_Awards_2024-gold?style=for-the-badge" alt="Digital India Awards">
-  <img src="https://img.shields.io/badge/🥇_Best-Cultural_Preservation_Tool-silver?style=for-the-badge" alt="Best Cultural Tool">
-  <img src="https://img.shields.io/badge/⭐_Featured-GitHub_Trending-black?style=for-the-badge&logo=github" alt="GitHub Trending">
 </div>
 
 ---
 
 ## 📄 License
 
-<div align="center">
-  <table>
-    <tr>
-      <td><strong>Code</strong></td>
-      <td><a href="LICENSE">MIT License</a></td>
-      <td>Free for commercial and personal use</td>
-    </tr>
-    <tr>
-      <td><strong>Cultural Content</strong></td>
-      <td><a href="LICENSE-CONTENT">CC BY 4.0</a></td>
-      <td>Attribution required for cultural data</td>
-    </tr>
-    <tr>
-      <td><strong>Documentation</strong></td>
-      <td><a href="LICENSE-DOCS">CC BY-SA 4.0</a></td>
-      <td>Share-alike for documentation</td>
-    </tr>
-  </table>
-</div>
-
----
-
-## 🙏 Acknowledgments
-
-<div align="center">
-  <h3>Special Thanks To</h3>
-  
-  <table>
-    <tr>
-      <td align="center">
-        <strong>🏛️ Cultural Institutions</strong><br>
-        Archaeological Survey of India<br>
-        Sangeet Natak Akademi<br>
-        Sahitya Akademi
-      </td>
-      <td align="center">
-        <strong>🎓 Academic Partners</strong><br>
-        IIT Delhi<br>
-        IIIT Hyderabad<br>
-        JNU New Delhi
-      </td>
-      <td align="center">
-        <strong>💻 Technology Partners</strong><br>
-        Streamlit<br>
-        Hugging Face<br>
-        OpenAI
-      </td>
-    </tr>
-  </table>
-</div>
-
-### 👥 Core Contributors
-
-<div align="center">
-  <a href="https://github.com/bharatverse/bharatverse/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=bharatverse/bharatverse" alt="Contributors">
-  </a>
-</div>
+- **Code**: MIT License
+- **Cultural Content**: CC BY 4.0
+- **Documentation**: CC BY-SA 4.0
 
 ---
 
@@ -471,5 +365,7 @@ pre-commit run --all-files
   <h2>🇮🇳 Made with ❤️ for India's Cultural Heritage</h2>
   <p><em>"Preserving the past, enriching the future"</em></p>
   
-  <img src="https://img.shields.io/badge/🕉️_Vasudhaiva-Kutumbakam-saffron?style=for-the-badge" alt="Vasudhaiva Kutumbakam">
+  <p>
+    <strong>BharatVerse</strong> - Where every story matters, every voice is heard, and every tradition lives on.
+  </p>
 </div>
