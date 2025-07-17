@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 def analytics_page():
     st.markdown("## 📊 Analytics Dashboard")
-    st.markdown("Explore insights and trends from TeluguVerse contributions")
+    st.markdown("Explore insights and trends from BharatVerse contributions")
     
     # Get data
     stats = get_statistics()

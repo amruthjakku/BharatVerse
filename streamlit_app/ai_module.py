@@ -326,7 +326,7 @@ def language_insights_section():
         <div style='background: white; padding: 1rem; border-radius: 8px; margin: 0.5rem 0; border-left: 4px solid {status_color[lang["status"]]};'>
             <h4 style='margin: 0; color: #333;'>{lang['name']}</h4>
             <p style='margin: 0.5rem 0; color: #666;'>Speakers: {lang['speakers']} | Status: <span style='color: {status_color[lang["status"]]};'>{lang['status']}</span></p>
-            <p style='margin: 0; color: #666;'>TeluguVerse Contributions: {lang['contributions']}</p>
+            <p style='margin: 0; color: #666;'>BharatVerse Contributions: {lang['contributions']}</p>
         </div>
         """, unsafe_allow_html=True)
 

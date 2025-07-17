@@ -1,5 +1,5 @@
 """
-Cache Manager for TeluguVerse
+Cache Manager for BharatVerse
 Implements caching strategies for improved performance
 """
 
@@ -13,7 +13,7 @@ import pickle
 from pathlib import Path
 
 class CacheManager:
-    """Manages caching for various operations in TeluguVerse"""
+    """Manages caching for various operations in BharatVerse"""
     
     def __init__(self, cache_dir="data/cache"):
         self.cache_dir = Path(cache_dir)
