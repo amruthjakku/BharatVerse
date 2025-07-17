@@ -3,24 +3,142 @@ import streamlit as st
 
 def load_enhanced_css():
     """Load enhanced CSS styles for the Streamlit app"""
-    st.markdown(
-        """
-        <style>
+    enhanced_css = """
+    <style>
         
         /* Import Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap');
+
+        /* CSS Variables for consistent theming */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         /* Global font and color styles */
         html, body, [class*="css"] {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: #1a1a1a;
+            font-family: 'Poppins', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Headings with Playfair Display */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', 'Noto Sans Devanagari', serif;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        /* Main app background */
+        .stApp {
+            background: linear-gradient(180deg, #ffffff 0%, #f9fafb 50%, #f3f4f6 100%);
+            background-attachment: fixed;
         }
 
         /* Main container styling */
         .main .block-container {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Beautiful sidebar styling */
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #fafbfc 0%, #f4f5f7 100%);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        section[data-testid="stSidebar"] .block-container {
             padding-top: 2rem;
-            padding-bottom: 2rem;
-            max-width: 1200px;
+        }
+
+        /* Sidebar navigation items */
+        section[data-testid="stSidebar"] .stRadio > label {
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin: 0.25rem 0;
+        }
+
+        section[data-testid="stSidebar"] .stRadio > label:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(4px);
+        }
+
+        /* Beautiful metric containers */
+        [data-testid="metric-container"] {
+            background: white;
+            border: none;
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-testid="metric-container"]:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        [data-testid="metric-container"]:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        [data-testid="metric-container"]:hover:before {
+            opacity: 1;
+        }
+
+        /* Metric value styling */
+        [data-testid="metric-container"] [data-testid="metric-value"] {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Metric label styling */
+        [data-testid="metric-container"] [data-testid="metric-label"] {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
         }
 
         /* Enhanced button styles */
@@ -263,7 +381,6 @@ def load_enhanced_css():
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    </style>
+    """
+    st.markdown(enhanced_css, unsafe_allow_html=True)

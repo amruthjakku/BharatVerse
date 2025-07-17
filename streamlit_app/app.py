@@ -1,6 +1,6 @@
 import streamlit as st
-import os
 import sys
+import os
 from pathlib import Path
 
 # Add parent directory to path
@@ -16,8 +16,8 @@ from streamlit_app.community_module import community_page
 from streamlit_app.ai_module import ai_insights_page
 from streamlit_app.collaboration_module import collaboration_page
 from streamlit_app.utils.database import init_db, get_statistics
-from streamlit_app.utils.styling import load_custom_css
-from streamlit_app.utils.enhanced_styling import load_enhanced_css
+from streamlit_app.utils.clean_styling import load_clean_css
+from streamlit_app.utils.cache_manager import cache_manager
 
 # Page configuration
 st.set_page_config(
@@ -30,9 +30,8 @@ st.set_page_config(
 # Initialize database
 init_db()
 
-# Load custom CSS
-load_custom_css()
-load_enhanced_css()
+# Load clean CSS with proper contrast
+load_clean_css()
 
 # Sidebar navigation
 with st.sidebar:
@@ -73,10 +72,10 @@ with st.sidebar:
 if page == "Home":
     # Enhanced Hero section
     st.markdown("""
-    <div style='text-align: center; padding: 3rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white; margin-bottom: 2rem;'>
-        <h1 style='font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700;'>🇮🇳 BharatVerse</h1>
-        <h2 style='font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400; opacity: 0.9;'>Preserving India's Culture, One Voice at a Time</h2>
-        <p style='font-size: 1.1rem; opacity: 0.8; max-width: 600px; margin: 0 auto;'>
+    <div class='hero-gradient'>
+        <h1 style='font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700; color: white !important;'>🇮🇳 BharatVerse</h1>
+        <h2 style='font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400; color: white !important; opacity: 0.95;'>Preserving India's Culture, One Voice at a Time</h2>
+        <p style='font-size: 1.1rem; color: white !important; opacity: 0.9; max-width: 600px; margin: 0 auto;'>
             Join thousands of contributors in documenting and preserving India's rich cultural heritage through stories, songs, recipes, and traditions.
         </p>
     </div>
@@ -88,9 +87,9 @@ if page == "Home":
     
     with col1:
         st.markdown("""
-        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-            <h2 style='color: #667eea; margin: 0;'>{}</h2>
-            <p style='margin: 0.5rem 0 0 0; color: #666;'>Total Contributions</p>
+        <div class='info-card'>
+            <h2 style='color: #3b82f6 !important;'>{}</h2>
+            <p style='color: #6b7280 !important;'>Total Contributions</p>
         </div>
         """.format(stats['total_contributions']), unsafe_allow_html=True)
     
