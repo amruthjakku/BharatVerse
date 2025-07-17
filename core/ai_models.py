@@ -1,5 +1,5 @@
 """
-AI Models Manager for TeluguVerse
+AI Models Manager for BharatVerse
 Handles Whisper (audio), Transformers (text), and BLIP (image) models
 """
 

@@ -1,5 +1,5 @@
 """
-FastAPI service for TeluguVerse
+FastAPI service for BharatVerse
 Integrates database operations with AI models
 """
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="TeluguVerse API",
+    title="BharatVerse API",
     description="API for cultural content preservation with AI processing",
     version="1.0.0"
 )

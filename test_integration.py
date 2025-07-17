@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for TeluguVerse integration
+Test script for BharatVerse integration
 Tests database connections, AI models, and API endpoints
 """
 
@@ -153,7 +153,7 @@ def test_sample_workflow():
 
 def main():
     """Run all tests"""
-    print("\n" + "🧪 TeluguVerse Integration Test Suite 🧪".center(60) + "\n")
+    print("\n" + "🧪 BharatVerse Integration Test Suite 🧪".center(60) + "\n")
     
     # Test components
     test_database_connections()
