@@ -137,62 +137,66 @@ def audio_page():
         
         if st.button("🤖 Transcribe Audio", use_container_width=True):
             with st.spinner("Transcribing audio..."):
-                try:
-                    # Prepare audio file for API
-                    if st.session_state.get('recorded_audio') is not None:
-                        # Convert numpy array to audio file
-                        audio_buffer = io.BytesIO()
-                        sf.write(audio_buffer, st.session_state.recorded_audio, 
-                                st.session_state.sample_rate, format='WAV')
-                        audio_buffer.seek(0)
-                        files = {'file': ('recording.wav', audio_buffer, 'audio/wav')}
-                    else:
-                        # Use uploaded file
-                        uploaded_file = st.session_state.get('uploaded_audio')
-                        files = {'file': (uploaded_file.name, uploaded_file, uploaded_file.type)}
-                    
-                    # Determine language code
-                    lang_code = None if language == "Auto-detect" else language.lower()[:2]
-                    
-                    # Call API for transcription
-                    response = requests.post(
-                        f"{API_URL}/api/v1/audio/transcribe",
-                        files=files,
-                        data={
-                            'language': lang_code or '',
-                            'translate': 'true'
-                        }
-                    )
-                    
-                    if response.status_code == 200:
-                        result = response.json()
-                        
-                        if result.get('success'):
-                            st.success("✅ Transcription complete!")
-                            
-                            # Show transcription
-                            transcription = result.get('transcription', '')
-                            detected_lang = result.get('language', 'unknown')
-                            
-                            st.text_area("Transcribed Text", transcription, height=150)
-                            st.caption(f"Detected language: {detected_lang}")
-                            
-                            # Show translation if available
-                            translation = result.get('translation', '')
-                            if translation:
-                                st.text_area("English Translation", translation, height=100)
-                            
-                            # Store results for submission
-                            st.session_state.transcription_result = result
+                use_real_data = st.session_state.get('use_real_data', False)
+                
+                if use_real_data:
+                    try:
+                        # Prepare audio file for API
+                        if st.session_state.get('recorded_audio') is not None:
+                            # Convert numpy array to audio file
+                            audio_buffer = io.BytesIO()
+                            sf.write(audio_buffer, st.session_state.recorded_audio, 
+                                    st.session_state.sample_rate, format='WAV')
+                            audio_buffer.seek(0)
+                            files = {'file': ('recording.wav', audio_buffer, 'audio/wav')}
                         else:
-                            st.error(f"Transcription failed: {result.get('error', 'Unknown error')}")
-                    else:
-                        st.error(f"API error: {response.status_code}")
+                            # Use uploaded file
+                            uploaded_file = st.session_state.get('uploaded_audio')
+                            files = {'file': (uploaded_file.name, uploaded_file, uploaded_file.type)}
                         
-                except Exception as e:
-                    st.error(f"Error during transcription: {str(e)}")
-                    # Fallback to mock data
-                    st.info("Using demo transcription...")
+                        # Determine language code
+                        lang_code = None if language == "Auto-detect" else language.lower()[:2]
+                        
+                        # Call API for transcription
+                        response = requests.post(
+                            f"{API_URL}/api/v1/audio/transcribe",
+                            files=files,
+                            data={
+                                'language': lang_code or '',
+                                'translate': 'true'
+                            }
+                        )
+                        
+                        if response.status_code == 200:
+                            result = response.json()
+                            
+                            if result.get('success'):
+                                st.success("✅ Transcription complete!")
+                                
+                                # Show transcription
+                                transcription = result.get('transcription', '')
+                                detected_lang = result.get('language', 'unknown')
+                                
+                                st.text_area("Transcribed Text", transcription, height=150)
+                                st.caption(f"Detected language: {detected_lang}")
+                                
+                                # Show translation if available
+                                translation = result.get('translation', '')
+                                if translation:
+                                    st.text_area("English Translation", translation, height=100)
+                                
+                                # Store results for submission
+                                st.session_state.transcription_result = result
+                            else:
+                                st.error(f"Transcription failed: {result.get('error', 'Unknown error')}")
+                        else:
+                            st.error(f"API error: {response.status_code}")
+                            
+                    except Exception as e:
+                        st.error(f"Error during transcription: {str(e)}")
+                else:
+                    # Demo mode - show demo transcription
+                    st.info("🟡 Demo Mode: Using sample transcription")
                     transcription = "पानी रे पानी तेरा रंग कैसा\nजिसमें मिला दो लागे जैसा"
                     translation = "Water, oh water, what is your color?\nYou become like whatever you're mixed with."
                     
@@ -210,18 +214,32 @@ def audio_page():
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                    title = st.text_input("Title", "Traditional Water Song")
-                    region = st.text_input("Region/State", "Rajasthan")
-                    performer = st.text_input("Performer Name (Optional)", "")
+                    if use_real_data:
+                        title = st.text_input("Title", "", placeholder="Enter title...")
+                        region = st.text_input("Region/State", "", placeholder="Enter region/state...")
+                        performer = st.text_input("Performer Name (Optional)", "", placeholder="Enter performer name...")
+                    else:
+                        title = st.text_input("Title", "Traditional Water Song")
+                        region = st.text_input("Region/State", "Rajasthan")
+                        performer = st.text_input("Performer Name (Optional)", "")
                 
                 with col2:
-                    occasion = st.text_input("Occasion/Context", "Harvest Festival")
-                    year_recorded = st.number_input("Year Recorded", 1900, 2024, 2024)
-                    tags = st.text_input("Tags (comma-separated)", "folk song, water, metaphor, traditional")
+                    if use_real_data:
+                        occasion = st.text_input("Occasion/Context", "", placeholder="Enter occasion/context...")
+                        year_recorded = st.number_input("Year Recorded", 1900, 2024, 2024)
+                        tags = st.text_input("Tags (comma-separated)", "", placeholder="Enter tags...")
+                    else:
+                        occasion = st.text_input("Occasion/Context", "Harvest Festival")
+                        year_recorded = st.number_input("Year Recorded", 1900, 2024, 2024)
+                        tags = st.text_input("Tags (comma-separated)", "folk song, water, metaphor, traditional")
                 
                 # Additional notes
-                notes = st.text_area("Additional Notes", 
-                    "Any additional context, history, or significance of this recording...")
+                if use_real_data:
+                    notes = st.text_area("Additional Notes", "", 
+                        placeholder="Any additional context, history, or significance of this recording...")
+                else:
+                    notes = st.text_area("Additional Notes", 
+                        "Any additional context, history, or significance of this recording...")
                 
                 # Consent checkbox
                 consent = st.checkbox(
