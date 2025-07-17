@@ -189,17 +189,24 @@ def analytics_page():
             """
             
             # Create word cloud
-            wordcloud = WordCloud(
-                width=800, 
-                height=400, 
-                background_color='white',
-                colormap='viridis'
-            ).generate(tags_text)
-            
-            fig_wc, ax = plt.subplots(figsize=(10, 5))
-            ax.imshow(wordcloud, interpolation='bilinear')
-            ax.axis('off')
-            st.pyplot(fig_wc)
+            if WORDCLOUD_AVAILABLE:
+                try:
+                    wordcloud = WordCloud(
+                        width=800, 
+                        height=400, 
+                        background_color='white',
+                        colormap='viridis'
+                    ).generate(tags_text)
+                    
+                    fig_wc, ax = plt.subplots(figsize=(10, 5))
+                    ax.imshow(wordcloud, interpolation='bilinear')
+                    ax.axis('off')
+                    st.pyplot(fig_wc)
+                except Exception as e:
+                    st.info("Word cloud visualization not available")
+            else:
+                st.info("📝 Word cloud feature requires additional dependencies. Showing text summary instead.")
+                st.text_area("Popular Tags", tags_text, height=200)
         
         with col2:
             st.markdown("#### 🏷️ Top Tags")
