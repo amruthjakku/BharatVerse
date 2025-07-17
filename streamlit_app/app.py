@@ -38,6 +38,23 @@ with st.sidebar:
     st.markdown("# 🇮🇳 BharatVerse")
     st.markdown("---")
 
+    # Demo/Real data toggle
+    data_mode = st.toggle(
+        "Use Real Data",
+        value=False,
+        help="Toggle between demo data and real API data. Turn ON to use real AI models (requires API server running)."
+    )
+    
+    # Store in session state
+    st.session_state.use_real_data = data_mode
+    
+    if data_mode:
+        st.success("🟢 Using Real Data")
+    else:
+        st.info("🟡 Using Demo Data")
+    
+    st.markdown("---")
+
     # Theme toggle
     theme = st.selectbox("Select Theme:", ["Light", "Dark"])
     st.markdown("---")

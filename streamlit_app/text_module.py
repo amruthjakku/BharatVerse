@@ -53,7 +53,52 @@ def story_section():
     if st.checkbox("Translate to English"):
         st.markdown("---")
         st.markdown("### 🔄 Translation")
-        st.text_area("Translated Story Content", "This is the translated version of the story...")
+        if st.button("Translate", key="translate_story"):
+            with st.spinner("Translating..."):
+                try:
+                    import requests
+                    import os
+                    import json
+                    
+                    API_URL = os.getenv("API_URL", "http://localhost:8000")
+                    response = requests.post(
+                        f"{API_URL}/api/v1/text/analyze",
+                        json={
+                            "text": content,
+                            "language": language.lower()[:2],
+                            "translate": True
+                        }
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get('success'):
+                            translation = result.get('translation', '')
+                            analysis = result.get('analysis', {})
+                            
+                            st.text_area("Translated Story Content", translation, height=200)
+                            
+                            # Show analysis insights
+                            if analysis:
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("Word Count", analysis.get('word_count', 0))
+                                with col2:
+                                    st.metric("Sentiment", analysis.get('sentiment', 'neutral'))
+                                with col3:
+                                    score = analysis.get('cultural_significance', 0)
+                                    st.metric("Cultural Score", f"{score:.2f}/1.0")
+                        else:
+                            st.error(f"Translation failed: {result.get('error', 'Unknown error')}")
+                    else:
+                        st.error(f"API error: {response.status_code}")
+                        
+                except Exception as e:
+                    # Fallback
+                    st.warning(f"Using demo translation (API error: {str(e)})")
+                    st.text_area("Translated Story Content", "This is the translated version of the story...")
+        else:
+            st.info("Click 'Translate' to translate your story to English")
 
     # Metadata
     st.markdown("---")

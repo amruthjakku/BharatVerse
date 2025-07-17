@@ -53,10 +53,45 @@ def image_page():
         
         if st.button("Generate Caption", use_container_width=True):
             with st.spinner("Analyzing image..."):
-                # Simulated AI caption
-                caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
-                st.success("Caption generated!")
-                st.text_area("Generated Caption", caption, height=100)
+                try:
+                    import requests
+                    import os
+                    
+                    # Prepare image for API
+                    image_buffer = io.BytesIO()
+                    image.save(image_buffer, format=image.format or 'PNG')
+                    image_buffer.seek(0)
+                    
+                    # Call API for caption generation
+                    API_URL = os.getenv("API_URL", "http://localhost:8000")
+                    files = {'file': (uploaded_file.name, image_buffer, uploaded_file.type)}
+                    
+                    response = requests.post(
+                        f"{API_URL}/api/v1/image/caption",
+                        files=files
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get('success'):
+                            caption = result.get('caption', '')
+                            cultural_elements = result.get('cultural_elements', [])
+                            
+                            st.success("Caption generated!")
+                            st.text_area("Generated Caption", caption, height=100)
+                            
+                            if cultural_elements:
+                                st.info(f"Detected cultural elements: {', '.join(cultural_elements)}")
+                        else:
+                            st.error(f"Caption generation failed: {result.get('error', 'Unknown error')}")
+                    else:
+                        st.error(f"API error: {response.status_code}")
+                        
+                except Exception as e:
+                    # Fallback to demo caption
+                    st.warning(f"Using demo caption (API error: {str(e)})")
+                    caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
+                    st.text_area("Generated Caption", caption, height=100)
         
         # Manual description
         st.markdown("### ✏️ Your Description")
