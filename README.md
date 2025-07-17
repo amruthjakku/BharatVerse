@@ -55,7 +55,7 @@
 <details>
 <summary><b>📹 Video Demo</b> (Click to expand)</summary>
 
-[![TeluguVerse Demo](https://img.youtube.com/vi/DEMO_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=DEMO_VIDEO_ID)
+[![TeluguVerse Demo](https://drive.google.com/file/d/1XjGInXkfbB762JgWvdCKNepqBw9DnoKl/view?usp=share_link)](https://drive.google.com/file/d/1XjGInXkfbB762JgWvdCKNepqBw9DnoKl/view?usp=share_link)
 
 </details>
 

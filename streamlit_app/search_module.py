@@ -139,7 +139,7 @@ def search_page():
                     col1, col2, col3, col4 = st.columns(4)
                     with col1:
                         if st.button(f"👁️ View", key=f"view_{i}"):
-                            show_detailed_view(result)
+                            st.session_state[f"show_details_{i}"] = True
                     with col2:
                         if st.button(f"⬇️ Download", key=f"download_{i}"):
                             st.success("Download started!")
@@ -149,6 +149,30 @@ def search_page():
                     with col4:
                         if st.button(f"📤 Share", key=f"share_{i}"):
                             st.success("Share link copied!")
+                
+                # Show detailed view if requested
+                if st.session_state.get(f"show_details_{i}", False):
+                    with st.expander("📋 Content Details", expanded=True):
+                        st.markdown(f"### {result['title']}")
+                        st.markdown(f"**Type:** {result['type']} | **Language:** {result['language']} | **Region:** {result['region']}")
+                        st.markdown(f"**Quality Score:** {result['quality']}%")
+                        st.markdown("**Description:**")
+                        st.markdown(result['description'])
+                        st.markdown("**Tags:** " + ", ".join(result['tags']))
+                        
+                        # Additional details
+                        st.markdown("**Additional Information:**")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Views", "1,234")
+                            st.metric("Downloads", "456")
+                        with col2:
+                            st.metric("Favorites", "89")
+                            st.metric("Shares", "23")
+                        
+                        if st.button("Close Details", key=f"close_{i}"):
+                            st.session_state[f"show_details_{i}"] = False
+                            st.rerun()
                 
                 st.markdown("---")
     
@@ -340,13 +364,4 @@ def generate_sample_results(query, content_types, languages, regions):
     
     return filtered_results if filtered_results else sample_data
 
-def show_detailed_view(result):
-    """Show detailed view of a search result"""
-    st.modal("Content Details")
-    with st.container():
-        st.markdown(f"# {result['title']}")
-        st.markdown(f"**Type:** {result['type']} | **Language:** {result['language']} | **Region:** {result['region']}")
-        st.markdown(f"**Quality Score:** {result['quality']}%")
-        st.markdown("---")
-        st.markdown(result['description'])
-        st.markdown("**Tags:** " + ", ".join(result['tags']))
+# Detailed view functionality is now handled inline with session state and expanders
