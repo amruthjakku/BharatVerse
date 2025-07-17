@@ -10,8 +10,14 @@ sys.path.append(str(Path(__file__).parent.parent))
 from streamlit_app.audio_module import audio_page
 from streamlit_app.text_module import text_page
 from streamlit_app.image_module import image_page
-from streamlit_app.utils.database import init_db
+from streamlit_app.analytics_module import analytics_page
+from streamlit_app.search_module import search_page
+from streamlit_app.community_module import community_page
+from streamlit_app.ai_module import ai_insights_page
+from streamlit_app.collaboration_module import collaboration_page
+from streamlit_app.utils.database import init_db, get_statistics
 from streamlit_app.utils.styling import load_custom_css
+from streamlit_app.utils.enhanced_styling import load_enhanced_css
 
 # Page configuration
 st.set_page_config(
@@ -26,6 +32,7 @@ init_db()
 
 # Load custom CSS
 load_custom_css()
+load_enhanced_css()
 
 # Sidebar navigation
 with st.sidebar:
@@ -35,16 +42,26 @@ with st.sidebar:
     # Navigation
     page = st.radio(
         "Navigate to:",
-        ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "Browse Contributions", "About"]
+        ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "🔍 Discover", "📊 Analytics", "🤝 Community", "🤖 AI Insights", "👥 Collaboration", "Browse Contributions", "About"]
     )
     
     st.markdown("---")
-    st.markdown("### 📊 Statistics")
+    st.markdown("### 📊 Live Statistics")
+    
+    # Get real statistics from database
+    stats = get_statistics()
+    
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total Contributions", "1,234")
+        st.metric("Total Contributions", stats['total_contributions'])
     with col2:
-        st.metric("Languages", "22")
+        st.metric("Languages", stats['unique_languages'])
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Audio", stats['audio_count'])
+    with col2:
+        st.metric("Text", stats['text_count'])
     
     st.markdown("---")
     st.markdown("### 🌐 Resources")
@@ -54,13 +71,54 @@ with st.sidebar:
 
 # Main content
 if page == "Home":
-    # Hero section
+    # Enhanced Hero section
     st.markdown("""
-    <div style='text-align: center; padding: 2rem 0;'>
-        <h1 style='font-size: 3rem; margin-bottom: 1rem;'>🇮🇳 BharatVerse</h1>
-        <h3 style='color: #666; margin-bottom: 2rem;'>Preserving India's Culture, One Voice at a Time</h3>
+    <div style='text-align: center; padding: 3rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white; margin-bottom: 2rem;'>
+        <h1 style='font-size: 3.5rem; margin-bottom: 1rem; font-weight: 700;'>🇮🇳 BharatVerse</h1>
+        <h2 style='font-size: 1.5rem; margin-bottom: 1rem; font-weight: 400; opacity: 0.9;'>Preserving India's Culture, One Voice at a Time</h2>
+        <p style='font-size: 1.1rem; opacity: 0.8; max-width: 600px; margin: 0 auto;'>
+            Join thousands of contributors in documenting and preserving India's rich cultural heritage through stories, songs, recipes, and traditions.
+        </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Quick stats
+    col1, col2, col3, col4 = st.columns(4)
+    stats = get_statistics()
+    
+    with col1:
+        st.markdown("""
+        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h2 style='color: #667eea; margin: 0;'>{}</h2>
+            <p style='margin: 0.5rem 0 0 0; color: #666;'>Total Contributions</p>
+        </div>
+        """.format(stats['total_contributions']), unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h2 style='color: #f093fb; margin: 0;'>{}</h2>
+            <p style='margin: 0.5rem 0 0 0; color: #666;'>Languages</p>
+        </div>
+        """.format(stats['unique_languages']), unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h2 style='color: #4facfe; margin: 0;'>2,847</h2>
+            <p style='margin: 0.5rem 0 0 0; color: #666;'>Active Contributors</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style='text-align: center; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h2 style='color: #43e97b; margin: 0;'>{}</h2>
+            <p style='margin: 0.5rem 0 0 0; color: #666;'>Regions Covered</p>
+        </div>
+        """.format(stats['unique_regions']), unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
     
     # Feature cards
     col1, col2, col3 = st.columns(3)
@@ -144,6 +202,21 @@ elif page == "Text Stories":
 
 elif page == "Visual Heritage":
     image_page()
+
+elif page == "🔍 Discover":
+    search_page()
+
+elif page == "📊 Analytics":
+    analytics_page()
+
+elif page == "🤝 Community":
+    community_page()
+
+elif page == "🤖 AI Insights":
+    ai_insights_page()
+
+elif page == "👥 Collaboration":
+    collaboration_page()
 
 elif page == "Browse Contributions":
     st.markdown("## 🔍 Browse Cultural Contributions")

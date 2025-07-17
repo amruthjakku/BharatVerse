@@ -1,0 +1,34 @@
+# Core dependencies for enhanced BharatVerse
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# Enhanced UI/UX
+plotly>=5.17.0
+altair>=5.0.0
+
+# Audio processing (basic)
+soundfile>=0.12.1
+librosa>=0.10.0
+
+# Text processing and NLP
+langdetect>=1.0.9
+textstat>=0.7.3
+
+# Image processing
+opencv-python>=4.8.0
+
+# File handling and utilities
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+markdown>=3.5.0
+
+# Data visualization
+matplotlib>=3.7.0
+wordcloud>=1.9.0
+
+# Security and validation
+pydantic>=2.5.0

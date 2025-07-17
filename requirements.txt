@@ -4,31 +4,61 @@ pandas>=2.0.0
 numpy>=1.24.0
 Pillow>=10.0.0
 
-# Audio processing (optional - for full functionality)
-# sounddevice==0.4.6
-# soundfile==0.12.1
+# Enhanced UI/UX
+plotly>=5.17.0
+altair>=5.0.0
+streamlit-option-menu>=0.3.6
+streamlit-lottie>=0.0.5
+streamlit-aggrid>=0.3.4
 
-# ML/AI dependencies (optional - for full functionality)
-# openai-whisper==20231117
-# transformers==4.36.0
-# torch==2.1.0
-# torchvision==0.16.0
+# Audio processing
+sounddevice>=0.4.6
+soundfile>=0.12.1
+librosa>=0.10.0
+pydub>=0.25.1
 
-# Indian language support (optional)
-# inltk==0.0.1
-# indic-nlp-library==0.92
+# ML/AI dependencies
+transformers>=4.36.0
+torch>=2.1.0
+torchvision>=0.16.0
+sentence-transformers>=2.2.2
 
-# API framework (optional - for API endpoints)
-# fastapi==0.104.1
-# uvicorn==0.24.0
+# Text processing and NLP
+langdetect>=1.0.9
+textstat>=0.7.3
+spacy>=3.7.0
 
-# Database (using JSON for demo, but can upgrade to)
-# sqlalchemy==2.0.23
-# psycopg2-binary==2.9.9
+# Indian language support
+indic-nlp-library>=0.92
+polyglot>=16.7.4
 
-# File handling
-python-multipart==0.0.6
+# Image processing
+opencv-python>=4.8.0
+scikit-image>=0.21.0
 
-# Utilities
-python-dotenv==1.0.0
-requests==2.31.0
+# API framework
+fastapi>=0.104.1
+uvicorn>=0.24.0
+
+# Database enhancements
+sqlalchemy>=2.0.23
+
+# File handling and utilities
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+markdown>=3.5.0
+
+# Data visualization and analytics
+seaborn>=0.12.0
+matplotlib>=3.7.0
+wordcloud>=1.9.0
+
+# Performance and caching
+redis>=5.0.0
+diskcache>=5.6.0
+
+# Security and validation
+pydantic>=2.5.0
+cryptography>=41.0.0
