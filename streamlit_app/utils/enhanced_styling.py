@@ -384,3 +384,8 @@ def load_enhanced_css():
     </style>
     """
     st.markdown(enhanced_css, unsafe_allow_html=True)
+
+
+def apply_enhanced_styling():
+    """Apply enhanced styling to the Streamlit app"""
+    load_enhanced_css()
