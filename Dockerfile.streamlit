@@ -1,0 +1,37 @@
+# Dockerfile for Enhanced Streamlit frontend with AI capabilities
+FROM python:3.11-slim
+
+# Install system dependencies for AI models
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    portaudio19-dev \
+    python3-pyaudio \
+    ffmpeg \
+    git \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create models cache directory
+RUN mkdir -p /app/models_cache
+ENV TRANSFORMERS_CACHE=/app/models_cache
+ENV TORCH_HOME=/app/models_cache
+
+# Copy application code
+COPY . .
+
+# Pre-download AI models (optional, for faster startup)
+RUN python -c "import whisper; whisper.load_model('base')" || echo "Whisper model download failed"
+RUN python -c "from transformers import pipeline; pipeline('sentiment-analysis', model='cardiffnlp/twitter-roberta-base-sentiment-latest')" || echo "Sentiment model download failed"
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "streamlit_app/app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+

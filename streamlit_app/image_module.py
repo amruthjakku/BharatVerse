@@ -3,6 +3,26 @@ from datetime import datetime
 import base64
 from PIL import Image
 import io
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent))
+
+# Try to import enhanced AI models
+try:
+    from core.ai_models_enhanced import ai_manager
+    AI_MODELS_AVAILABLE = True
+except ImportError:
+    AI_MODELS_AVAILABLE = False
+
+# Database imports
+try:
+    from streamlit_app.utils.database import add_contribution
+    from core.database import DatabaseManager, ContentRepository
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
 
 def image_page():
     st.markdown("## 📷 Visual Heritage")
@@ -47,27 +67,84 @@ def image_page():
             photographer = st.text_input("Photographer (Optional)", "")
             year_taken = st.number_input("Year Taken", 1900, 2024, 2023)
         
-        # AI-generated caption
+        # AI-generated caption and analysis
         st.markdown("---")
-        st.markdown("### 🤖 AI-Generated Caption")
+        st.markdown("### 🤖 AI Image Analysis")
         
-        if st.button("Generate Caption", use_container_width=True):
-            with st.spinner("Analyzing image..."):
-                try:
-                    import requests
-                    import os
-                    
-                    # Prepare image for API
-                    image_buffer = io.BytesIO()
-                    image.save(image_buffer, format=image.format or 'PNG')
-                    image_buffer.seek(0)
-                    
-                    # Call API for caption generation
-                    API_URL = os.getenv("API_URL", "http://localhost:8000")
-                    use_real_data = st.session_state.get('use_real_data', False)
-                    
-                    if use_real_data:
+        if st.button("Analyze Image", use_container_width=True):
+            with st.spinner("Analyzing image with AI..."):
+                use_real_data = st.session_state.get('use_real_data', False)
+                
+                if use_real_data and AI_MODELS_AVAILABLE:
+                    try:
+                        # Use enhanced AI models for image analysis
+                        st.info("🤖 Using real AI models for image analysis...")
+                        
+                        # Convert image to bytes
+                        image_buffer = io.BytesIO()
+                        image.save(image_buffer, format=image.format or 'PNG')
+                        image_bytes = image_buffer.getvalue()
+                        
+                        result = ai_manager.process_image(image_bytes)
+                        
+                        if result.get('success'):
+                            st.success("✅ Image analysis complete!")
+                            
+                            # Show generated caption
+                            caption = result.get('caption', '')
+                            st.text_area("AI-Generated Caption", caption, height=100)
+                            
+                            # Show image analysis details
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                dimensions = result.get('dimensions', {})
+                                st.metric("Width", f"{dimensions.get('width', 0)}px")
+                                st.metric("Height", f"{dimensions.get('height', 0)}px")
+                            
+                            with col2:
+                                aspect_ratio = result.get('aspect_ratio', 0)
+                                st.metric("Aspect Ratio", f"{aspect_ratio:.2f}")
+                                
+                                analysis = result.get('analysis', {})
+                                brightness = analysis.get('brightness', 0)
+                                st.metric("Brightness", f"{brightness:.2%}")
+                            
+                            with col3:
+                                complexity = analysis.get('complexity', 0)
+                                st.metric("Complexity", f"{complexity:.2%}")
+                                
+                                dominant_colors = analysis.get('dominant_colors', [])
+                                if dominant_colors:
+                                    st.write("**Colors:**")
+                                    st.write(", ".join(dominant_colors[:3]))
+                            
+                            # Cultural elements detected
+                            cultural_elements = result.get('cultural_elements', [])
+                            if cultural_elements:
+                                st.markdown("### 🏛️ Cultural Elements Detected")
+                                st.write(", ".join(cultural_elements))
+                            
+                            # Store results for submission
+                            st.session_state.image_analysis_result = result
+                            
+                        else:
+                            st.error(f"Image analysis failed: {result.get('error', 'Unknown error')}")
+                            
+                    except Exception as e:
+                        st.error(f"Error during image analysis: {str(e)}")
+                        # Fallback to API call
+                        st.info("Falling back to API analysis...")
                         try:
+                            import requests
+                            import os
+                            
+                            # Prepare image for API
+                            image_buffer = io.BytesIO()
+                            image.save(image_buffer, format=image.format or 'PNG')
+                            image_buffer.seek(0)
+                            
+                            API_URL = os.getenv("API_URL", "http://localhost:8000")
                             files = {'file': (uploaded_file.name, image_buffer, uploaded_file.type)}
                             
                             response = requests.post(
@@ -81,7 +158,7 @@ def image_page():
                                     caption = result.get('caption', '')
                                     cultural_elements = result.get('cultural_elements', [])
                                     
-                                    st.success("Caption generated!")
+                                    st.success("API Caption generated!")
                                     st.text_area("Generated Caption", caption, height=100)
                                     
                                     if cultural_elements:
@@ -90,13 +167,22 @@ def image_page():
                                     st.error(f"Caption generation failed: {result.get('error', 'Unknown error')}")
                             else:
                                 st.error(f"API error: {response.status_code}")
-                        except Exception as e:
-                            st.error(f"API connection failed: {str(e)}")
-                    else:
-                        # Demo mode - show demo caption
-                        st.info("🟡 Demo Mode: Using sample caption")
-                        caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
-                        st.text_area("Generated Caption", caption, height=100)
+                        except Exception as api_e:
+                            st.error(f"API fallback also failed: {str(api_e)}")
+                
+                elif use_real_data and not AI_MODELS_AVAILABLE:
+                    st.warning("🚧 Real AI models not available. Install dependencies with: pip install -r requirements.txt")
+                    # Show demo caption as fallback
+                    caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
+                    st.text_area("Demo Generated Caption", caption, height=100)
+                    st.info("Detected cultural elements: festival, traditional, art, religious, decoration")
+                
+                else:
+                    # Demo mode - show demo caption
+                    st.info("🟡 Demo Mode: Using sample caption")
+                    caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
+                    st.text_area("Generated Caption", caption, height=100)
+                    st.info("Detected cultural elements: festival, traditional, art, religious, decoration")
                 
                 except Exception as e:
                     st.error(f"Image processing error: {str(e)}")

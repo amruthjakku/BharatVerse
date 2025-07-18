@@ -1,37 +1,107 @@
-version: '3.8'
+version: '3.9'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:16
+    restart: always
     environment:
       POSTGRES_DB: bharatverse
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secure_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: bharatverse_user
+      POSTGRES_PASSWORD: secretpassword
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redisdata:/data
+    restart: always
+    command: redis-server --appendonly yes
 
   minio:
     image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio_data:/data
+      - miniodata:/data
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    env_file: .env
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    ports:
+      - "8000:8000"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    command: server /data --console-address ":9001"
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=bharatverse_user
+      - POSTGRES_PASSWORD=secretpassword
+      - POSTGRES_DB=bharatverse
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MINIO_HOST=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - CORS_ORIGINS=http://localhost:8501
+      - API_URL=http://api:8000
+    volumes:
+      - ./models_cache:/app/models_cache  # Cache for AI models
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 4G  # Increased memory for AI models
+        reservations:
+          memory: 2G
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    env_file: .env
+    depends_on:
+      - api
+      - postgres
+      - redis
+      - minio
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=bharatverse_user
+      - POSTGRES_PASSWORD=secretpassword
+      - POSTGRES_DB=bharatverse
+      - REDIS_HOST=redis
+      - MINIO_HOST=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    volumes:
+      - ./models_cache:/app/models_cache  # Share AI models cache
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G  # Memory for AI models in Streamlit
+        reservations:
+          memory: 1G
 
 volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
+  pgdata:
+  redisdata:
+  miniodata:

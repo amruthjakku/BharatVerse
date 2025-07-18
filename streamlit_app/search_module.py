@@ -3,10 +3,38 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import json
+import sys
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent))
+
 from streamlit_app.utils.database import get_contributions
-from langdetect import detect
-import plotly.express as px
+
+# Try to import enhanced AI models and database
+try:
+    from core.ai_models_enhanced import ai_manager
+    AI_MODELS_AVAILABLE = True
+except ImportError:
+    AI_MODELS_AVAILABLE = False
+
+try:
+    from core.database import DatabaseManager, ContentRepository
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
+
+try:
+    from langdetect import detect
+    LANGDETECT_AVAILABLE = True
+except ImportError:
+    LANGDETECT_AVAILABLE = False
+
+try:
+    import plotly.express as px
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
 
 def search_page():
     st.markdown("## 🔍 Discover Cultural Heritage")

@@ -9,17 +9,23 @@ def community_page():
     st.markdown("## 🤝 Community Hub")
     st.markdown("Connect with fellow cultural enthusiasts and contributors")
     
+    # Import the utility function
+    from streamlit_app.utils.mock_data_handler import get_community_data
+    
+    # Get community data
+    community_data = get_community_data()
+    
     # Community stats
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Active Members", "2,847", "+127 this month")
+        st.metric("Active Members", community_data["members"], "+127 this month" if community_data["members"] > 0 else "Real data not available")
     with col2:
-        st.metric("Cultural Experts", "156", "+8 this week")
+        st.metric("Cultural Experts", community_data["experts"], "+8 this week" if community_data["experts"] > 0 else "Real data not available")
     with col3:
-        st.metric("Verified Contributors", "892", "+23 this month")
+        st.metric("Verified Contributors", community_data["contributors"], "+23 this month" if community_data["contributors"] > 0 else "Real data not available")
     with col4:
-        st.metric("Community Projects", "34", "+3 active")
+        st.metric("Community Projects", community_data["projects"], "+3 active" if community_data["projects"] > 0 else "Real data not available")
     
     # Main content tabs
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -47,6 +53,13 @@ def community_page():
 
 def leaderboard_section():
     st.markdown("### 🏆 Top Contributors")
+    
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("🏆 Real leaderboard data would be displayed here when available from the API")
+        return
     
     # Time period selector
     period = st.selectbox("Time Period", ["This Week", "This Month", "All Time"], key="leaderboard_period")
@@ -122,6 +135,13 @@ def leaderboard_section():
 
 def contributors_section():
     st.markdown("### 👥 Community Contributors")
+    
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("👥 Real contributors data would be displayed here when available from the API")
+        return
     
     # Search and filter
     col1, col2, col3 = st.columns(3)

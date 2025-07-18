@@ -1,0 +1,42 @@
+Collecting openai-whisper
+  Using cached openai_whisper-20250625-py3-none-any.whl
+Collecting more-itertools (from openai-whisper)
+  Using cached more_itertools-10.7.0-py3-none-any.whl.metadata (37 kB)
+Collecting numba (from openai-whisper)
+  Using cached numba-0.61.2-cp313-cp313-macosx_11_0_arm64.whl.metadata (2.7 kB)
+Requirement already satisfied: numpy in ./venv/lib/python3.13/site-packages (from openai-whisper) (2.3.1)
+Collecting tiktoken (from openai-whisper)
+  Using cached tiktoken-0.9.0-cp313-cp313-macosx_11_0_arm64.whl.metadata (6.7 kB)
+Requirement already satisfied: torch in ./venv/lib/python3.13/site-packages (from openai-whisper) (2.7.1)
+Requirement already satisfied: tqdm in ./venv/lib/python3.13/site-packages (from openai-whisper) (4.67.1)
+Collecting llvmlite<0.45,>=0.44.0dev0 (from numba->openai-whisper)
+  Using cached llvmlite-0.44.0-cp313-cp313-macosx_11_0_arm64.whl.metadata (4.8 kB)
+Collecting numpy (from openai-whisper)
+  Using cached numpy-2.2.6-cp313-cp313-macosx_14_0_arm64.whl.metadata (62 kB)
+Requirement already satisfied: regex>=2022.1.18 in ./venv/lib/python3.13/site-packages (from tiktoken->openai-whisper) (2024.11.6)
+Requirement already satisfied: requests>=2.26.0 in ./venv/lib/python3.13/site-packages (from tiktoken->openai-whisper) (2.32.4)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./venv/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken->openai-whisper) (3.4.2)
+Requirement already satisfied: idna<4,>=2.5 in ./venv/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken->openai-whisper) (3.10)
+Requirement already satisfied: urllib3<3,>=1.21.1 in ./venv/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken->openai-whisper) (2.5.0)
+Requirement already satisfied: certifi>=2017.4.17 in ./venv/lib/python3.13/site-packages (from requests>=2.26.0->tiktoken->openai-whisper) (2025.7.14)
+Requirement already satisfied: filelock in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (3.18.0)
+Requirement already satisfied: typing-extensions>=4.10.0 in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (4.14.1)
+Requirement already satisfied: setuptools in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (80.9.0)
+Requirement already satisfied: sympy>=1.13.3 in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (1.14.0)
+Requirement already satisfied: networkx in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (3.5)
+Requirement already satisfied: jinja2 in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (3.1.6)
+Requirement already satisfied: fsspec in ./venv/lib/python3.13/site-packages (from torch->openai-whisper) (2025.7.0)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in ./venv/lib/python3.13/site-packages (from sympy>=1.13.3->torch->openai-whisper) (1.3.0)
+Requirement already satisfied: MarkupSafe>=2.0 in ./venv/lib/python3.13/site-packages (from jinja2->torch->openai-whisper) (3.0.2)
+Using cached more_itertools-10.7.0-py3-none-any.whl (65 kB)
+Using cached numba-0.61.2-cp313-cp313-macosx_11_0_arm64.whl (2.8 MB)
+Using cached llvmlite-0.44.0-cp313-cp313-macosx_11_0_arm64.whl (26.2 MB)
+Using cached numpy-2.2.6-cp313-cp313-macosx_14_0_arm64.whl (5.1 MB)
+Using cached tiktoken-0.9.0-cp313-cp313-macosx_11_0_arm64.whl (1.0 MB)
+Installing collected packages: numpy, more-itertools, llvmlite, tiktoken, numba, openai-whisper
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.3.1
+    Uninstalling numpy-2.3.1:
+      Successfully uninstalled numpy-2.3.1
+
+Successfully installed llvmlite-0.44.0 more-itertools-10.7.0 numba-0.61.2 numpy-2.2.6 openai-whisper-20250625 tiktoken-0.9.0

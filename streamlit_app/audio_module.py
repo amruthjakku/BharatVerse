@@ -8,6 +8,11 @@ import tempfile
 import os
 import requests
 import json
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent))
 
 # Try to import audio libraries with fallback
 try:
@@ -17,6 +22,21 @@ try:
 except (ImportError, OSError) as e:
     AUDIO_AVAILABLE = False
     # Don't show warning here as it will show on every import
+
+# Try to import enhanced AI models
+try:
+    from core.ai_models_enhanced import ai_manager
+    AI_MODELS_AVAILABLE = True
+except ImportError:
+    AI_MODELS_AVAILABLE = False
+
+# Database imports
+try:
+    from streamlit_app.utils.database import add_contribution
+    from core.database import DatabaseManager, ContentRepository
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
 
 # API endpoint
 API_URL = os.getenv("API_URL", "http://localhost:8000")
@@ -139,61 +159,142 @@ def audio_page():
             with st.spinner("Transcribing audio..."):
                 use_real_data = st.session_state.get('use_real_data', False)
                 
-                if use_real_data:
+                if use_real_data and AI_MODELS_AVAILABLE:
                     try:
-                        # Prepare audio file for API
+                        # Get audio data
+                        audio_data = None
                         if st.session_state.get('recorded_audio') is not None:
-                            # Convert numpy array to audio file
-                            audio_buffer = io.BytesIO()
-                            sf.write(audio_buffer, st.session_state.recorded_audio, 
-                                    st.session_state.sample_rate, format='WAV')
-                            audio_buffer.seek(0)
-                            files = {'file': ('recording.wav', audio_buffer, 'audio/wav')}
-                        else:
-                            # Use uploaded file
+                            audio_data = st.session_state.recorded_audio
+                        elif st.session_state.get('uploaded_audio') is not None:
                             uploaded_file = st.session_state.get('uploaded_audio')
-                            files = {'file': (uploaded_file.name, uploaded_file, uploaded_file.type)}
+                            audio_data = uploaded_file.read()
+                        
+                        if audio_data is None:
+                            st.error("No audio data found")
+                            return
                         
                         # Determine language code
                         lang_code = None if language == "Auto-detect" else language.lower()[:2]
                         
-                        # Call API for transcription
-                        response = requests.post(
-                            f"{API_URL}/api/v1/audio/transcribe",
-                            files=files,
-                            data={
-                                'language': lang_code or '',
-                                'translate': 'true'
-                            }
+                        # Use enhanced AI models for transcription
+                        st.info("🤖 Using real AI models for transcription...")
+                        result = ai_manager.process_audio(
+                            audio_data, 
+                            language=lang_code, 
+                            translate=True
                         )
                         
-                        if response.status_code == 200:
-                            result = response.json()
+                        if result.get('success'):
+                            st.success("✅ Transcription complete!")
                             
-                            if result.get('success'):
-                                st.success("✅ Transcription complete!")
-                                
-                                # Show transcription
-                                transcription = result.get('transcription', '')
-                                detected_lang = result.get('language', 'unknown')
-                                
-                                st.text_area("Transcribed Text", transcription, height=150)
-                                st.caption(f"Detected language: {detected_lang}")
-                                
-                                # Show translation if available
-                                translation = result.get('translation', '')
-                                if translation:
-                                    st.text_area("English Translation", translation, height=100)
-                                
-                                # Store results for submission
-                                st.session_state.transcription_result = result
-                            else:
-                                st.error(f"Transcription failed: {result.get('error', 'Unknown error')}")
+                            # Show transcription
+                            transcription = result.get('transcription', '')
+                            detected_lang = result.get('language', 'unknown')
+                            confidence = result.get('confidence', 0.0)
+                            
+                            st.text_area("Transcribed Text", transcription, height=150)
+                            
+                            # Show confidence and language info
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.caption(f"🌐 Detected language: {detected_lang}")
+                            with col2:
+                                st.caption(f"🎯 Confidence: {confidence:.2%}")
+                            
+                            # Show translation if available
+                            translation_result = result.get('translation', {})
+                            if translation_result and translation_result.get('success'):
+                                translation = translation_result.get('translation', '')
+                                st.text_area("English Translation", translation, height=100)
+                                st.caption(f"🔄 Translation confidence: {translation_result.get('confidence', 0.0):.2%}")
+                            
+                            # Show text analysis if available
+                            text_analysis = result.get('text_analysis', {})
+                            if text_analysis and text_analysis.get('success'):
+                                with st.expander("📊 Text Analysis"):
+                                    col1, col2, col3 = st.columns(3)
+                                    with col1:
+                                        st.metric("Word Count", text_analysis.get('word_count', 0))
+                                    with col2:
+                                        sentiment = text_analysis.get('sentiment', {})
+                                        st.metric("Sentiment", sentiment.get('label', 'Unknown'))
+                                    with col3:
+                                        readability = text_analysis.get('readability', {})
+                                        st.metric("Readability", readability.get('difficulty', 'Unknown'))
+                                    
+                                    # Show cultural indicators
+                                    cultural_indicators = text_analysis.get('cultural_indicators', [])
+                                    if cultural_indicators:
+                                        st.write("🏛️ **Cultural Elements Detected:**")
+                                        st.write(", ".join(cultural_indicators))
+                                    
+                                    # Show keywords
+                                    keywords = text_analysis.get('keywords', [])
+                                    if keywords:
+                                        st.write("🔑 **Keywords:**")
+                                        st.write(", ".join(keywords[:10]))
+                            
+                            # Store results for submission
+                            st.session_state.transcription_result = result
                         else:
-                            st.error(f"API error: {response.status_code}")
+                            st.error(f"Transcription failed: {result.get('error', 'Unknown error')}")
                             
                     except Exception as e:
                         st.error(f"Error during transcription: {str(e)}")
+                        # Fallback to API call
+                        st.info("Falling back to API transcription...")
+                        try:
+                            # Prepare audio file for API
+                            if st.session_state.get('recorded_audio') is not None:
+                                # Convert numpy array to audio file
+                                audio_buffer = io.BytesIO()
+                                sf.write(audio_buffer, st.session_state.recorded_audio, 
+                                        st.session_state.sample_rate, format='WAV')
+                                audio_buffer.seek(0)
+                                files = {'file': ('recording.wav', audio_buffer, 'audio/wav')}
+                            else:
+                                # Use uploaded file
+                                uploaded_file = st.session_state.get('uploaded_audio')
+                                files = {'file': (uploaded_file.name, uploaded_file, uploaded_file.type)}
+                            
+                            # Call API for transcription
+                            response = requests.post(
+                                f"{API_URL}/api/v1/audio/transcribe",
+                                files=files,
+                                data={
+                                    'language': lang_code or '',
+                                    'translate': 'true'
+                                }
+                            )
+                            
+                            if response.status_code == 200:
+                                result = response.json()
+                                if result.get('success'):
+                                    st.success("✅ API Transcription complete!")
+                                    transcription = result.get('transcription', '')
+                                    st.text_area("Transcribed Text", transcription, height=150)
+                                    st.session_state.transcription_result = result
+                                else:
+                                    st.error(f"API Transcription failed: {result.get('error', 'Unknown error')}")
+                            else:
+                                st.error(f"API error: {response.status_code}")
+                        except Exception as api_e:
+                            st.error(f"API fallback also failed: {str(api_e)}")
+                
+                elif use_real_data and not AI_MODELS_AVAILABLE:
+                    st.warning("🚧 Real AI models not available. Install dependencies with: pip install -r requirements.txt")
+                    # Show demo transcription as fallback
+                    transcription = "पानी रे पानी तेरा रंग कैसा\nजिसमें मिला दो लागे जैसा"
+                    translation = "Water, oh water, what is your color?\nYou become like whatever you're mixed with."
+                    
+                    st.text_area("Demo Transcribed Text", transcription, height=150)
+                    st.text_area("Demo English Translation", translation, height=100)
+                    
+                    st.session_state.transcription_result = {
+                        'transcription': transcription,
+                        'translation': translation,
+                        'language': 'hi'
+                    }
                 else:
                     # Demo mode - show demo transcription
                     st.info("🟡 Demo Mode: Using sample transcription")

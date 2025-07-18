@@ -1,5 +1,25 @@
 import streamlit as st
 from datetime import datetime
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent))
+
+# Try to import enhanced AI models
+try:
+    from core.ai_models_enhanced import ai_manager
+    AI_MODELS_AVAILABLE = True
+except ImportError:
+    AI_MODELS_AVAILABLE = False
+
+# Database imports
+try:
+    from streamlit_app.utils.database import add_contribution
+    from core.database import DatabaseManager, ContentRepository
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
 
 
 def text_page():
@@ -61,43 +81,117 @@ def story_section():
             height=200
         )
 
-    # Translation option
-    if st.checkbox("Translate to English"):
+    # Translation and Analysis option
+    if st.checkbox("Analyze & Translate Text"):
         st.markdown("---")
-        st.markdown("### 🔄 Translation")
-        if st.button("Translate", key="translate_story"):
-            with st.spinner("Translating..."):
+        st.markdown("### 🔄 AI Analysis & Translation")
+        if st.button("Analyze Text", key="analyze_story"):
+            with st.spinner("Analyzing text..."):
                 use_real_data = st.session_state.get('use_real_data', False)
                 
-                if use_real_data:
+                if use_real_data and AI_MODELS_AVAILABLE:
                     try:
-                        import requests
-                        import os
-                        import json
+                        # Use enhanced AI models for text analysis
+                        st.info("🤖 Using real AI models for text analysis...")
                         
-                        API_URL = os.getenv("API_URL", "http://localhost:8000")
-                        response = requests.post(
-                            f"{API_URL}/api/v1/text/analyze",
-                            json={
-                                "text": content,
-                                "language": language.lower()[:2],
-                                "translate": True
-                            }
+                        # Determine language code
+                        lang_code = language.lower()[:2] if language != "English" else "en"
+                        
+                        result = ai_manager.process_text(
+                            content, 
+                            language=lang_code, 
+                            translate=True
                         )
                         
-                        if response.status_code == 200:
-                            result = response.json()
-                            if result.get('success'):
-                                translation = result.get('translation', '')
-                                analysis = result.get('analysis', {})
-                                
-                                st.text_area("Translated Story Content", translation, height=200)
-                                
-                                # Show analysis insights
-                                if analysis:
-                                    col1, col2, col3 = st.columns(3)
-                                    with col1:
-                                        st.metric("Word Count", analysis.get('word_count', 0))
+                        if result.get('success'):
+                            st.success("✅ Analysis complete!")
+                            
+                            # Show comprehensive analysis
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Word Count", result.get('word_count', 0))
+                            with col2:
+                                sentiment = result.get('sentiment', {})
+                                st.metric("Sentiment", sentiment.get('label', 'Unknown'))
+                            with col3:
+                                readability = result.get('readability', {})
+                                st.metric("Readability", readability.get('difficulty', 'Unknown'))
+                            
+                            # Language detection
+                            detected_lang = result.get('language', 'unknown')
+                            st.info(f"🌐 Detected language: {detected_lang}")
+                            
+                            # Show translation if available
+                            translation_result = result.get('translation', {})
+                            if translation_result and translation_result.get('success'):
+                                translation = translation_result.get('translation', '')
+                                st.text_area("English Translation", translation, height=200)
+                                st.caption(f"🔄 Translation confidence: {translation_result.get('confidence', 0.0):.2%}")
+                            
+                            # Cultural indicators
+                            cultural_indicators = result.get('cultural_indicators', [])
+                            if cultural_indicators:
+                                st.markdown("### 🏛️ Cultural Elements Detected")
+                                st.write(", ".join(cultural_indicators))
+                            
+                            # Keywords
+                            keywords = result.get('keywords', [])
+                            if keywords:
+                                st.markdown("### 🔑 Key Terms")
+                                st.write(", ".join(keywords[:15]))
+                            
+                            # Detailed sentiment analysis
+                            sentiment = result.get('sentiment', {})
+                            if sentiment.get('all_scores'):
+                                with st.expander("📊 Detailed Sentiment Analysis"):
+                                    for score_data in sentiment['all_scores']:
+                                        st.write(f"**{score_data['label']}**: {score_data['score']:.3f}")
+                            
+                            # Readability details
+                            readability = result.get('readability', {})
+                            if readability:
+                                with st.expander("📖 Readability Analysis"):
+                                    st.write(f"**Overall Score**: {readability.get('score', 0):.1f}/100")
+                                    st.write(f"**Average Words per Sentence**: {readability.get('avg_words_per_sentence', 0):.1f}")
+                                    st.write(f"**Average Characters per Word**: {readability.get('avg_chars_per_word', 0):.1f}")
+                                    st.write(f"**Difficulty Level**: {readability.get('difficulty', 'Unknown')}")
+                            
+                            # Store results for submission
+                            st.session_state.text_analysis_result = result
+                        else:
+                            st.error(f"Analysis failed: {result.get('error', 'Unknown error')}")
+                            
+                    except Exception as e:
+                        st.error(f"Error during analysis: {str(e)}")
+                        # Fallback to API call
+                        st.info("Falling back to API analysis...")
+                        try:
+                            import requests
+                            import os
+                            
+                            API_URL = os.getenv("API_URL", "http://localhost:8000")
+                            response = requests.post(
+                                f"{API_URL}/api/v1/text/analyze",
+                                json={
+                                    "text": content,
+                                    "language": language.lower()[:2],
+                                    "translate": True
+                                }
+                            )
+                            
+                            if response.status_code == 200:
+                                result = response.json()
+                                if result.get('success'):
+                                    translation = result.get('translation', '')
+                                    analysis = result.get('analysis', {})
+                                    
+                                    st.text_area("Translated Story Content", translation, height=200)
+                                    
+                                    # Show analysis insights
+                                    if analysis:
+                                        col1, col2, col3 = st.columns(3)
+                                        with col1:
+                                            st.metric("Word Count", analysis.get('word_count', 0))
                                     with col2:
                                         st.metric("Sentiment", analysis.get('sentiment', 'neutral'))
                                     with col3:

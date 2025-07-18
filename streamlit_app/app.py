@@ -18,6 +18,7 @@ from streamlit_app.collaboration_module import collaboration_page
 from streamlit_app.utils.database import init_db, get_statistics
 from streamlit_app.utils.theme_styling import load_theme_css
 from streamlit_app.utils.cache_manager import cache_manager
+from streamlit_app.utils.data_handler import get_contributions, should_use_real_data
 
 # Page configuration
 st.set_page_config(
@@ -39,13 +40,19 @@ with st.sidebar:
     st.markdown("---")
 
     # Demo/Real data toggle
+    prev_data_mode = st.session_state.get("use_real_data", False)
     data_mode = st.toggle(
         "Use Real Data",
-        value=False,
+        value=prev_data_mode,
         help="Toggle between demo data and real API data. Turn ON to use real AI models (requires API server running)."
     )
     
     # Store in session state
+    if data_mode and not prev_data_mode:
+        from datetime import datetime
+        st.session_state.real_data_start_time = datetime.utcnow().isoformat()
+        st.toast("🟢 Real Data mode activated. Showing new uploads only.")
+    
     st.session_state.use_real_data = data_mode
     
     if data_mode:
@@ -126,12 +133,22 @@ if page == "Home":
         """.format(stats['unique_languages']), unsafe_allow_html=True)
     
     with col3:
-        st.markdown("""
-        <div class='info-card'>
-            <h2>2,847</h2>
-            <p>Active Contributors</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Check if we should use real data
+        use_real_data = st.session_state.get('use_real_data', False)
+        if use_real_data:
+            st.markdown("""
+            <div class='info-card'>
+                <h2>N/A</h2>
+                <p>Active Contributors</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class='info-card'>
+                <h2>2,847</h2>
+                <p>Active Contributors</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     with col4:
         st.markdown("""
@@ -183,39 +200,45 @@ if page == "Home":
     st.markdown("---")
     st.markdown("### 🎆 Recent Contributions")
     
-    recent_cols = st.columns(4)
-    contributions = [
-        {"type": "🎙️", "title": "Baul Song from Bengal", "lang": "Bengali", "time": "2 hours ago"},
-        {"type": "📝", "title": "Pongal Recipe", "lang": "Tamil", "time": "5 hours ago"},
-        {"type": "📷", "title": "Durga Puja Celebration", "lang": "Hindi", "time": "1 day ago"},
-        {"type": "🎙️", "title": "Lavani Performance", "lang": "Marathi", "time": "2 days ago"}
-    ]
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
     
-    for i, (col, contrib) in enumerate(zip(recent_cols, contributions)):
-        with col:
-            st.markdown(f"""
-            <div class='contribution-card'>
-                <h2>{contrib['type']}</h2>
-                <h5>{contrib['title']}</h5>
-                <p>{contrib['lang']} • {contrib['time']}</p>
-            </div>
-            """, unsafe_allow_html=True)
+    contributions = get_contributions()
+    if not contributions:
+        if should_use_real_data():
+            st.info("No contributions found. Upload something to get started!")
+        else:
+            st.info("No demo data found. Contact admin.")
+    else:
+        recent_cols = st.columns(min(4, len(contributions)))
+        for i, (col, contrib) in enumerate(zip(recent_cols, contributions[:4])):
+            with col:
+                st.markdown(f"""
+                <div class='contribution-card'>
+                    <h2>{contrib['type']}</h2>
+                    <h5>{contrib['title']}</h5>
+                    <p>{contrib['lang']} • {contrib['time']}</p>
+                </div>
+                """, unsafe_allow_html=True)
     
     # Impact metrics
     st.markdown("---")
     st.markdown("### 📈 Our Impact")
     
-    metric_cols = st.columns(4)
-    metrics = [
-        {"label": "Stories Preserved", "value": "15,234", "delta": "+234 this week"},
-        {"label": "Active Contributors", "value": "3,456", "delta": "+56 today"},
-        {"label": "Languages Covered", "value": "22", "delta": "+2 this month"},
-        {"label": "Research Downloads", "value": "45,678", "delta": "+1,234 this month"}
-    ]
-    
-    for col, metric in zip(metric_cols, metrics):
-        with col:
-            st.metric(metric["label"], metric["value"], metric["delta"])
+    if use_real_data:
+        st.info("📊 Real impact metrics would be displayed here when available from the API")
+    else:
+        metric_cols = st.columns(4)
+        metrics = [
+            {"label": "Stories Preserved", "value": "15,234", "delta": "+234 this week"},
+            {"label": "Active Contributors", "value": "3,456", "delta": "+56 today"},
+            {"label": "Languages Covered", "value": "22", "delta": "+2 this month"},
+            {"label": "Research Downloads", "value": "45,678", "delta": "+1,234 this month"}
+        ]
+        
+        for col, metric in zip(metric_cols, metrics):
+            with col:
+                st.metric(metric["label"], metric["value"], metric["delta"])
 
 elif page == "Audio Capture":
     audio_page()
@@ -244,6 +267,9 @@ elif page == "👥 Collaboration":
 elif page == "Browse Contributions":
     st.markdown("## 🔍 Browse Cultural Contributions")
     
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
     # Filters
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -262,27 +288,30 @@ elif page == "Browse Contributions":
     st.markdown("---")
     st.markdown("### 📚 Results")
     
-    # Sample results
-    for i in range(3):
-        col1, col2 = st.columns([1, 4])
-        with col1:
-            st.markdown("""
-            <div style='background: #f0f2f6; padding: 2rem; border-radius: 8px; text-align: center;'>
-                <h1>🎙️</h1>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"### Traditional Folk Song #{i+1}")
-            st.markdown("**Language:** Punjabi | **Region:** North India | **Duration:** 3:45")
-            st.markdown("A beautiful rendition of a harvest song traditionally sung during Baisakhi celebrations...")
-            col1, col2, col3 = st.columns(3)
+    if use_real_data:
+        st.info("🔍 Real search results would be displayed here when available from the API")
+    else:
+        # Sample results
+        for i in range(3):
+            col1, col2 = st.columns([1, 4])
             with col1:
-                st.button(f"🎧 Play", key=f"play_{i}")
+                st.markdown("""
+                <div style='background: #f0f2f6; padding: 2rem; border-radius: 8px; text-align: center;'>
+                    <h1>🎙️</h1>
+                </div>
+                """, unsafe_allow_html=True)
             with col2:
-                st.button(f"📝 View Transcript", key=f"transcript_{i}")
-            with col3:
-                st.button(f"💾 Download", key=f"download_{i}")
-        st.markdown("---")
+                st.markdown(f"### Traditional Folk Song #{i+1}")
+                st.markdown("**Language:** Punjabi | **Region:** North India | **Duration:** 3:45")
+                st.markdown("A beautiful rendition of a harvest song traditionally sung during Baisakhi celebrations...")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.button(f"🎧 Play", key=f"play_{i}")
+                with col2:
+                    st.button(f"📝 View Transcript", key=f"transcript_{i}")
+                with col3:
+                    st.button(f"💾 Download", key=f"download_{i}")
+            st.markdown("---")
 
 elif page == "About":
     st.markdown("""

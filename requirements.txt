@@ -46,7 +46,7 @@ streamlit-aggrid>=0.3.4
 # Charts and graphs
 seaborn>=0.12.0
 matplotlib>=3.7.0
-wordcloud>=1.9.0
+# wordcloud>=1.9.0  # Commented out due to build issues in Docker
 
 #=============================================================================
 # UTILITY LIBRARIES
@@ -63,44 +63,39 @@ cryptography>=41.0.0
 diskcache>=5.6.0
 
 #=============================================================================
-# AUDIO PROCESSING (Optional - requires system PortAudio library)
+# AUDIO PROCESSING (Now Required for Real AI Features)
 #=============================================================================
-# Uncomment if you need audio recording features
-# sounddevice>=0.4.6
-# soundfile>=0.12.1
-# librosa>=0.10.0
-# pydub>=0.25.1
+sounddevice>=0.4.6
+soundfile>=0.12.1
+librosa>=0.10.0
+pydub>=0.25.1
 
 #=============================================================================
-# MACHINE LEARNING & AI (Optional - large downloads)
+# MACHINE LEARNING & AI (Now Required for Real AI Features)
 #=============================================================================
-# Uncomment if you need AI-powered features
-# transformers>=4.36.0
-# torch>=2.1.0
-# torchvision>=0.16.0
-# sentence-transformers>=2.2.2
+transformers>=4.36.0
+torch>=2.1.0
+torchvision>=0.16.0
+sentence-transformers>=2.2.2
+openai-whisper>=20231117
 
 #=============================================================================
-# TEXT PROCESSING & NLP (Optional)
+# TEXT PROCESSING & NLP (Now Required for Real AI Features)
 #=============================================================================
-# Uncomment if you need advanced text analysis
-# langdetect>=1.0.9
-# textstat>=0.7.3
-# spacy>=3.7.0
+langdetect>=1.0.9
+textstat>=0.7.3
 
 #=============================================================================
-# INDIAN LANGUAGE SUPPORT (Optional)
+# INDIAN LANGUAGE SUPPORT (Enhanced)
 #=============================================================================
-# Uncomment if you need Indian language processing
-# indic-nlp-library>=0.92
-# polyglot>=16.7.4
+# indic-nlp-library>=0.92  # Optional for advanced Indic language support
+# polyglot>=16.7.4  # Optional for multilingual support
 
 #=============================================================================
-# IMAGE PROCESSING (Optional - requires system libraries)
+# IMAGE PROCESSING (Now Required for Real AI Features)
 #=============================================================================
-# Uncomment if you need advanced image processing
-# opencv-python>=4.8.0
-# scikit-image>=0.21.0
+opencv-python>=4.8.0
+scikit-image>=0.21.0
 
 #=============================================================================
 # INSTALLATION NOTES

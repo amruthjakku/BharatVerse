@@ -506,6 +506,217 @@ async def get_statistics():
         raise HTTPException(500, str(e))
 
 
+# Community endpoints
+@app.get("/api/v1/community/stats")
+async def get_community_stats():
+    """Get community statistics"""
+    try:
+        conn = db_manager.get_postgres_connection()
+        try:
+            with conn.cursor() as cursor:
+                # Get total unique contributors
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT user_id) as contributors
+                    FROM content_metadata
+                    WHERE user_id IS NOT NULL
+                """)
+                contributors = cursor.fetchone()[0] or 0
+                
+                # Get active contributors (last 30 days)
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT user_id) as active_contributors
+                    FROM content_metadata
+                    WHERE user_id IS NOT NULL 
+                    AND created_at >= NOW() - INTERVAL '30 days'
+                """)
+                active_contributors = cursor.fetchone()[0] or 0
+                
+                return {
+                    "success": True,
+                    "stats": {
+                        "total_contributors": contributors,
+                        "active_contributors": active_contributors,
+                        "total_members": contributors,  # For now, same as contributors
+                        "experts": max(1, contributors // 10),  # Estimate
+                        "verified_contributors": max(1, contributors // 5),  # Estimate
+                        "projects": 0  # Not implemented yet
+                    }
+                }
+        finally:
+            db_manager.release_postgres_connection(conn)
+    except Exception as e:
+        logger.error(f"Community stats failed: {e}")
+        raise HTTPException(500, str(e))
+
+
+@app.get("/api/v1/community/leaderboard")
+async def get_leaderboard(limit: int = 10):
+    """Get community leaderboard"""
+    try:
+        conn = db_manager.get_postgres_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        user_id,
+                        COUNT(*) as contributions,
+                        COUNT(*) * 10 as points
+                    FROM content_metadata
+                    WHERE user_id IS NOT NULL
+                    GROUP BY user_id
+                    ORDER BY contributions DESC
+                    LIMIT %s
+                """, (limit,))
+                
+                leaderboard = []
+                for i, (user_id, contributions, points) in enumerate(cursor.fetchall(), 1):
+                    leaderboard.append({
+                        "rank": i,
+                        "user_id": user_id,
+                        "name": f"User {str(user_id)[:8]}",  # Simplified name
+                        "contributions": contributions,
+                        "points": points
+                    })
+                
+                return {
+                    "success": True,
+                    "leaderboard": leaderboard
+                }
+        finally:
+            db_manager.release_postgres_connection(conn)
+    except Exception as e:
+        logger.error(f"Leaderboard failed: {e}")
+        raise HTTPException(500, str(e))
+
+
+@app.get("/api/v1/content/recent")
+async def get_recent_content(limit: int = 10):
+    """Get recent content contributions"""
+    try:
+        conn = db_manager.get_postgres_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        id,
+                        title,
+                        content_type,
+                        language,
+                        created_at
+                    FROM content_metadata
+                    ORDER BY created_at DESC
+                    LIMIT %s
+                """, (limit,))
+                
+                recent_content = []
+                for row in cursor.fetchall():
+                    content_id, title, content_type, language, created_at = row
+                    
+                    # Map content type to emoji
+                    type_emoji = {
+                        "audio": "🎙️",
+                        "text": "📝",
+                        "image": "📷",
+                        "video": "🎥"
+                    }.get(content_type, "📄")
+                    
+                    # Calculate time ago
+                    import datetime
+                    now = datetime.datetime.now()
+                    if created_at.tzinfo is None:
+                        created_at = created_at.replace(tzinfo=datetime.timezone.utc)
+                    if now.tzinfo is None:
+                        now = now.replace(tzinfo=datetime.timezone.utc)
+                    
+                    time_diff = now - created_at
+                    if time_diff.days > 0:
+                        time_ago = f"{time_diff.days} days ago"
+                    elif time_diff.seconds > 3600:
+                        time_ago = f"{time_diff.seconds // 3600} hours ago"
+                    else:
+                        time_ago = f"{time_diff.seconds // 60} minutes ago"
+                    
+                    recent_content.append({
+                        "id": str(content_id),
+                        "type": type_emoji,
+                        "title": title,
+                        "lang": language or "Unknown",
+                        "time": time_ago,
+                        "created_at": created_at.isoformat()
+                    })
+                
+                return {
+                    "success": True,
+                    "results": recent_content
+                }
+        finally:
+            db_manager.release_postgres_connection(conn)
+    except Exception as e:
+        logger.error(f"Recent content failed: {e}")
+        raise HTTPException(500, str(e))
+
+
+@app.get("/api/v1/analytics/extended")
+async def get_extended_analytics():
+    """Get extended analytics data"""
+    try:
+        conn = db_manager.get_postgres_connection()
+        try:
+            with conn.cursor() as cursor:
+                # Get content by region
+                cursor.execute("""
+                    SELECT region, COUNT(*) as count
+                    FROM content_metadata
+                    WHERE region IS NOT NULL
+                    GROUP BY region
+                    ORDER BY count DESC
+                """)
+                regions = dict(cursor.fetchall())
+                
+                # Get daily content creation for last 30 days
+                cursor.execute("""
+                    SELECT 
+                        DATE(created_at) as date,
+                        COUNT(*) as count
+                    FROM content_metadata
+                    WHERE created_at >= NOW() - INTERVAL '30 days'
+                    GROUP BY DATE(created_at)
+                    ORDER BY date
+                """)
+                daily_stats = cursor.fetchall()
+                
+                # Get content quality metrics (simplified)
+                cursor.execute("""
+                    SELECT 
+                        AVG(CASE WHEN description IS NOT NULL THEN 1 ELSE 0 END) * 100 as has_description,
+                        AVG(CASE WHEN array_length(tags, 1) > 0 THEN 1 ELSE 0 END) * 100 as has_tags,
+                        AVG(CASE WHEN language IS NOT NULL THEN 1 ELSE 0 END) * 100 as has_language
+                    FROM content_metadata
+                """)
+                quality_row = cursor.fetchone()
+                
+                return {
+                    "success": True,
+                    "analytics": {
+                        "regions": regions,
+                        "daily_stats": [{
+                            "date": str(date),
+                            "count": count
+                        } for date, count in daily_stats],
+                        "quality_metrics": {
+                            "has_description": round(quality_row[0] or 0, 1),
+                            "has_tags": round(quality_row[1] or 0, 1),
+                            "has_language": round(quality_row[2] or 0, 1)
+                        }
+                    }
+                }
+        finally:
+            db_manager.release_postgres_connection(conn)
+    except Exception as e:
+        logger.error(f"Extended analytics failed: {e}")
+        raise HTTPException(500, str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
