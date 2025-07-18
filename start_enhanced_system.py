@@ -72,6 +72,19 @@ class BharatVerseSystem:
         print("\n🚀 Starting Enhanced API Server...")
         
         try:
+            # Set environment for local development
+            env = os.environ.copy()
+            
+            # Load local environment file if it exists
+            local_env_path = Path(".env.local")
+            if local_env_path.exists():
+                try:
+                    from dotenv import load_dotenv
+                    load_dotenv(".env.local", override=True)
+                    print("✅ Loaded local environment configuration")
+                except ImportError:
+                    print("⚠️  python-dotenv not available, using system environment")
+            
             # Check if enhanced API exists
             api_file = Path(__file__).parent / "api" / "enhanced_main.py"
             if not api_file.exists():
@@ -90,7 +103,8 @@ class BharatVerseSystem:
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                env=env
             )
             
             # Wait for API to start

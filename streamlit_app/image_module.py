@@ -183,9 +183,6 @@ def image_page():
                     caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
                     st.text_area("Generated Caption", caption, height=100)
                     st.info("Detected cultural elements: festival, traditional, art, religious, decoration")
-                
-                except Exception as e:
-                    st.error(f"Image processing error: {str(e)}")
         
         # Manual description
         st.markdown("### ✏️ Your Description")

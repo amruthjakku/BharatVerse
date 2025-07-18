@@ -192,31 +192,30 @@ def story_section():
                                         col1, col2, col3 = st.columns(3)
                                         with col1:
                                             st.metric("Word Count", analysis.get('word_count', 0))
-                                    with col2:
-                                        st.metric("Sentiment", analysis.get('sentiment', 'neutral'))
-                                    with col3:
-                                        score = analysis.get('cultural_significance', 0)
-                                        st.metric("Cultural Score", f"{score:.2f}/1.0")
+                                        with col2:
+                                            st.metric("Sentiment", analysis.get('sentiment', 'neutral'))
+                                        with col3:
+                                            score = analysis.get('cultural_significance', 0)
+                                            st.metric("Cultural Score", f"{score:.2f}/1.0")
+                                else:
+                                    st.error(f"Translation failed: {result.get('error', 'Unknown error')}")
                             else:
-                                st.error(f"Translation failed: {result.get('error', 'Unknown error')}")
-                        else:
-                            st.error(f"API error: {response.status_code}")
-                            raise Exception("API call failed")
-                            
-                    except Exception as e:
-                        # Fallback to demo
-                        st.warning(f"Using demo translation (API error: {str(e)})")
-                        st.text_area("Translated Story Content", 
-                                   "It was a bright sunny morning when we decided to go to the village fair... "
-                                   "The fair was bustling with people, vibrant colors, and the smell of delicious food in the air.",
-                                   height=200)
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("Word Count", "42")
-                        with col2:
-                            st.metric("Sentiment", "positive")
-                        with col3:
-                            st.metric("Cultural Score", "0.85/1.0")
+                                st.error(f"API error: {response.status_code}")
+                                
+                        except Exception as e:
+                            # Fallback to demo
+                            st.warning(f"Using demo translation (API error: {str(e)})")
+                            st.text_area("Translated Story Content", 
+                                       "It was a bright sunny morning when we decided to go to the village fair... "
+                                       "The fair was bustling with people, vibrant colors, and the smell of delicious food in the air.",
+                                       height=200)
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Word Count", "42")
+                            with col2:
+                                st.metric("Sentiment", "positive")
+                            with col3:
+                                st.metric("Cultural Score", "0.85/1.0")
                 else:
                     # Demo mode
                     st.info("Demo Mode: Showing simulated translation")

@@ -1,6 +1,0 @@
-Collecting opencv-python
-  Using cached opencv_python-4.12.0.88-cp37-abi3-macosx_13_0_arm64.whl.metadata (19 kB)
-Requirement already satisfied: numpy<2.3.0,>=2 in ./venv/lib/python3.13/site-packages (from opencv-python) (2.2.6)
-Using cached opencv_python-4.12.0.88-cp37-abi3-macosx_13_0_arm64.whl (37.9 MB)
-Installing collected packages: opencv-python
-Successfully installed opencv-python-4.12.0.88
