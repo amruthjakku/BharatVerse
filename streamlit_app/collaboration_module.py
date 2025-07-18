@@ -37,6 +37,34 @@ def collaboration_page():
 def active_projects_section():
     st.markdown("### 🚀 Active Collaborative Projects")
     
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("🔍 No collaborative projects available yet!")
+        st.markdown("**Collaboration features will include:**")
+        st.markdown("- Team-based content creation projects")
+        st.markdown("- Peer review and validation workflows")
+        st.markdown("- Regional cultural documentation initiatives")
+        st.markdown("- Expert-guided preservation projects")
+        st.markdown("- Community-driven research collaborations")
+        
+        st.markdown("---")
+        st.markdown("#### 🚀 Start a New Project")
+        
+        with st.form("new_project_form"):
+            project_title = st.text_input("Project Title")
+            project_description = st.text_area("Project Description")
+            project_type = st.selectbox("Project Type", ["Documentation", "Preservation", "Research", "Education"])
+            
+            if st.form_submit_button("Create Project"):
+                st.success("🎉 Project creation feature coming soon!")
+        
+        return
+    
+    # Demo mode - show sample projects
+    st.info("🎭 **Demo Mode**: Showing sample collaborative projects")
+    
     # Project filters
     col1, col2, col3 = st.columns(3)
     
@@ -176,6 +204,21 @@ def active_projects_section():
 def task_board_section():
     st.markdown("### 📋 Collaborative Task Board")
     
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("🔍 No collaborative tasks available yet!")
+        st.markdown("**Task management features will include:**")
+        st.markdown("- Content creation and review tasks")
+        st.markdown("- Quality assurance workflows")
+        st.markdown("- Translation and localization tasks")
+        st.markdown("- Expert validation assignments")
+        return
+    
+    # Demo mode
+    st.info("🎭 **Demo Mode**: Showing sample task board")
+    
     # Task filters
     col1, col2, col3, col4 = st.columns(4)
     
@@ -261,6 +304,21 @@ def task_board_section():
 
 def review_queue_section():
     st.markdown("### 🔄 Content Review Queue")
+    
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("🔍 No content in review queue yet!")
+        st.markdown("**Review system will include:**")
+        st.markdown("- Peer review of contributed content")
+        st.markdown("- Expert validation workflows")
+        st.markdown("- Quality scoring and feedback")
+        st.markdown("- Community moderation tools")
+        return
+    
+    # Demo mode
+    st.info("🎭 **Demo Mode**: Showing sample review queue")
     
     # Review stats
     col1, col2, col3, col4 = st.columns(4)
@@ -388,6 +446,21 @@ def review_queue_section():
 def team_analytics_section():
     st.markdown("### 📊 Team Performance Analytics")
     
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("🔍 No team analytics available yet!")
+        st.markdown("**Team analytics will show:**")
+        st.markdown("- Collaboration activity metrics")
+        st.markdown("- Team productivity insights")
+        st.markdown("- Content quality trends")
+        st.markdown("- Regional contribution patterns")
+        return
+    
+    # Demo mode
+    st.info("🎭 **Demo Mode**: Showing sample team analytics")
+    
     # Team overview
     col1, col2, col3, col4 = st.columns(4)
     
@@ -473,6 +546,21 @@ def team_analytics_section():
 
 def workflows_section():
     st.markdown("### 🎯 Automated Workflows")
+    
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        st.info("🔍 No automated workflows available yet!")
+        st.markdown("**Workflow automation will include:**")
+        st.markdown("- Content validation pipelines")
+        st.markdown("- Quality assurance workflows")
+        st.markdown("- Automated tagging and categorization")
+        st.markdown("- Notification and alert systems")
+        return
+    
+    # Demo mode
+    st.info("🎭 **Demo Mode**: Showing sample workflows")
     
     # Workflow templates
     st.markdown("#### 📋 Workflow Templates")

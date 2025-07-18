@@ -148,7 +148,7 @@ def image_page():
                             files = {'file': (uploaded_file.name, image_buffer, uploaded_file.type)}
                             
                             response = requests.post(
-                                f"{API_URL}/api/v1/image/caption",
+                                f"{API_URL}/api/v1/image/analyze",
                                 files=files
                             )
                             

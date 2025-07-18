@@ -249,7 +249,7 @@ def trend_prediction_section():
     
     with col1:
         fig = px.bar(df, x="Theme", y="Growth", title="Growth Rate (%)")
-        fig.update_layout(xaxis_tickangle=45)
+        fig.update_xaxis(tickangle=45)
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:

@@ -1,84 +1,11 @@
 {
-  "audio": [
-    {
-      "id": "audio_1",
-      "title": "Baul Song from Bengal",
-      "description": "Traditional folk song from rural Bengal",
-      "language": "Bengali",
-      "region": "East India",
-      "duration": "3:45",
-      "contributor": "Amit Roy",
-      "tags": ["folk", "baul", "bengal", "traditional"],
-      "timestamp": "2024-01-15T10:30:00",
-      "quality_score": 92
-    },
-    {
-      "id": "audio_2",
-      "title": "Lavani Performance",
-      "description": "Energetic Marathi folk dance song",
-      "language": "Marathi",
-      "region": "West India",
-      "duration": "4:12",
-      "contributor": "Priya Deshmukh",
-      "tags": ["lavani", "dance", "marathi", "folk"],
-      "timestamp": "2024-01-14T15:45:00",
-      "quality_score": 88
-    }
-  ],
-  "text": [
-    {
-      "id": "text_1",
-      "title": "Pongal Recipe",
-      "description": "Traditional Tamil harvest festival recipe",
-      "language": "Tamil",
-      "region": "South India",
-      "type": "recipe",
-      "contributor": "Lakshmi Iyer",
-      "tags": ["pongal", "recipe", "festival", "tamil"],
-      "timestamp": "2024-01-15T08:20:00",
-      "quality_score": 95
-    },
-    {
-      "id": "text_2",
-      "title": "Wedding Customs of Rajasthan",
-      "description": "Detailed documentation of Rajasthani wedding traditions",
-      "language": "Hindi",
-      "region": "North India",
-      "type": "custom",
-      "contributor": "Raj Singh",
-      "tags": ["wedding", "rajasthan", "customs", "traditions"],
-      "timestamp": "2024-01-13T14:30:00",
-      "quality_score": 90
-    }
-  ],
-  "image": [
-    {
-      "id": "image_1",
-      "title": "Durga Puja Celebration",
-      "description": "Vibrant scenes from Kolkata's Durga Puja",
-      "language": "Bengali",
-      "region": "East India",
-      "contributor": "Sourav Ghosh",
-      "tags": ["durga puja", "festival", "bengal", "celebration"],
-      "timestamp": "2024-01-14T09:15:00",
-      "quality_score": 94
-    },
-    {
-      "id": "image_2",
-      "title": "Kathakali Performance",
-      "description": "Traditional Kerala dance drama in full costume",
-      "language": "Malayalam",
-      "region": "South India",
-      "contributor": "Anand Nair",
-      "tags": ["kathakali", "dance", "kerala", "traditional"],
-      "timestamp": "2024-01-12T16:45:00",
-      "quality_score": 96
-    }
-  ],
+  "audio": [],
+  "text": [],
+  "image": [],
   "metadata": {
-    "total_contributions": 6,
-    "languages": ["Bengali", "Marathi", "Tamil", "Hindi", "Malayalam"],
-    "regions": ["East India", "West India", "South India", "North India"],
-    "last_updated": "2024-01-15T10:30:00"
+    "total_contributions": 0,
+    "languages": [],
+    "regions": [],
+    "last_updated": "2025-07-18T15:21:29.337204"
   }
 }

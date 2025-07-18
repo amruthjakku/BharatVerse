@@ -54,6 +54,28 @@ def add_contribution(contribution_type, data):
 
 def get_contributions(contribution_type=None, limit=10):
     """Retrieve contributions from the database"""
+    import streamlit as st
+    
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        # Try to get real contributions from API
+        try:
+            import requests
+            API_URL = os.getenv("API_URL", "http://localhost:8000")
+            response = requests.get(f"{API_URL}/api/v1/content/recent?limit={limit}", timeout=5)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('results', [])
+        except Exception as e:
+            print(f"Error getting real contributions: {e}")
+        
+        # Return empty list for fresh start
+        return []
+    
+    # Use local JSON file for demo mode
     try:
         with open(CONTRIBUTIONS_FILE, 'r') as f:
             db = json.load(f)
@@ -78,6 +100,44 @@ def get_contributions(contribution_type=None, limit=10):
 
 def get_statistics():
     """Get database statistics"""
+    import streamlit as st
+    
+    # Check if we should use real data
+    use_real_data = st.session_state.get('use_real_data', False)
+    
+    if use_real_data:
+        # Try to get real statistics from API
+        try:
+            import requests
+            API_URL = os.getenv("API_URL", "http://localhost:8000")
+            response = requests.get(f"{API_URL}/api/v1/analytics", timeout=5)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'total_contributions': data.get('total_contributions', 0),
+                    'audio_count': data.get('content_by_type', {}).get('audio', 0),
+                    'text_count': data.get('content_by_type', {}).get('text', 0),
+                    'image_count': data.get('content_by_type', {}).get('image', 0),
+                    'unique_languages': len(data.get('languages', [])),
+                    'unique_regions': len(data.get('regions', [])),
+                    'last_updated': datetime.now().isoformat()
+                }
+        except Exception as e:
+            print(f"Error getting real statistics: {e}")
+        
+        # Return empty stats for fresh start
+        return {
+            'total_contributions': 0,
+            'audio_count': 0,
+            'text_count': 0,
+            'image_count': 0,
+            'unique_languages': 0,
+            'unique_regions': 0,
+            'last_updated': datetime.now().isoformat()
+        }
+    
+    # Use local JSON file for demo mode
     try:
         with open(CONTRIBUTIONS_FILE, 'r') as f:
             db = json.load(f)
@@ -113,5 +173,6 @@ def get_statistics():
             'text_count': 0,
             'image_count': 0,
             'unique_languages': 0,
-            'unique_regions': 0
+            'unique_regions': 0,
+            'last_updated': datetime.now().isoformat()
         }

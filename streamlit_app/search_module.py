@@ -109,20 +109,61 @@ def search_page():
         st.markdown("---")
         st.markdown("### 📚 Search Results")
         
-        # Generate sample search results
-        sample_results = generate_sample_results(search_query, content_type, languages, regions)
+        # Check if we should use real data
+        use_real_data = st.session_state.get('use_real_data', False)
+        
+        if use_real_data:
+            # Try to get real search results from API
+            try:
+                import requests
+                import os
+                
+                API_URL = os.getenv("API_URL", "http://localhost:8000")
+                response = requests.post(
+                    f"{API_URL}/api/v1/search",
+                    json={
+                        "query": search_query or "",
+                        "content_types": content_type,
+                        "languages": languages,
+                        "regions": regions,
+                        "limit": 20
+                    },
+                    timeout=5
+                )
+                
+                if response.status_code == 200:
+                    result_data = response.json()
+                    search_results = result_data.get('results', [])
+                else:
+                    search_results = []
+                    
+            except Exception as e:
+                st.warning(f"Could not fetch real search results: {e}")
+                search_results = []
+            
+            if not search_results:
+                st.info("🔍 No results found. Start contributing content to see search results here!")
+                st.markdown("**Try:**")
+                st.markdown("- Upload audio files in the Audio module")
+                st.markdown("- Add text content in the Text module") 
+                st.markdown("- Upload images in the Image module")
+                return
+                
+        else:
+            # Generate sample search results for demo
+            search_results = generate_sample_results(search_query, content_type, languages, regions)
         
         # Results summary
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Total Results", len(sample_results))
+            st.metric("Total Results", len(search_results))
         with col2:
-            st.metric("Languages Found", len(set([r['language'] for r in sample_results])))
+            st.metric("Languages Found", len(set([r.get('language', 'Unknown') for r in search_results])))
         with col3:
-            st.metric("Regions Covered", len(set([r['region'] for r in sample_results])))
+            st.metric("Regions Covered", len(set([r.get('region', 'Unknown') for r in search_results])))
         
         # Results display
-        for i, result in enumerate(sample_results[:10]):  # Show first 10 results
+        for i, result in enumerate(search_results[:10]):  # Show first 10 results
             with st.container():
                 col1, col2 = st.columns([1, 4])
                 

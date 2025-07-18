@@ -501,6 +501,97 @@ async def reload_models():
         logger.error(f"Model reload error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Community endpoints
+@app.get("/api/v1/community/stats")
+async def get_community_stats():
+    """Get community statistics"""
+    if not DATABASE_AVAILABLE or not content_repo:
+        # Return empty stats for fresh start
+        return {
+            "total_contributions": 0,
+            "total_users": 0,
+            "content_by_type": {
+                "audio": 0,
+                "text": 0,
+                "image": 0
+            },
+            "content_by_language": {},
+            "recent_activity": 0,
+            "top_regions": []
+        }
+    
+    try:
+        # Get real stats from database
+        stats = content_repo.get_community_stats()
+        return stats
+        
+    except Exception as e:
+        logger.error(f"Community stats error: {e}")
+        # Return empty stats on error
+        return {
+            "total_contributions": 0,
+            "total_users": 0,
+            "content_by_type": {
+                "audio": 0,
+                "text": 0,
+                "image": 0
+            },
+            "content_by_language": {},
+            "recent_activity": 0,
+            "top_regions": []
+        }
+
+@app.get("/api/v1/community/leaderboard")
+async def get_community_leaderboard():
+    """Get community leaderboard"""
+    if not DATABASE_AVAILABLE or not content_repo:
+        # Return empty leaderboard for fresh start
+        return {
+            "top_contributors": [],
+            "recent_contributors": [],
+            "most_active_regions": []
+        }
+    
+    try:
+        # Get real leaderboard from database
+        leaderboard = content_repo.get_community_leaderboard()
+        return leaderboard
+        
+    except Exception as e:
+        logger.error(f"Community leaderboard error: {e}")
+        # Return empty leaderboard on error
+        return {
+            "top_contributors": [],
+            "recent_contributors": [],
+            "most_active_regions": []
+        }
+
+@app.get("/api/v1/content/recent")
+async def get_recent_content():
+    """Get recent content contributions"""
+    if not DATABASE_AVAILABLE or not content_repo:
+        # Return empty results for fresh start
+        return {
+            "results": [],
+            "total": 0
+        }
+    
+    try:
+        # Get recent content from database
+        recent_content = content_repo.get_recent_content(limit=20)
+        return {
+            "results": recent_content,
+            "total": len(recent_content)
+        }
+        
+    except Exception as e:
+        logger.error(f"Recent content error: {e}")
+        # Return empty results on error
+        return {
+            "results": [],
+            "total": 0
+        }
+
 if __name__ == "__main__":
     import uvicorn
     
