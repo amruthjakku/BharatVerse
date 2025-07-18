@@ -127,6 +127,11 @@ python setup_admin.py list
 
 ## 🔧 Technical Implementation
 
+### Recent Updates
+- **✅ Fixed Streamlit API Deprecation** - Updated to use `st.query_params` instead of deprecated `st.experimental_get_query_params`
+- **✅ Streamlined Query Parameter Handling** - Simplified code to use only the new Streamlit API
+- **✅ Removed API Compatibility Layer** - No more fallback code for older Streamlit versions
+
 ### Database Schema
 ```sql
 -- Users table

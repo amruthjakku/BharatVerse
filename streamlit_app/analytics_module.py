@@ -1,92 +1,52 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
-import json
-from pathlib import Path
-from streamlit_app.utils.database import get_contributions, get_statistics
-import matplotlib.pyplot as plt
-
-# Optional imports
-try:
-    from wordcloud import WordCloud
-    WORDCLOUD_AVAILABLE = True
-except ImportError:
-    WORDCLOUD_AVAILABLE = False
+from streamlit_app.utils.database import get_statistics
+from streamlit_app.utils.data_handler import get_contributions
 
 def analytics_page():
+    """Analytics dashboard page - demo mode removed"""
     st.markdown("## 📊 Analytics Dashboard")
     st.markdown("Explore insights and trends from BharatVerse contributions")
     
-    # Check if we should use real data
-    use_real_data = st.session_state.get('use_real_data', False)
-    
-    # Get data
+    # Get data from database
     stats = get_statistics()
-    contributions = get_contributions(limit=100)
+    contributions = get_contributions()
     
     # Overview metrics
     st.markdown("### 🎯 Overview")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        if use_real_data:
-            st.metric(
-                "Total Contributions", 
-                stats['total_contributions'],
-                delta=None
-            )
-        else:
-            st.metric(
-                "Total Contributions", 
-                stats['total_contributions'],
-                delta=f"+{np.random.randint(5, 25)} this week"
-            )
+        st.metric(
+            "Total Contributions", 
+            stats['total_contributions'],
+            delta=None
+        )
     
     with col2:
-        if use_real_data:
-            st.metric(
-                "Languages Covered", 
-                stats['unique_languages'],
-                delta=None
-            )
-        else:
-            st.metric(
-                "Languages Covered", 
-                stats['unique_languages'],
-                delta=f"+{np.random.randint(1, 3)} this month"
-            )
+        st.metric(
+            "Languages Covered", 
+            stats['unique_languages'],
+            delta=None
+        )
     
     with col3:
-        if use_real_data:
-            st.metric(
-                "Regions Active", 
-                stats['unique_regions'],
-                delta=None
-            )
-        else:
-            st.metric(
-                "Regions Active", 
-                stats['unique_regions'],
-                delta=f"+{np.random.randint(1, 5)} this month"
-            )
+        st.metric(
+            "Regions Active", 
+            stats['unique_regions'],
+            delta=None
+        )
     
     with col4:
-        if use_real_data:
-            st.metric(
-                "Active Contributors", 
-                "N/A",
-                delta=None
-            )
-        else:
-            st.metric(
-                "Active Contributors", 
-                np.random.randint(150, 300),
-                delta=f"+{np.random.randint(10, 30)} today"
-            )
+        st.metric(
+            "Active Contributors", 
+            stats.get('active_contributors', 0),
+            delta=None
+        )
     
     # Content type distribution
     st.markdown("---")
@@ -95,301 +55,171 @@ def analytics_page():
     col1, col2 = st.columns(2)
     
     with col1:
-        # Pie chart for content types
+        # Content type pie chart
         content_data = {
-            'Audio': stats['audio_count'],
-            'Text': stats['text_count'], 
-            'Images': stats['image_count']
+            'Type': ['Audio', 'Text', 'Image'],
+            'Count': [stats['audio_count'], stats['text_count'], stats['image_count']]
         }
+        df_content = pd.DataFrame(content_data)
         
         fig_pie = px.pie(
-            values=list(content_data.values()),
-            names=list(content_data.keys()),
-            title="Content Type Distribution",
+            df_content, 
+            values='Count', 
+            names='Type',
+            title='Content Type Distribution',
             color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1']
         )
         fig_pie.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig_pie, use_container_width=True)
     
     with col2:
-        if use_real_data:
-            # Show message for real data
-            st.info("📊 Real language distribution data would be displayed here when available")
-        else:
-            # Generate sample language data
-            languages = ['Hindi', 'Bengali', 'Tamil', 'Telugu', 'Marathi', 'Gujarati', 'Kannada', 'Malayalam']
-            lang_counts = np.random.randint(10, 100, len(languages))
+        # Language distribution
+        if contributions:
+            # Get actual language data from contributions
+            lang_counts = {}
+            for contrib in contributions:
+                lang = contrib.get('lang', 'Unknown')
+                lang_counts[lang] = lang_counts.get(lang, 0) + 1
             
-            fig_bar = px.bar(
-                x=languages,
-                y=lang_counts,
-                title="Contributions by Language",
-                color=lang_counts,
-                color_continuous_scale='viridis'
-            )
-            fig_bar.update_layout(showlegend=False)
-            st.plotly_chart(fig_bar, use_container_width=True)
+            if lang_counts:
+                df_lang = pd.DataFrame(list(lang_counts.items()), columns=['Language', 'Count'])
+                fig_bar = px.bar(df_lang, x='Language', y='Count', title='Languages Used')
+                st.plotly_chart(fig_bar, use_container_width=True)
+            else:
+                st.info("No language data available yet")
+        else:
+            st.info("No contributions available yet")
     
     # Time series analysis
     st.markdown("---")
     st.markdown("### 📅 Contribution Trends")
     
-    if use_real_data:
-        # Show message for real data
-        st.info("📈 Real time series data would be displayed here when available")
+    if contributions:
+        # Create time series from actual contributions
+        dates = []
+        for contrib in contributions:
+            try:
+                # Parse the time string to datetime
+                time_str = contrib.get('time', '')
+                if 'ago' in time_str:
+                    # Handle relative times like "2 hours ago"
+                    dates.append(datetime.now() - timedelta(hours=2))
+                else:
+                    # Handle absolute dates
+                    dates.append(datetime.strptime(time_str, '%Y-%m-%d %H:%M'))
+            except:
+                dates.append(datetime.now())
+        
+        # Group by date
+        date_counts = {}
+        for date in dates:
+            date_key = date.strftime('%Y-%m-%d')
+            date_counts[date_key] = date_counts.get(date_key, 0) + 1
+        
+        if date_counts:
+            df_time = pd.DataFrame(list(date_counts.items()), columns=['Date', 'Contributions'])
+            df_time['Date'] = pd.to_datetime(df_time['Date'])
+            
+            fig_time = px.line(df_time, x='Date', y='Contributions', title='Contributions Over Time')
+            st.plotly_chart(fig_time, use_container_width=True)
+        else:
+            st.info("No time series data available yet")
     else:
-        # Generate sample time series data
-        dates = pd.date_range(start='2024-01-01', end='2024-12-31', freq='D')
-        daily_contributions = np.random.poisson(5, len(dates))
-        
-        # Add some seasonal patterns
-        for i, date in enumerate(dates):
-            if date.month in [3, 4, 10, 11]:  # Festival seasons
-                daily_contributions[i] += np.random.poisson(3)
-        
-        df_time = pd.DataFrame({
-            'Date': dates,
-            'Contributions': daily_contributions
-        })
-        
-        # Create time series plot
-        fig_time = px.line(
-            df_time, 
-            x='Date', 
-            y='Contributions',
-            title='Daily Contributions Over Time'
-        )
-        fig_time.update_traces(line_color='#FF6B6B')
-        st.plotly_chart(fig_time, use_container_width=True)
+        st.info("No contributions available for time series analysis")
     
     # Regional analysis
     st.markdown("---")
-    st.markdown("### 🗺️ Regional Insights")
+    st.markdown("### 🗺️ Regional Distribution")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        if use_real_data:
-            st.info("🗺️ Real regional data would be displayed here when available")
-        else:
-            # Sample regional data
-            regions = ['North India', 'South India', 'West India', 'East India', 'Northeast India']
-            region_counts = np.random.randint(20, 150, len(regions))
+        if contributions:
+            # Get regional data from contributions
+            region_counts = {}
+            for contrib in contributions:
+                # This would need to be extracted from contribution metadata
+                region = "Unknown"  # Placeholder
+                region_counts[region] = region_counts.get(region, 0) + 1
             
-            fig_region = px.bar(
-                x=region_counts,
-                y=regions,
-                orientation='h',
-                title="Contributions by Region",
-                color=region_counts,
-                color_continuous_scale='plasma'
-            )
-            st.plotly_chart(fig_region, use_container_width=True)
+            if len(region_counts) > 1:
+                df_region = pd.DataFrame(list(region_counts.items()), columns=['Region', 'Count'])
+                fig_region = px.bar(df_region, x='Region', y='Count', title='Regional Distribution')
+                st.plotly_chart(fig_region, use_container_width=True)
+            else:
+                st.info("Regional data will be displayed when more contributions are available")
+        else:
+            st.info("No regional data available yet")
     
     with col2:
-        if use_real_data:
-            st.info("🏛️ Real state-wise data would be displayed here when available")
-        else:
-            # Top contributing states
-            states = ['Maharashtra', 'West Bengal', 'Tamil Nadu', 'Karnataka', 'Gujarat', 
-                     'Rajasthan', 'Kerala', 'Punjab', 'Odisha', 'Assam']
-            state_counts = np.random.randint(15, 80, len(states))
-            
-            df_states = pd.DataFrame({
-                'State': states,
-                'Contributions': state_counts
-            }).sort_values('Contributions', ascending=False)
-            
-            fig_states = px.bar(
-                df_states.head(8),
-                x='Contributions',
-                y='State',
-                orientation='h',
-                title="Top Contributing States",
-                color='Contributions',
-                color_continuous_scale='sunset'
-            )
-            st.plotly_chart(fig_states, use_container_width=True)
+        st.info("State-wise distribution will be available with more detailed location data")
     
     # Content analysis
     st.markdown("---")
     st.markdown("### 🔍 Content Analysis")
     
-    tab1, tab2, tab3 = st.tabs(["Popular Tags", "Content Quality", "Engagement"])
+    if contributions:
+        st.markdown("#### 📝 Recent Contributions")
+        
+        # Show recent contributions table
+        contrib_data = []
+        for contrib in contributions[:10]:  # Show last 10
+            contrib_data.append({
+                'Title': contrib.get('title', 'Untitled'),
+                'Type': contrib.get('type', 'Unknown'),
+                'Language': contrib.get('lang', 'Unknown'),
+                'Time': contrib.get('time', 'Unknown'),
+                'Contributor': contrib.get('contributor', 'Anonymous')
+            })
+        
+        if contrib_data:
+            df_contrib = pd.DataFrame(contrib_data)
+            st.dataframe(df_contrib, use_container_width=True)
+        else:
+            st.info("No contribution data available")
+    else:
+        st.info("No contributions available for analysis")
     
-    with tab1:
-        # Generate word cloud for popular tags
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            # Sample tags data
-            tags_text = """
-            folk song traditional music dance festival celebration culture heritage
-            story mythology legend fable wisdom proverb saying recipe food cooking
-            art craft handicraft painting sculpture architecture temple palace
-            wedding ceremony ritual custom tradition regional local community
-            language literature poetry verse epic classical modern contemporary
-            instrument tabla sitar flute drum percussion string wind classical
-            costume clothing jewelry ornament decoration pattern design motif
-            """
-            
-            # Create word cloud
-            if WORDCLOUD_AVAILABLE:
-                try:
-                    wordcloud = WordCloud(
-                        width=800, 
-                        height=400, 
-                        background_color='white',
-                        colormap='viridis'
-                    ).generate(tags_text)
-                    
-                    fig_wc, ax = plt.subplots(figsize=(10, 5))
-                    ax.imshow(wordcloud, interpolation='bilinear')
-                    ax.axis('off')
-                    st.pyplot(fig_wc)
-                except Exception as e:
-                    st.info("Word cloud visualization not available")
-            else:
-                st.info("📝 Word cloud feature requires additional dependencies. Showing text summary instead.")
-                st.text_area("Popular Tags", tags_text, height=200)
-        
-        with col2:
-            st.markdown("#### 🏷️ Top Tags")
-            top_tags = [
-                ("folk song", 156),
-                ("traditional", 134),
-                ("festival", 98),
-                ("recipe", 87),
-                ("story", 76),
-                ("dance", 65),
-                ("art", 54),
-                ("ceremony", 43)
-            ]
-            
-            for tag, count in top_tags:
-                st.markdown(f"**{tag}**: {count}")
-    
-    with tab2:
-        # Content quality metrics
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if use_real_data:
-                st.info("📊 Real quality score data would be displayed here when available")
-            else:
-                # Quality score distribution
-                quality_scores = np.random.beta(2, 1, 1000) * 100
-                
-                fig_quality = px.histogram(
-                    x=quality_scores,
-                    nbins=20,
-                    title="Content Quality Score Distribution",
-                    labels={'x': 'Quality Score', 'y': 'Count'}
-                )
-                fig_quality.update_traces(marker_color='#4ECDC4')
-                st.plotly_chart(fig_quality, use_container_width=True)
-        
-        with col2:
-            # Completeness metrics
-            completeness_data = {
-                'Complete Metadata': 85,
-                'Has Description': 92,
-                'Tagged Properly': 78,
-                'Has Translation': 65,
-                'Cultural Context': 71
-            }
-            
-            fig_complete = px.bar(
-                x=list(completeness_data.keys()),
-                y=list(completeness_data.values()),
-                title="Content Completeness (%)",
-                color=list(completeness_data.values()),
-                color_continuous_scale='greens'
-            )
-            fig_complete.update_layout(showlegend=False)
-            st.plotly_chart(fig_complete, use_container_width=True)
-    
-    with tab3:
-        # Engagement metrics
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if use_real_data:
-                st.info("👥 Real engagement data would be displayed here when available")
-            else:
-                # Daily active users
-                dates_engagement = pd.date_range(start='2024-11-01', end='2024-12-31', freq='D')
-                daily_users = np.random.poisson(50, len(dates_engagement))
-                
-                df_engagement = pd.DataFrame({
-                    'Date': dates_engagement,
-                    'Active Users': daily_users
-                })
-                
-                fig_users = px.line(
-                    df_engagement,
-                    x='Date',
-                    y='Active Users',
-                    title='Daily Active Contributors'
-                )
-                fig_users.update_traces(line_color='#45B7D1')
-                st.plotly_chart(fig_users, use_container_width=True)
-        
-        with col2:
-            # Content interaction
-            interaction_data = {
-                'Views': 15420,
-                'Downloads': 3240,
-                'Shares': 890,
-                'Favorites': 1560,
-                'Comments': 420
-            }
-            
-            fig_interaction = px.bar(
-                x=list(interaction_data.keys()),
-                y=list(interaction_data.values()),
-                title="Content Interactions",
-                color=list(interaction_data.values()),
-                color_continuous_scale='blues'
-            )
-            st.plotly_chart(fig_interaction, use_container_width=True)
-    
-    # Recent activity feed
+    # Quality metrics
     st.markdown("---")
-    st.markdown("### 🔄 Recent Activity")
+    st.markdown("### 📊 Quality Metrics")
     
-    # Generate sample recent activities
-    activities = [
-        {"time": "2 minutes ago", "action": "New audio contribution", "user": "Priya_K", "content": "Bengali folk song from Purulia"},
-        {"time": "15 minutes ago", "action": "Story added", "user": "Rajesh_M", "content": "Panchatantra tale in Hindi"},
-        {"time": "1 hour ago", "action": "Image uploaded", "user": "Meera_S", "content": "Kathakali performance photos"},
-        {"time": "2 hours ago", "action": "Recipe shared", "user": "Lakshmi_R", "content": "Traditional Onam Sadhya items"},
-        {"time": "3 hours ago", "action": "Audio transcribed", "user": "System", "content": "Gujarati garba song processed"},
-    ]
+    col1, col2 = st.columns(2)
     
-    for activity in activities:
-        with st.container():
-            col1, col2, col3 = st.columns([1, 3, 1])
-            with col1:
-                st.markdown(f"**{activity['time']}**")
-            with col2:
-                st.markdown(f"{activity['action']} by **{activity['user']}**: {activity['content']}")
-            with col3:
-                st.markdown("🔗")
-        st.markdown("---")
+    with col1:
+        st.info("Quality metrics will be available as the system collects more data")
+    
+    with col2:
+        st.info("Engagement metrics will be displayed when user interaction data is available")
     
     # Export options
+    st.markdown("---")
     st.markdown("### 📤 Export Data")
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📊 Export Analytics Report", use_container_width=True):
-            st.success("Analytics report exported to downloads!")
+        if st.button("📊 Export Statistics", use_container_width=True):
+            st.download_button(
+                label="Download CSV",
+                data=pd.DataFrame([stats]).to_csv(index=False),
+                file_name=f"bharatverse_stats_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime="text/csv"
+            )
     
     with col2:
-        if st.button("📋 Export Contribution Data", use_container_width=True):
-            st.success("Contribution data exported as CSV!")
+        if st.button("📋 Export Contributions", use_container_width=True):
+            if contributions:
+                df_export = pd.DataFrame(contributions)
+                st.download_button(
+                    label="Download CSV",
+                    data=df_export.to_csv(index=False),
+                    file_name=f"bharatverse_contributions_{datetime.now().strftime('%Y%m%d')}.csv",
+                    mime="text/csv"
+                )
+            else:
+                st.info("No contributions to export")
     
     with col3:
-        if st.button("📈 Generate Insights", use_container_width=True):
-            st.success("AI insights generated!")
+        if st.button("📈 Generate Report", use_container_width=True):
+            st.info("Detailed report generation will be available soon")

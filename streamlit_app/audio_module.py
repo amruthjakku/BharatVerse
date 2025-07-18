@@ -132,9 +132,7 @@ def audio_page():
         
         if st.button("🤖 Transcribe Audio", use_container_width=True):
             with st.spinner("Transcribing audio..."):
-                use_real_data = st.session_state.get('use_real_data', False)
-                
-                if use_real_data and AI_MODELS_AVAILABLE:
+                if AI_MODELS_AVAILABLE:
                     try:
                         # Get audio data
                         audio_data = None
@@ -256,66 +254,27 @@ def audio_page():
                         except Exception as api_e:
                             st.error(f"API fallback also failed: {str(api_e)}")
                 
-                elif use_real_data and not AI_MODELS_AVAILABLE:
-                    st.warning("🚧 Real AI models not available. Install dependencies with: pip install -r requirements.txt")
-                    # Show demo transcription as fallback
-                    transcription = "पानी रे पानी तेरा रंग कैसा\nजिसमें मिला दो लागे जैसा"
-                    translation = "Water, oh water, what is your color?\nYou become like whatever you're mixed with."
-                    
-                    st.text_area("Demo Transcribed Text", transcription, height=150)
-                    st.text_area("Demo English Translation", translation, height=100)
-                    
-                    st.session_state.transcription_result = {
-                        'transcription': transcription,
-                        'translation': translation,
-                        'language': 'hi'
-                    }
                 else:
-                    # Demo mode - show demo transcription
-                    st.info("🟡 Demo Mode: Using sample transcription")
-                    transcription = "पानी रे पानी तेरा रंग कैसा\nजिसमें मिला दो लागे जैसा"
-                    translation = "Water, oh water, what is your color?\nYou become like whatever you're mixed with."
-                    
-                    st.text_area("Transcribed Text", transcription, height=150)
-                    st.text_area("English Translation", translation, height=100)
-                    
-                    st.session_state.transcription_result = {
-                        'transcription': transcription,
-                        'translation': translation,
-                        'language': 'hi'
-                    }
+                    st.warning("🚧 AI models not available. Install dependencies with: pip install -r requirements.txt")
+                    st.info("Please provide manual transcription below or install AI models for automatic transcription.")
                 
                 # Metadata
                 st.markdown("### 🏷️ Metadata & Tags")
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                    if use_real_data:
-                        title = st.text_input("Title", "", placeholder="Enter title...")
-                        region = st.text_input("Region/State", "", placeholder="Enter region/state...")
-                        performer = st.text_input("Performer Name (Optional)", "", placeholder="Enter performer name...")
-                    else:
-                        title = st.text_input("Title", "Traditional Water Song")
-                        region = st.text_input("Region/State", "Rajasthan")
-                        performer = st.text_input("Performer Name (Optional)", "")
+                    title = st.text_input("Title", "", placeholder="Enter title...")
+                    region = st.text_input("Region/State", "", placeholder="Enter region/state...")
+                    performer = st.text_input("Performer Name (Optional)", "", placeholder="Enter performer name...")
                 
                 with col2:
-                    if use_real_data:
-                        occasion = st.text_input("Occasion/Context", "", placeholder="Enter occasion/context...")
-                        year_recorded = st.number_input("Year Recorded", 1900, 2024, 2024)
-                        tags = st.text_input("Tags (comma-separated)", "", placeholder="Enter tags...")
-                    else:
-                        occasion = st.text_input("Occasion/Context", "Harvest Festival")
-                        year_recorded = st.number_input("Year Recorded", 1900, 2024, 2024)
-                        tags = st.text_input("Tags (comma-separated)", "folk song, water, metaphor, traditional")
+                    occasion = st.text_input("Occasion/Context", "", placeholder="Enter occasion/context...")
+                    year_recorded = st.number_input("Year Recorded", 1900, 2024, 2024)
+                    tags = st.text_input("Tags (comma-separated)", "", placeholder="Enter tags...")
                 
                 # Additional notes
-                if use_real_data:
-                    notes = st.text_area("Additional Notes", "", 
-                        placeholder="Any additional context, history, or significance of this recording...")
-                else:
-                    notes = st.text_area("Additional Notes", 
-                        "Any additional context, history, or significance of this recording...")
+                notes = st.text_area("Additional Notes", "", 
+                    placeholder="Any additional context, history, or significance of this recording...")
                 
                 # Consent checkbox
                 consent = st.checkbox(
@@ -355,8 +314,7 @@ def audio_page():
                                     'occasion': occasion,
                                     'year_recorded': year_recorded,
                                     'tags': [tag.strip() for tag in tags.split(',') if tag.strip()],
-                                    'contributor': 'Anonymous',  # TODO: Add user system
-                                    'use_real_data': use_real_data
+                                    'contributor': 'Anonymous'  # TODO: Add user system
                                 }
                                 
                                 # Process audio file

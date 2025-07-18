@@ -1,16 +1,66 @@
 import json
 import os
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-# Simple JSON-based database for demo purposes
+# Database configuration
 DATA_DIR = Path("data")
-CONTRIBUTIONS_FILE = DATA_DIR / "contributions.json"
+CONTRIBUTIONS_FILE = DATA_DIR / "contributions.json"  # Keep for backward compatibility
+DB_FILE = DATA_DIR / "bharatverse.db"
+
+def get_db_connection():
+    """Get SQLite database connection"""
+    DATA_DIR.mkdir(exist_ok=True)
+    conn = sqlite3.connect(str(DB_FILE))
+    return conn
 
 def init_db():
-    """Initialize the database directory and files"""
+    """Initialize the SQLite database and create tables"""
     DATA_DIR.mkdir(exist_ok=True)
     
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Create users table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            name TEXT,
+            email TEXT,
+            gitlab_id INTEGER UNIQUE,
+            is_admin BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Create contributions table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS contributions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            content_type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            language TEXT,
+            region TEXT,
+            file_path TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Create indexes for better performance
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_contributions_type ON contributions(content_type)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_contributions_user ON contributions(user_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_contributions_created ON contributions(created_at)')
+    
+    conn.commit()
+    conn.close()
+    
+    # Keep JSON file creation for backward compatibility
     if not CONTRIBUTIONS_FILE.exists():
         with open(CONTRIBUTIONS_FILE, 'w') as f:
             json.dump({
@@ -26,145 +76,99 @@ def init_db():
             }, f, indent=2)
 
 def add_contribution(contribution_type, data):
-    """Add a new contribution to the database"""
+    """Add a new contribution to the SQLite database"""
     try:
-        with open(CONTRIBUTIONS_FILE, 'r') as f:
-            db = json.load(f)
+        conn = get_db_connection()
+        cursor = conn.cursor()
         
-        # Add timestamp
-        data['timestamp'] = datetime.now().isoformat()
-        data['id'] = f"{contribution_type}_{db['metadata']['total_contributions'] + 1}"
+        # Insert contribution
+        cursor.execute('''
+            INSERT INTO contributions (user_id, content_type, title, description, language, region, file_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            data.get('user_id'),
+            contribution_type,
+            data.get('title', ''),
+            data.get('description', ''),
+            data.get('language'),
+            data.get('region'),
+            data.get('file_path')
+        ))
         
-        # Add to appropriate collection
-        if contribution_type in db:
-            db[contribution_type].append(data)
+        contribution_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
         
-        # Update metadata
-        db['metadata']['total_contributions'] += 1
-        db['metadata']['last_updated'] = datetime.now().isoformat()
+        # Also update JSON file for backward compatibility
+        try:
+            with open(CONTRIBUTIONS_FILE, 'r') as f:
+                db = json.load(f)
+            
+            # Add timestamp and id for JSON compatibility
+            json_data = data.copy()
+            json_data['timestamp'] = datetime.now().isoformat()
+            json_data['id'] = f"{contribution_type}_{contribution_id}"
+            
+            # Add to appropriate collection
+            if contribution_type in db:
+                db[contribution_type].append(json_data)
+            
+            # Update metadata
+            db['metadata']['total_contributions'] += 1
+            db['metadata']['last_updated'] = datetime.now().isoformat()
+            
+            # Save back to file
+            with open(CONTRIBUTIONS_FILE, 'w') as f:
+                json.dump(db, f, indent=2)
+        except:
+            pass  # JSON update is optional
         
-        # Save back to file
-        with open(CONTRIBUTIONS_FILE, 'w') as f:
-            json.dump(db, f, indent=2)
-        
-        return True, data['id']
+        return True, contribution_id
     except Exception as e:
         print(f"Error adding contribution: {e}")
         return False, None
 
-def get_contributions(contribution_type=None, limit=10):
-    """Retrieve contributions from the database"""
-    import streamlit as st
-    
-    # Check if we should use real data
-    use_real_data = st.session_state.get('use_real_data', False)
-    
-    if use_real_data:
-        # Try to get real contributions from API
-        try:
-            import requests
-            API_URL = os.getenv("API_URL", "http://localhost:8000")
-            response = requests.get(f"{API_URL}/api/v1/content/recent?limit={limit}", timeout=5)
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data.get('results', [])
-        except Exception as e:
-            print(f"Error getting real contributions: {e}")
-        
-        # Return empty list for fresh start
-        return []
-    
-    # Use local JSON file for demo mode
-    try:
-        with open(CONTRIBUTIONS_FILE, 'r') as f:
-            db = json.load(f)
-        
-        if contribution_type:
-            return db.get(contribution_type, [])[-limit:]
-        else:
-            # Return recent contributions across all types
-            all_contributions = []
-            for c_type in ['audio', 'text', 'image']:
-                contributions = db.get(c_type, [])
-                for contrib in contributions:
-                    contrib['type'] = c_type
-                    all_contributions.append(contrib)
-            
-            # Sort by timestamp and return most recent
-            all_contributions.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-            return all_contributions[:limit]
-    except Exception as e:
-        print(f"Error retrieving contributions: {e}")
-        return []
+# Old get_contributions function removed - now using data_handler.py version
 
 def get_statistics():
-    """Get database statistics"""
-    import streamlit as st
-    
-    # Check if we should use real data
-    use_real_data = st.session_state.get('use_real_data', False)
-    
-    if use_real_data:
-        # Try to get real statistics from API
-        try:
-            import requests
-            API_URL = os.getenv("API_URL", "http://localhost:8000")
-            response = requests.get(f"{API_URL}/api/v1/analytics", timeout=5)
-            
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    'total_contributions': data.get('total_contributions', 0),
-                    'audio_count': data.get('content_by_type', {}).get('audio', 0),
-                    'text_count': data.get('content_by_type', {}).get('text', 0),
-                    'image_count': data.get('content_by_type', {}).get('image', 0),
-                    'unique_languages': len(data.get('languages', [])),
-                    'unique_regions': len(data.get('regions', [])),
-                    'last_updated': datetime.now().isoformat()
-                }
-        except Exception as e:
-            print(f"Error getting real statistics: {e}")
+    """Get database statistics from SQLite database"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
         
-        # Return empty stats for fresh start
+        # Get total contributions
+        cursor.execute("SELECT COUNT(*) FROM contributions")
+        total_contributions = cursor.fetchone()[0]
+        
+        # Get contributions by type
+        cursor.execute("SELECT content_type, COUNT(*) FROM contributions GROUP BY content_type")
+        type_counts = dict(cursor.fetchall())
+        
+        # Get unique languages
+        cursor.execute("SELECT COUNT(DISTINCT language) FROM contributions WHERE language IS NOT NULL")
+        unique_languages = cursor.fetchone()[0]
+        
+        # Get unique regions
+        cursor.execute("SELECT COUNT(DISTINCT region) FROM contributions WHERE region IS NOT NULL")
+        unique_regions = cursor.fetchone()[0]
+        
+        # Get active contributors (users who have made contributions)
+        cursor.execute("SELECT COUNT(DISTINCT user_id) FROM contributions WHERE user_id IS NOT NULL")
+        active_contributors = cursor.fetchone()[0]
+        
+        conn.close()
+        
         return {
-            'total_contributions': 0,
-            'audio_count': 0,
-            'text_count': 0,
-            'image_count': 0,
-            'unique_languages': 0,
-            'unique_regions': 0,
+            'total_contributions': total_contributions,
+            'audio_count': type_counts.get('audio', 0),
+            'text_count': type_counts.get('text', 0),
+            'image_count': type_counts.get('image', 0),
+            'unique_languages': unique_languages,
+            'unique_regions': unique_regions,
+            'active_contributors': active_contributors,
             'last_updated': datetime.now().isoformat()
         }
-    
-    # Use local JSON file for demo mode
-    try:
-        with open(CONTRIBUTIONS_FILE, 'r') as f:
-            db = json.load(f)
         
-        stats = {
-            'total_contributions': db['metadata']['total_contributions'],
-            'audio_count': len(db.get('audio', [])),
-            'text_count': len(db.get('text', [])),
-            'image_count': len(db.get('image', [])),
-            'last_updated': db['metadata']['last_updated']
-        }
-        
-        # Count unique languages and regions
-        languages = set()
-        regions = set()
-        
-        for c_type in ['audio', 'text', 'image']:
-            for contrib in db.get(c_type, []):
-                if 'language' in contrib:
-                    languages.add(contrib['language'])
-                if 'region' in contrib:
-                    regions.add(contrib['region'])
-        
-        stats['unique_languages'] = len(languages)
-        stats['unique_regions'] = len(regions)
-        
-        return stats
     except Exception as e:
         print(f"Error getting statistics: {e}")
         return {
@@ -174,5 +178,6 @@ def get_statistics():
             'image_count': 0,
             'unique_languages': 0,
             'unique_regions': 0,
+            'active_contributors': 0,
             'last_updated': datetime.now().isoformat()
         }

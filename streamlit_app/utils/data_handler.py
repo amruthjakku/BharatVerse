@@ -1,48 +1,40 @@
 import os
 import streamlit as st
-import requests
-
-API_BASE_URL = os.getenv("API_URL", "http://localhost:8000") + "/api/v1"
-
-def should_use_real_data():
-    return st.session_state.get("use_real_data", False)
-
-def get_real_contributions():
-    try:
-        response = requests.get(f"{API_BASE_URL}/content/recent", timeout=5)
-        response.raise_for_status()
-        return response.json().get("results", [])
-    except Exception as e:
-        st.error("Failed to fetch real data from API.")
-        return []
-
-def get_mock_contributions():
-    return [
-        {"type": "🎙️", "title": "Baul Song from Bengal", "lang": "Bengali", "time": "2 hours ago"},
-        {"type": "📝", "title": "Pongal Recipe", "lang": "Tamil", "time": "5 hours ago"},
-        {"type": "📷", "title": "Durga Puja Celebration", "lang": "Hindi", "time": "1 day ago"},
-        {"type": "🎙️", "title": "Lavani Performance", "lang": "Marathi", "time": "2 days ago"}
-    ]
-
+from streamlit_app.utils.database import get_db_connection
 from datetime import datetime
 
-def get_real_data_start_time():
-    return st.session_state.get("real_data_start_time")
-
 def get_contributions():
-    if should_use_real_data():
-        data = get_real_contributions()
-        start_time = get_real_data_start_time()
+    """Get contributions from database"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
         
-        if start_time:
-            try:
-                start_dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
-                # Filter to show only content created *after* the toggle time
-                return [c for c in data if datetime.fromisoformat(c["created_at"].replace("Z", "+00:00")) > start_dt]
-            except (ValueError, TypeError):
-                return [] # Return empty if timestamps are invalid
-        else:
-            # If no start time is set, it means the toggle was just turned on, so show nothing yet
-            return []
-    else:
-        return get_mock_contributions()
+        # Get recent contributions with user info
+        cursor.execute("""
+            SELECT c.*, u.name as contributor_name, u.username as contributor_username
+            FROM contributions c
+            LEFT JOIN users u ON c.user_id = u.id
+            ORDER BY c.created_at DESC
+            LIMIT 20
+        """)
+        
+        contributions = []
+        for row in cursor.fetchall():
+            contrib = {
+                'id': row[0],
+                'type': row[2],  # content_type
+                'title': row[3],
+                'lang': row[5] or 'Unknown',  # language
+                'time': row[8].strftime('%Y-%m-%d %H:%M') if row[8] else 'Unknown',  # created_at
+                'description': row[4] or '',  # description
+                'contributor': row[10] or 'Anonymous',  # contributor_name
+                'username': row[11] or 'unknown'  # contributor_username
+            }
+            contributions.append(contrib)
+        
+        conn.close()
+        return contributions
+        
+    except Exception as e:
+        st.error(f"Failed to fetch contributions: {e}")
+        return []

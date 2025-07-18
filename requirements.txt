@@ -120,3 +120,4 @@ scikit-image>=0.21.0
 # 5. Docker installation:
 #    All dependencies are included in the Docker image
 langdetect
+textblob

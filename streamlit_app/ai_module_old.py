@@ -33,13 +33,8 @@ def ai_insights_page():
     st.markdown("## 🤖 AI-Powered Cultural Insights")
     st.markdown("Discover patterns, trends, and insights from cultural data using artificial intelligence")
     
-    # Check if we should use real data
-    use_real_data = st.session_state.get('use_real_data', False)
-    
-    if use_real_data:
-        st.info("🤖 **Real AI Mode**: Analysis based on your actual contributions")
-    else:
-        st.info("🎭 **Demo Mode**: Showing sample AI insights")
+    # Always use real data - demo mode removed
+    st.info("🤖 **Real AI Mode**: Analysis based on your actual contributions")
     
     # Main tabs
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -68,30 +63,27 @@ def ai_insights_page():
 def content_analysis_section():
     st.markdown("### 📊 Content Quality & Sentiment Analysis")
     
-    # Check if we should use real data
-    use_real_data = st.session_state.get('use_real_data', False)
-    
-    if use_real_data:
-        # Try to get real content from API
-        try:
-            import requests
-            import os
+    # Always use real data - demo mode removed
+    # Try to get real content from API
+    try:
+        import requests
+        import os
+        
+        API_URL = os.getenv("API_URL", "http://localhost:8000")
+        response = requests.get(f"{API_URL}/api/v1/content/recent?limit=10", timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            real_content = data.get('results', [])
             
-            API_URL = os.getenv("API_URL", "http://localhost:8000")
-            response = requests.get(f"{API_URL}/api/v1/content/recent?limit=10", timeout=5)
-            
-            if response.status_code == 200:
-                data = response.json()
-                real_content = data.get('results', [])
-                
-                if real_content:
-                    # Create content dictionary from real data
-                    content_texts = {}
-                    for item in real_content:
-                        title = item.get('title', 'Untitled')
-                        description = item.get('description', '')
-                        if description:
-                            content_texts[title] = description
+            if real_content:
+                # Create content dictionary from real data
+                content_texts = {}
+                for item in real_content:
+                    title = item.get('title', 'Untitled')
+                    description = item.get('description', '')
+                    if description:
+                        content_texts[title] = description
                     
                     if content_texts:
                         # Content selector
@@ -223,9 +215,9 @@ def analyze_content_text(title, content_text):
 def trend_prediction_section():
     st.markdown("### 🔮 Cultural Trend Predictions")
     
-    use_real_data = st.session_state.get('use_real_data', False)
+    # Demo mode removed
     
-    if use_real_data:
+    # Always use real data
         st.info("🔍 No trend data available yet. Upload more content to see predictions!")
         st.markdown("**Trend analysis will show:**")
         st.markdown("- Popular cultural themes")
@@ -249,7 +241,7 @@ def trend_prediction_section():
     
     with col1:
         fig = px.bar(df, x="Theme", y="Growth", title="Growth Rate (%)")
-        fig.update_xaxis(tickangle=45)
+        fig.update_layout(xaxis_tickangle=45)
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
@@ -259,9 +251,9 @@ def trend_prediction_section():
 def language_insights_section():
     st.markdown("### 🌐 Language Distribution & Insights")
     
-    use_real_data = st.session_state.get('use_real_data', False)
+    # Demo mode removed
     
-    if use_real_data:
+    # Always use real data
         st.info("🔍 No language data available yet. Upload content in different languages!")
         return
     
@@ -289,9 +281,9 @@ def language_insights_section():
 def visual_analysis_section():
     st.markdown("### 🎨 Visual Content Analysis")
     
-    use_real_data = st.session_state.get('use_real_data', False)
+    # Demo mode removed
     
-    if use_real_data:
+    # Always use real data
         st.info("🔍 No visual content available yet. Upload images to see analysis!")
         return
     
@@ -307,9 +299,9 @@ def visual_analysis_section():
 def recommendations_section():
     st.markdown("### 💡 AI Recommendations")
     
-    use_real_data = st.session_state.get('use_real_data', False)
+    # Demo mode removed
     
-    if use_real_data:
+    # Always use real data
         st.info("🔍 No recommendations available yet. Upload content to get personalized suggestions!")
         st.markdown("**AI will recommend:**")
         st.markdown("- Similar cultural content to explore")

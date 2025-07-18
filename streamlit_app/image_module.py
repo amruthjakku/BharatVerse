@@ -73,9 +73,7 @@ def image_page():
         
         if st.button("Analyze Image", use_container_width=True):
             with st.spinner("Analyzing image with AI..."):
-                use_real_data = st.session_state.get('use_real_data', False)
-                
-                if use_real_data and AI_MODELS_AVAILABLE:
+                if AI_MODELS_AVAILABLE:
                     try:
                         # Use enhanced AI models for image analysis
                         st.info("🤖 Using real AI models for image analysis...")
@@ -170,58 +168,33 @@ def image_page():
                         except Exception as api_e:
                             st.error(f"API fallback also failed: {str(api_e)}")
                 
-                elif use_real_data and not AI_MODELS_AVAILABLE:
-                    st.warning("🚧 Real AI models not available. Install dependencies with: pip install -r requirements.txt")
-                    # Show demo caption as fallback
-                    caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
-                    st.text_area("Demo Generated Caption", caption, height=100)
-                    st.info("Detected cultural elements: festival, traditional, art, religious, decoration")
-                
                 else:
-                    # Demo mode - show demo caption
-                    st.info("🟡 Demo Mode: Using sample caption")
-                    caption = "A beautifully decorated Durga Puja pandal featuring intricate artwork and traditional Bengali motifs. The goddess Durga is shown in her fierce form, defeating the demon Mahishasura, symbolizing the victory of good over evil."
-                    st.text_area("Generated Caption", caption, height=100)
-                    st.info("Detected cultural elements: festival, traditional, art, religious, decoration")
+                    st.warning("🚧 AI models not available. Install dependencies with: pip install -r requirements.txt")
+                    st.info("Please provide manual description below or install AI models for automatic analysis.")
         
         # Manual description
         st.markdown("### ✏️ Your Description")
-        use_real_data = st.session_state.get('use_real_data', False)
-        
-        if use_real_data:
-            description = st.text_area(
-                "Describe the cultural significance",
-                "",
-                height=150,
-                placeholder="Enter your description of the cultural significance..."
-            )
-        else:
-            description = st.text_area(
-                "Describe the cultural significance",
-                "This pandal represents the annual celebration of Durga Puja, one of the most important festivals in Bengali culture. The artistic decorations showcase traditional craftsmanship passed down through generations.",
-                height=150
-            )
+        description = st.text_area(
+            "Describe the cultural significance",
+            "",
+            height=150,
+            placeholder="Enter your description of the cultural significance..."
+        )
         
         # Tags
-        if use_real_data:
-            tags = st.text_input(
-                "Tags (comma-separated)",
-                "",
-                placeholder="Enter tags separated by commas..."
-            )
-        else:
-            tags = st.text_input(
-                "Tags (comma-separated)",
-                "durga puja, bengali festival, pandal, goddess durga, kolkata, tradition"
-            )
+        tags = st.text_input(
+            "Tags (comma-separated)",
+            "",
+            placeholder="Enter tags separated by commas..."
+        )
         
         # Cultural context
         st.markdown("### 🎭 Cultural Context")
         
         col1, col2 = st.columns(2)
         with col1:
-            region = st.text_input("Region/State", "West Bengal")
-            community = st.text_input("Community", "Bengali Hindu")
+            region = st.text_input("Region/State", "", placeholder="Enter region/state...")
+            community = st.text_input("Community", "", placeholder="Enter community...")
         
         with col2:
             significance = st.selectbox(
