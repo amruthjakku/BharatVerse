@@ -59,6 +59,11 @@ markdown>=3.5.0
 pydantic>=2.5.0
 cryptography>=41.0.0
 
+# OAuth and Authentication
+authlib>=1.2.1
+httpx>=0.25.0
+python-jose[cryptography]>=3.3.0
+
 # Performance and caching
 diskcache>=5.6.0
 

@@ -6,6 +6,11 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv('.env.local')  # Load local env first
+load_dotenv('.env')        # Then load default env
+
 # Import modules
 from streamlit_app.audio_module import audio_page
 from streamlit_app.text_module import text_page
@@ -15,10 +20,14 @@ from streamlit_app.search_module import search_page
 from streamlit_app.community_module import community_page
 from streamlit_app.ai_module import ai_insights_page
 from streamlit_app.collaboration_module import collaboration_page
+from streamlit_app.gitlab_module import gitlab_page
+from streamlit_app.user_profile import user_profile_main
+from streamlit_app.admin_dashboard import admin_dashboard_main
 from streamlit_app.utils.database import init_db, get_statistics
 from streamlit_app.utils.theme_styling import load_theme_css
 from streamlit_app.utils.cache_manager import cache_manager
 from streamlit_app.utils.data_handler import get_contributions, should_use_real_data
+from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, render_user_info, init_auth
 
 # Page configuration
 st.set_page_config(
@@ -28,8 +37,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize database
+# Initialize database and authentication
 init_db()
+init_auth()
+
+# Handle OAuth callback if present
+handle_oauth_callback()
 
 # Load theme-based CSS after getting theme selection
 # This will be loaded after the sidebar is created
@@ -67,10 +80,18 @@ with st.sidebar:
     st.markdown("---")
 
     # Navigation
-    page = st.radio(
-        "Navigate to:",
-        ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "🔍 Discover", "📊 Analytics", "🤝 Community", "🤖 AI Insights", "👥 Collaboration", "Browse Contributions", "About"]
-    )
+    auth = GitLabAuth()
+    nav_options = ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "🔍 Discover", "📊 Analytics", "🤝 Community", "🤖 AI Insights", "👥 Collaboration", "🦊 GitLab", "Browse Contributions", "About"]
+    
+    # Add authenticated user options
+    if auth.is_authenticated():
+        nav_options.insert(-2, "👤 My Profile")  # Insert before "About"
+        
+        # Add admin option for admins
+        if auth.is_admin():
+            nav_options.insert(-2, "🛡️ Admin Dashboard")
+    
+    page = st.radio("Navigate to:", nav_options)
     
     st.markdown("---")
     st.markdown("### 📊 Live Statistics")
@@ -89,6 +110,16 @@ with st.sidebar:
         st.metric("Audio", stats['audio_count'])
     with col2:
         st.metric("Text", stats['text_count'])
+    
+    st.markdown("---")
+    
+    # Authentication section
+    if auth.is_authenticated():
+        render_user_info()
+    else:
+        st.markdown("### 🔐 Authentication")
+        st.info("Login with GitLab to contribute and access personalized features.")
+        render_login_button()
     
     st.markdown("---")
     st.markdown("### 🌐 Resources")
@@ -263,6 +294,15 @@ elif page == "🤖 AI Insights":
 
 elif page == "👥 Collaboration":
     collaboration_page()
+
+elif page == "🦊 GitLab":
+    gitlab_page()
+
+elif page == "👤 My Profile":
+    user_profile_main()
+
+elif page == "🛡️ Admin Dashboard":
+    admin_dashboard_main()
 
 elif page == "Browse Contributions":
     st.markdown("## 🔍 Browse Cultural Contributions")

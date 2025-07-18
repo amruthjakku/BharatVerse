@@ -38,6 +38,14 @@ try:
 except ImportError:
     DATABASE_AVAILABLE = False
 
+# User management imports
+try:
+    from streamlit_app.utils.auth import GitLabAuth
+    from streamlit_app.utils.user_manager import user_manager
+    USER_MANAGEMENT_AVAILABLE = True
+except ImportError:
+    USER_MANAGEMENT_AVAILABLE = False
+
 # API endpoint
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
