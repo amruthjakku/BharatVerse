@@ -195,13 +195,9 @@ def handle_oauth_callback():
             st.error(f"Authentication error: {e}")
     
     elif 'error' in query_params:
-        # Handle both old and new Streamlit query param formats
-        if isinstance(query_params.get('error'), list):
-            error = query_params['error'][0]
-            error_description = query_params.get('error_description', ['Unknown error'])[0]
-        else:
-            error = query_params['error']
-            error_description = query_params.get('error_description', 'Unknown error')
+        # Handle OAuth errors
+        error = query_params['error']
+        error_description = query_params.get('error_description', 'Unknown error')
         st.error(f"OAuth Error: {error} - {error_description}")
 
 
