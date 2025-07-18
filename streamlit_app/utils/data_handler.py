@@ -11,9 +11,9 @@ def get_contributions():
         
         # Get recent contributions with user info
         cursor.execute("""
-            SELECT c.*, u.name as contributor_name, u.username as contributor_username
-            FROM contributions c
-            LEFT JOIN users u ON c.user_id = u.id
+            SELECT c.*, u.full_name as contributor_name, u.username as contributor_username
+            FROM content_metadata c
+            LEFT JOIN users u ON c.user_id = u.id::text
             ORDER BY c.created_at DESC
             LIMIT 20
         """)
@@ -21,14 +21,15 @@ def get_contributions():
         contributions = []
         for row in cursor.fetchall():
             contrib = {
-                'id': row[0],
-                'type': row[2],  # content_type
-                'title': row[3],
-                'lang': row[5] or 'Unknown',  # language
-                'time': row[8].strftime('%Y-%m-%d %H:%M') if row[8] else 'Unknown',  # created_at
-                'description': row[4] or '',  # description
-                'contributor': row[10] or 'Anonymous',  # contributor_name
-                'username': row[11] or 'unknown'  # contributor_username
+                'id': row[0],  # id
+                'title': row[1],  # title
+                'description': row[2] or '',  # description
+                'type': row[3],  # content_type
+                'lang': row[4] or 'Unknown',  # language
+                'region': row[5] or 'Unknown',  # region
+                'time': row[11].strftime('%Y-%m-%d %H:%M') if row[11] else 'Unknown',  # created_at
+                'contributor': row[13] or 'Anonymous',  # contributor_name
+                'username': row[14] or 'unknown'  # contributor_username
             }
             contributions.append(contrib)
         
