@@ -119,3 +119,4 @@ diskcache>=5.6.0
 #
 # 5. Docker installation:
 #    All dependencies are included in the Docker image
+langdetect
