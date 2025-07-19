@@ -33,11 +33,33 @@ class DatabaseConfig:
         """Check if a value is a placeholder"""
         if not value:
             return True
-        placeholders = [
+        
+        # These are definitely placeholders
+        definite_placeholders = [
             "your-project-id", "your-supabase-host", "your-password",
-            "your-redis-instance", "localhost", "minioadmin"
+            "your-redis-instance", "your-token", "your-key", "your-secret"
         ]
-        return any(placeholder in str(value).lower() for placeholder in placeholders)
+        
+        # Check for definite placeholders
+        value_str = str(value).lower()
+        if any(placeholder in value_str for placeholder in definite_placeholders):
+            return True
+        
+        # Special case: localhost and minioadmin are valid for local development
+        # Only consider them placeholders if they appear in secrets.toml context
+        if value_str in ["localhost", "minioadmin"]:
+            # Check if we're in a secrets.toml context (this is a heuristic)
+            try:
+                import streamlit as st
+                if hasattr(st, 'secrets') and st.secrets:
+                    # If we're accessing secrets and it's localhost/minioadmin, it's likely a placeholder
+                    return True
+            except:
+                pass
+            # Otherwise, localhost/minioadmin are valid for local development
+            return False
+        
+        return False
     
     @staticmethod
     def _get_safe_config(key, default=None, required=False):
@@ -84,39 +106,54 @@ class DatabaseConfig:
         return value
     
     # PostgreSQL - with safe fallbacks
-    POSTGRES_HOST = _get_safe_config("POSTGRES_HOST")
-    POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-    POSTGRES_DB = _get_safe_config("POSTGRES_DB", "bharatverse")
-    POSTGRES_USER = _get_safe_config("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD = _get_safe_config("POSTGRES_PASSWORD")
+    @classmethod
+    def get_postgres_config(cls):
+        return {
+            'host': cls._get_safe_config("POSTGRES_HOST"),
+            'port': os.getenv("POSTGRES_PORT", "5432"),
+            'database': cls._get_safe_config("POSTGRES_DB", "bharatverse"),
+            'user': cls._get_safe_config("POSTGRES_USER", "postgres"),
+            'password': cls._get_safe_config("POSTGRES_PASSWORD")
+        }
     
     # MinIO - with safe fallbacks
-    MINIO_HOST = _get_safe_config("MINIO_HOST")
-    MINIO_ACCESS_KEY = _get_safe_config("MINIO_ACCESS_KEY")
-    MINIO_SECRET_KEY = _get_safe_config("MINIO_SECRET_KEY")
-    MINIO_SECURE = os.getenv("MINIO_SECURE", "False").lower() == "true"
+    @classmethod
+    def get_minio_config(cls):
+        return {
+            'host': cls._get_safe_config("MINIO_HOST"),
+            'access_key': cls._get_safe_config("MINIO_ACCESS_KEY"),
+            'secret_key': cls._get_safe_config("MINIO_SECRET_KEY"),
+            'secure': os.getenv("MINIO_SECURE", "False").lower() == "true"
+        }
     
     # Redis - with safe fallbacks
-    REDIS_HOST = _get_safe_config("REDIS_HOST")
-    REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
-    REDIS_DB = int(os.getenv("REDIS_DB", "0"))
-    REDIS_PASSWORD = _get_safe_config("REDIS_PASSWORD")
-    REDIS_URL = _get_safe_config("REDIS_URL")
+    @classmethod
+    def get_redis_config(cls):
+        return {
+            'host': cls._get_safe_config("REDIS_HOST"),
+            'port': int(os.getenv("REDIS_PORT", "6379")),
+            'db': int(os.getenv("REDIS_DB", "0")),
+            'password': cls._get_safe_config("REDIS_PASSWORD"),
+            'url': cls._get_safe_config("REDIS_URL")
+        }
     
     @classmethod
     def is_postgres_configured(cls):
         """Check if PostgreSQL is properly configured"""
-        return all([cls.POSTGRES_HOST, cls.POSTGRES_PASSWORD])
+        config = cls.get_postgres_config()
+        return all([config['host'], config['password']])
     
     @classmethod
     def is_redis_configured(cls):
         """Check if Redis is properly configured"""
-        return cls.REDIS_URL or (cls.REDIS_HOST and cls.REDIS_HOST != "localhost")
+        config = cls.get_redis_config()
+        return config['url'] or (config['host'] and config['host'] != "localhost")
     
     @classmethod
     def is_minio_configured(cls):
         """Check if MinIO is properly configured"""
-        return all([cls.MINIO_HOST, cls.MINIO_ACCESS_KEY, cls.MINIO_SECRET_KEY])
+        config = cls.get_minio_config()
+        return all([config['host'], config['access_key'], config['secret_key']])
     
     # Buckets
     AUDIO_BUCKET = "bharatverse-audio"
@@ -141,50 +178,95 @@ class DatabaseManager:
             logger.info("Database connections disabled (running in UI-only mode)")
     
     def _initialize_connections(self):
-        """Initialize all database connections"""
-        try:
-            # PostgreSQL connection pool
-            self._postgres_pool = SimpleConnectionPool(
-                1, 20,  # min and max connections
-                host=self.config.POSTGRES_HOST,
-                port=self.config.POSTGRES_PORT,
-                database=self.config.POSTGRES_DB,
-                user=self.config.POSTGRES_USER,
-                password=self.config.POSTGRES_PASSWORD
-            )
-            
-            # MinIO client
-            self._minio_client = Minio(
-                self.config.MINIO_HOST,
-                access_key=self.config.MINIO_ACCESS_KEY,
-                secret_key=self.config.MINIO_SECRET_KEY,
-                secure=self.config.MINIO_SECURE
-            )
-            
-            # Redis client
-            self._redis_client = redis.Redis(
-                host=self.config.REDIS_HOST,
-                port=self.config.REDIS_PORT,
-                db=self.config.REDIS_DB,
-                password=self.config.REDIS_PASSWORD,
-                decode_responses=True
-            )
-            
-            # Initialize MinIO buckets
-            self._initialize_buckets()
-            
-            # Initialize PostgreSQL schema
-            self._initialize_schema()
-            
-            logger.info("All database connections initialized successfully")
-            
-        except Exception as e:
-            logger.error(f"Failed to initialize database connections: {e}")
-            print(f"\nFailed to initialize database connections: {e}")
-            if self._disabled:
-                logger.info("Running in UI-only mode without database")
-            else:
-                raise
+        """Initialize all database connections with graceful fallbacks"""
+        
+        # PostgreSQL connection pool
+        if self.config.is_postgres_configured():
+            try:
+                pg_config = self.config.get_postgres_config()
+                self._postgres_pool = SimpleConnectionPool(
+                    1, 20,  # min and max connections
+                    host=pg_config['host'],
+                    port=pg_config['port'],
+                    database=pg_config['database'],
+                    user=pg_config['user'],
+                    password=pg_config['password']
+                )
+                logger.info("PostgreSQL connection pool initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize PostgreSQL: {e}")
+                self._postgres_pool = None
+        else:
+            logger.info("PostgreSQL not configured - running without database persistence")
+            self._postgres_pool = None
+        
+        # MinIO client
+        if self.config.is_minio_configured():
+            try:
+                minio_config = self.config.get_minio_config()
+                self._minio_client = Minio(
+                    minio_config['host'],
+                    access_key=minio_config['access_key'],
+                    secret_key=minio_config['secret_key'],
+                    secure=minio_config['secure']
+                )
+                # Initialize MinIO buckets
+                self._initialize_buckets()
+                logger.info("MinIO client initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize MinIO: {e}")
+                self._minio_client = None
+        else:
+            logger.info("MinIO not configured - running without file storage")
+            self._minio_client = None
+        
+        # Redis client
+        if self.config.is_redis_configured():
+            try:
+                redis_config = self.config.get_redis_config()
+                if redis_config['url']:
+                    self._redis_client = redis.from_url(
+                        redis_config['url'],
+                        decode_responses=True
+                    )
+                else:
+                    self._redis_client = redis.Redis(
+                        host=redis_config['host'],
+                        port=redis_config['port'],
+                        db=redis_config['db'],
+                        password=redis_config['password'],
+                        decode_responses=True
+                    )
+                # Test connection
+                self._redis_client.ping()
+                logger.info("Redis client initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize Redis: {e}")
+                self._redis_client = None
+        else:
+            logger.info("Redis not configured - running without external caching")
+            self._redis_client = None
+        
+        # Initialize PostgreSQL schema if available
+        if self._postgres_pool:
+            try:
+                self._initialize_schema()
+            except Exception as e:
+                logger.error(f"Failed to initialize database schema: {e}")
+        
+        # Log final status
+        services = []
+        if self._postgres_pool:
+            services.append("PostgreSQL")
+        if self._minio_client:
+            services.append("MinIO")
+        if self._redis_client:
+            services.append("Redis")
+        
+        if services:
+            logger.info(f"Database services initialized: {', '.join(services)}")
+        else:
+            logger.info("Running in local-only mode (no external services configured)")
     
     def _initialize_buckets(self):
         """Create MinIO buckets if they don't exist"""
@@ -605,6 +687,77 @@ class ContentRepository:
             )
 
 
-# Singleton instance
-db_manager = DatabaseManager()
-content_repo = ContentRepository(db_manager)
+class MockDatabaseManager:
+    """Mock database manager for graceful degradation when external services aren't available"""
+    
+    def __init__(self):
+        self._disabled = True
+        logger.info("Using MockDatabaseManager - running in local-only mode")
+    
+    def is_connected(self):
+        return False
+    
+    def get_connection(self):
+        return None
+    
+    def execute_query(self, query, params=None):
+        logger.warning("Database query attempted but no database configured")
+        return []
+    
+    def save_content(self, content_type, file_data, metadata):
+        logger.warning("Content save attempted but no database configured")
+        return {"id": "mock_id", "status": "local_only"}
+    
+    def get_content(self, content_id):
+        logger.warning("Content retrieval attempted but no database configured")
+        return None
+    
+    def list_content(self, content_type=None, limit=10):
+        logger.warning("Content listing attempted but no database configured")
+        return []
+    
+    def close_connections(self):
+        pass
+    
+    def __getattr__(self, name):
+        """Return a no-op function for any missing methods"""
+        def no_op(*args, **kwargs):
+            logger.warning(f"Database operation '{name}' attempted but no database configured")
+            return None
+        return no_op
+
+
+# Lazy singleton instances
+_db_manager = None
+_content_repo = None
+
+def get_db_manager():
+    """Get database manager instance (lazy initialization)"""
+    global _db_manager
+    if _db_manager is None:
+        try:
+            _db_manager = DatabaseManager()
+        except Exception as e:
+            logger.error(f"Failed to initialize database manager: {e}")
+            # Return a mock database manager for graceful degradation
+            _db_manager = MockDatabaseManager()
+    return _db_manager
+
+def get_content_repo():
+    """Get content repository instance (lazy initialization)"""
+    global _content_repo
+    if _content_repo is None:
+        _content_repo = ContentRepository(get_db_manager())
+    return _content_repo
+
+# For backward compatibility
+db_manager = None  # Will be set on first access
+content_repo = None  # Will be set on first access
+
+def __getattr__(name):
+    """Module-level attribute access for backward compatibility"""
+    if name == 'db_manager':
+        return get_db_manager()
+    elif name == 'content_repo':
+        return get_content_repo()
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
