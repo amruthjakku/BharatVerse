@@ -1,0 +1,3 @@
+# System packages for Streamlit Cloud
+ffmpeg
+libsndfile1

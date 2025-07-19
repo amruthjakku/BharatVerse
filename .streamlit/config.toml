@@ -1,8 +1,3 @@
-[theme]
-primaryColor = "#FF6B35"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#262730"
 
 [server]
 headless = true
@@ -12,3 +7,9 @@ enableXsrfProtection = false
 
 [browser]
 gatherUsageStats = false
+
+[theme]
+primaryColor = "#FF6B35"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"

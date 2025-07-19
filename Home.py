@@ -1,5 +1,6 @@
 import streamlit as st
 import sys
+import os
 from pathlib import Path
 
 # Add the project root to Python path
@@ -9,6 +10,10 @@ sys.path.append(str(project_root))
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
+
+# Detect deployment mode
+DEPLOYMENT_MODE = os.getenv("AI_MODE", "local")
+IS_CLOUD_DEPLOYMENT = DEPLOYMENT_MODE == "cloud"
 
 # Import styling and authentication
 from streamlit_app.utils.main_styling import load_custom_css
