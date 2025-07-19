@@ -24,6 +24,30 @@ from utils.performance_optimizer import (
     show_loading_placeholder,
     progressive_loading_container
 )
+from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
+from utils.redis_cache import get_cache_manager
+
+# Initialize performance components
+@st.cache_resource
+def get_audio_performance_components():
+    """Get cached performance components for audio module"""
+    return {
+        'optimizer': get_performance_optimizer(),
+        'memory_manager': get_memory_manager(),
+        'cache_manager': get_cache_manager()
+    }
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_audio_processing_config():
+    """Get cached audio processing configuration"""
+    return {
+        'supported_formats': ['.wav', '.mp3', '.m4a', '.ogg', '.flac'],
+        'max_file_size_mb': 50,
+        'sample_rate': 16000,
+        'channels': 1,
+        'chunk_size': 1024,
+        'processing_timeout': 300
+    }
 
 # Try to import audio libraries with fallback
 try:
@@ -180,12 +204,33 @@ def audio_page():
     st.markdown("## 🎙️ Audio Capture & Transcription")
     st.markdown("Record folk songs, stories, and oral traditions in your language.")
     
-    # Initialize performance optimizer
-    optimizer = get_performance_optimizer()
+    # Initialize performance components
+    perf_components = get_audio_performance_components()
+    optimizer = perf_components['optimizer']
+    memory_manager = perf_components['memory_manager']
+    cache_manager = perf_components['cache_manager']
     
-    # Warm up services on first load
-    if st.button("🔥 Warm Up AI Services", help="Pre-load AI services to reduce processing time"):
-        warm_up_ai_services()
+    # Get audio configuration
+    audio_config = get_audio_processing_config()
+    
+    # Performance monitoring for admins
+    if st.session_state.get("user_role") == "admin":
+        with st.expander("⚡ Performance Monitoring", expanded=False):
+            show_memory_dashboard()
+    
+    # Memory tracking for audio operations
+    with MemoryTracker("audio_page_load"):
+        # Warm up services on first load
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            if st.button("🔥 Warm Up AI Services", help="Pre-load AI services to reduce processing time"):
+                with st.spinner("Warming up services..."):
+                    warm_up_ai_services()
+        
+        with col2:
+            # Show current memory usage
+            memory_usage = memory_manager.get_memory_usage()
+            st.metric("Memory", f"{memory_usage['rss_mb']:.0f}MB")
     
     # Check if audio libraries are available
     if not AUDIO_AVAILABLE:
