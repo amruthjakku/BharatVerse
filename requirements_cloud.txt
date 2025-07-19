@@ -1,0 +1,45 @@
+# BharatVerse - Free Cloud Deployment Requirements
+# Optimized for Streamlit Cloud with external AI services
+
+# Core Web Framework
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Visualization
+plotly>=5.15.0
+pillow>=10.0.0
+
+# Database & Caching
+psycopg2-binary>=2.9.7
+sqlalchemy>=2.0.0
+redis>=5.0.0
+
+# Object Storage (S3 Compatible)
+boto3>=1.34.0
+
+# Authentication & Security
+pydantic>=2.0.0
+bcrypt>=4.0.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Lightweight AI (inference via API)
+# No heavy models - using external APIs
+transformers>=4.30.0  # For tokenizers only
+torch>=2.0.0,<2.1.0  # CPU only, minimal
+
+# Audio processing (lightweight)
+librosa>=0.10.0
+soundfile>=0.12.0
+
+# Language detection & basic NLP
+langdetect>=1.0.9
+textstat>=0.7.3
+
+# Utilities
+python-dateutil>=2.8.0
+pytz>=2023.3
+aiohttp>=3.9.0
