@@ -1,6 +1,13 @@
 """
-AI Model Inference Utilities
-Handles communication with external AI services (HuggingFace Spaces, RunPod, etc.)
+AI Inference Manager for BharatVerse Cloud Deployment  
+Executes HuggingFace API calls for text, image, and audio processing
+
+Module: inference_manager.py
+Purpose: Direct API interface to HuggingFace Inference API
+- Makes actual HTTP requests to AI model endpoints
+- Handles API rate limiting and error responses  
+- Processes model outputs into standardized formats
+- Used by cloud_ai_manager.py for orchestration
 """
 import streamlit as st
 import requests

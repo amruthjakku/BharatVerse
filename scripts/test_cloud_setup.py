@@ -18,36 +18,43 @@ def test_imports():
     print("🧪 Testing Imports...")
     
     try:
-        from utils.r2 import get_storage_manager
-        print("✅ R2 Storage utilities imported successfully")
+        from utils.r2_storage import get_storage_manager
+        print("✅ R2 Storage module imported successfully")
     except Exception as e:
         print(f"❌ R2 Storage import failed: {e}")
         return False
     
     try:
-        from utils.db import get_database_manager
-        print("✅ Database utilities imported successfully")
+        from utils.supabase_db import get_database_manager
+        print("✅ Supabase Database module imported successfully")
     except Exception as e:
         print(f"❌ Database import failed: {e}")
         return False
     
     try:
-        from utils.inference import get_inference_manager
-        print("✅ Inference utilities imported successfully")
+        from utils.inference_manager import get_inference_manager
+        print("✅ Inference Manager module imported successfully")
     except Exception as e:
         print(f"❌ Inference import failed: {e}")
         return False
     
     try:
         from utils.redis_cache import get_cache_manager
-        print("✅ Redis cache utilities imported successfully")
+        print("✅ Redis Cache Manager imported successfully")
     except Exception as e:
         print(f"❌ Redis cache import failed: {e}")
         return False
     
     try:
+        from utils.config_validator import get_config_validator
+        print("✅ Configuration Validator imported successfully")
+    except Exception as e:
+        print(f"❌ Config validator import failed: {e}")
+        return False
+    
+    try:
         from core.cloud_ai_manager import get_cloud_ai_manager
-        print("✅ Cloud AI manager imported successfully")
+        print("✅ Cloud AI Manager (Orchestrator) imported successfully")
     except Exception as e:
         print(f"❌ Cloud AI manager import failed: {e}")
         return False
