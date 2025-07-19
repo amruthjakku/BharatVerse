@@ -6,7 +6,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-from streamlit_app.utils.enhanced_styling import apply_enhanced_styling
+from streamlit_app.utils.main_styling import load_custom_css
 
 def main():
     st.set_page_config(
@@ -16,7 +16,7 @@ def main():
     )
     
     # Apply enhanced styling
-    apply_enhanced_styling()
+    load_custom_css()
     
     # Header
     st.markdown("""

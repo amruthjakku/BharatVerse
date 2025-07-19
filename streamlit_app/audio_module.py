@@ -25,7 +25,7 @@ except (ImportError, OSError) as e:
 
 # Try to import enhanced AI models
 try:
-    from core.ai_models_enhanced import ai_manager
+    from core.ai_models import ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
     AI_MODELS_AVAILABLE = False

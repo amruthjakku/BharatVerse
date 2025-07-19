@@ -13,7 +13,7 @@ from streamlit_app.utils.data_handler import get_contributions
 
 # Try to import enhanced AI models and database
 try:
-    from core.ai_models_enhanced import ai_manager
+    from core.ai_models import ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
     AI_MODELS_AVAILABLE = False

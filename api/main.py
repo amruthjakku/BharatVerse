@@ -21,7 +21,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Import enhanced AI models and database
 try:
-    from core.ai_models_enhanced import ai_manager
+    from core.ai_models import ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
     AI_MODELS_AVAILABLE = False
@@ -492,7 +492,7 @@ async def reload_models():
     try:
         # Reinitialize AI manager
         global ai_manager
-        from core.ai_models_enhanced import AIManager
+        from core.ai_models import AIManager
         ai_manager = AIManager()
         
         return {"status": "success", "message": "Models reloaded successfully"}

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import styling and authentication
-from streamlit_app.utils.enhanced_styling import apply_enhanced_styling
+from streamlit_app.utils.main_styling import load_custom_css
 from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, init_auth
 from streamlit_app.utils.user_manager import user_manager
 
@@ -52,8 +52,8 @@ def main():
     # Initialize auth system (handles OAuth callback)
     init_auth()
     
-    # Apply enhanced styling
-    apply_enhanced_styling()
+    # Apply custom styling
+    load_custom_css()
     
     # Check authentication and redirect if logged in
     if auth.is_authenticated():
@@ -72,12 +72,12 @@ def main():
             with col2:
                 if db_user.get('role') == 'admin':
                     st.info("🛡️ You have administrator privileges.")
-                    if st.button("📊 Go to Admin Dashboard", use_container_width=True, type="primary"):
-                        st.switch_page("pages/01_📊_Dashboard.py")
+                    if st.button("📊 Go to Analytics Dashboard", use_container_width=True, type="primary"):
+                        st.switch_page("pages/05_📊_Analytics.py")
                 else:
                     st.info("👤 Welcome to your personal dashboard.")
-                    if st.button("📊 Go to My Dashboard", use_container_width=True, type="primary"):
-                        st.switch_page("pages/01_📊_Dashboard.py")
+                    if st.button("👤 Go to My Profile", use_container_width=True, type="primary"):
+                        st.switch_page("pages/10_👤_My_Profile.py")
                 
                 if st.button("🚪 Logout", use_container_width=True):
                     auth.logout()

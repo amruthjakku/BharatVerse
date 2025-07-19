@@ -8,7 +8,7 @@ sys.path.append(str(project_root))
 
 # Import the analytics module
 from streamlit_app.analytics_module import analytics_page
-from streamlit_app.utils.enhanced_styling import apply_enhanced_styling
+from streamlit_app.utils.main_styling import load_custom_css
 
 def main():
     st.set_page_config(
@@ -18,7 +18,7 @@ def main():
     )
     
     # Apply enhanced styling
-    apply_enhanced_styling()
+    load_custom_css()
     
     # Call the analytics page function
     analytics_page()

@@ -190,7 +190,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent))
 
 try:
-    from core.ai_models_enhanced import ai_manager
+    from core.ai_models import ai_manager
     status = ai_manager.get_model_status()
     
     print("🤖 AI Models Status:")
