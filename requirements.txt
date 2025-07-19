@@ -22,6 +22,10 @@ psutil>=5.9.0
 librosa>=0.10.0
 soundfile>=0.12.0
 
+# NLP (lightweight)
+langdetect>=1.0.9
+textstat>=0.7.3
+
 # Utilities
 python-dateutil>=2.8.0
 pytz>=2023.3
