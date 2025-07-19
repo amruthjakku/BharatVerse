@@ -1,0 +1,16 @@
+# AI/ML dependencies
+transformers>=4.36.0
+torch>=2.1.0
+torchaudio>=2.1.0
+librosa>=0.10.1
+soundfile>=0.12.1
+pydub>=0.25.1
+webrtcvad-wheels>=2.0.11
+
+# NLP
+sentencepiece>=0.1.99
+tokenizers>=0.15.0
+
+# Audio processing
+ffmpeg-python>=0.2.0
+audioread>=3.0.0

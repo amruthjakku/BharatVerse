@@ -99,14 +99,19 @@ cd bharatverse
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (choose one):
+pip install -r requirements/base.txt  # Core features only
+pip install -r requirements.txt        # Full installation with AI
+pip install -r requirements/dev.txt    # Development setup
+
+# Setup environment
+cp .env.local .env  # Edit .env with your settings
 
 # Start infrastructure services (optional)
 docker-compose up -d
 
 # Run the application
-streamlit run streamlit_app/app.py
+streamlit run Home.py
 ```
 
 🎉 **That's it!** Open http://localhost:8501 in your browser.
@@ -246,8 +251,21 @@ stories = response.json()
 
 ```
 bharatverse/
-├── streamlit_app/           # Streamlit frontend
-│   ├── app.py              # Main application
+├── Home.py                 # Main application entry point
+├── pages/                  # Streamlit pages
+│   ├── 01_🎤_Audio_Capture.py
+│   ├── 02_📝_Text_Stories.py
+│   ├── 03_📸_Visual_Heritage.py
+│   ├── 04_🔍_Discover.py
+│   ├── 05_📊_Analytics.py
+│   ├── 06_🤝_Community.py
+│   ├── 07_🤖_AI_Insights.py
+│   ├── 08_👥_Collaboration.py
+│   ├── 09_🦊_GitLab.py
+│   ├── 10_👤_My_Profile.py
+│   ├── 11_📚_Browse_Contributions.py
+│   └── 12_ℹ️_About.py
+├── streamlit_app/          # Streamlit modules
 │   ├── audio_module.py     # Audio recording & transcription
 │   ├── text_module.py      # Text story documentation
 │   ├── image_module.py     # Visual heritage upload
@@ -258,14 +276,27 @@ bharatverse/
 │   ├── collaboration_module.py # Collaboration tools
 │   └── utils/              # Utility modules
 ├── api/                    # FastAPI backend
-├── core/                   # Core database management
-│   └── database.py         # Database connections & operations
+│   └── main.py            # API server
+├── core/                   # Core functionality
+│   ├── database.py        # Database connections
+│   ├── ai_models.py       # AI/ML models
+│   ├── api_service.py     # API services
+│   └── community_service.py # Community features
 ├── data/                   # Data storage
 │   └── bharatverse.db     # SQLite database
+├── tests/                  # Test suite
+├── scripts/                # Utility scripts
+├── docs/                   # Documentation
+│   ├── guides/            # User guides
+│   └── technical/         # Technical docs
+├── requirements/           # Dependency management
+│   ├── base.txt           # Core dependencies
+│   ├── ai.txt             # AI/ML dependencies
+│   └── dev.txt            # Development dependencies
+├── docker/                 # Docker configurations
 ├── .env                    # Environment configuration
 ├── docker-compose.yml      # Infrastructure services
-├── requirements.txt        # Python dependencies
-├── requirements_core.txt   # Core dependencies
+├── requirements.txt        # Main requirements file
 └── README.md              # This file
 ```
 
