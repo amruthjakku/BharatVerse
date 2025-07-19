@@ -436,9 +436,14 @@ def user_profile_main():
     if not auth.is_authenticated():
         st.markdown("## 👤 User Profile")
         st.markdown("---")
-        st.info("Please login to access your profile.")
+        st.error("🔐 Authentication required to access your profile.")
+        st.info("Please login from the home page to access your dashboard.")
         
-        from streamlit_app.utils.auth import render_login_button
-        render_login_button()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🏠 Go to Home Page", use_container_width=True, type="primary"):
+                st.switch_page("Home.py")
+        
+        st.stop()
     else:
         user_profile_page()

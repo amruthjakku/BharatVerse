@@ -16,11 +16,11 @@ sys.path.append(str(project_root))
 
 from core.database import DatabaseManager
 from core.community_service import CommunityService
-from streamlit_app.utils.demo_auth import demo_auth
+from streamlit_app.utils.auth_simple import GitLabAuthSimple
 from streamlit_app.utils.community_styling import apply_community_styling
 
-# Use demo auth for community features
-auth = demo_auth
+# Use GitLab auth for community features
+auth = GitLabAuthSimple()
 
 def get_current_user():
     """Get current user for community features"""
@@ -51,18 +51,26 @@ def community_page():
     # Apply community styling
     apply_community_styling()
     
-    # Show user info in sidebar
-    auth.show_user_info()
-    
     st.markdown("## 🤝 Community Hub")
     st.markdown("Connect with fellow cultural enthusiasts and contributors")
     
     # Get current user
     current_user = get_current_user()
     if not current_user:
-        st.markdown("### 🔐 Authentication Required")
-        st.info("Please log in to access community features and start connecting with fellow cultural enthusiasts!")
-        auth.show_login_form()
+        st.markdown("### 🔐 GitLab Authentication Required")
+        st.info("Please log in with your GitLab account to access community features and start connecting with fellow cultural enthusiasts!")
+        
+        # Show login button
+        if st.button("🔗 Login with GitLab", type="primary"):
+            auth_url = auth.get_authorization_url()
+            st.markdown(f"[Click here to login with GitLab]({auth_url})")
+            st.info("You will be redirected to GitLab for authentication.")
+        
+        st.markdown("---")
+        st.markdown("**Why GitLab Authentication?**")
+        st.markdown("• Secure authentication with your existing GitLab account")
+        st.markdown("• Access control based on your GitLab permissions")
+        st.markdown("• Seamless integration with development workflow")
         return
     
     community_service = get_community_service()

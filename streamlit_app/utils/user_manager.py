@@ -189,6 +189,19 @@ class UserManager:
             return self._row_to_user_dict(user_row)
         return None
     
+    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """Get user by username"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user_row = cursor.fetchone()
+        conn.close()
+        
+        if user_row:
+            return self._row_to_user_dict(user_row)
+        return None
+    
     def update_user_role(self, user_id: int, role: str) -> bool:
         """Update user role (admin, moderator, user)"""
         if role not in ['admin', 'moderator', 'user']:

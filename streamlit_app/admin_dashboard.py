@@ -4,7 +4,7 @@ Administrative interface for user and content management
 """
 
 import streamlit as st
-from streamlit_app.utils.auth import GitLabAuth, require_auth
+from streamlit_app.utils.auth import GitLabAuth
 from streamlit_app.utils.user_manager import user_manager
 from datetime import datetime, timedelta
 import json
@@ -40,7 +40,7 @@ def admin_dashboard_page():
     auth = GitLabAuth()
     admin_user = auth.get_current_db_user()
     
-    st.markdown(f"**Welcome, Admin {admin_user.get('name', 'Unknown')}**")
+    st.markdown(f"**Welcome, Admin {admin_user.get('name', 'Unknown') if admin_user else 'Unknown'}**")
     st.markdown("*Administrative control panel for BharatVerse*")
     
     # Quick stats
@@ -448,19 +448,35 @@ def admin_dashboard_main():
     if not auth.is_authenticated():
         st.markdown("## 🛡️ Admin Dashboard")
         st.markdown("---")
-        st.info("Please login to access the admin dashboard.")
+        st.error("🔐 Authentication required to access the admin dashboard.")
+        st.info("Please login from the home page to access this dashboard.")
         
-        from streamlit_app.utils.auth import render_login_button
-        render_login_button()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🏠 Go to Home Page", use_container_width=True, type="primary"):
+                st.switch_page("Home.py")
+        
+        st.stop()
+        
     elif not auth.is_admin():
         st.markdown("## 🛡️ Admin Dashboard")
         st.markdown("---")
         st.error("🚫 Admin privileges required to access this page.")
-        st.info("Contact an administrator if you need access.")
+        st.info("You are logged in, but you don't have administrator privileges.")
         
-        # Show current user role
-        db_user = auth.get_current_db_user()
-        if db_user:
-            st.markdown(f"**Your current role:** {db_user.get('role', 'user').title()}")
+        # Show current user info
+        current_user = auth.get_current_user()
+        if current_user:
+            st.markdown(f"**Current User:** {current_user.get('name', 'Unknown')}")
+            st.markdown(f"**Username:** {current_user.get('username', 'Unknown')}")
+            st.markdown("**Role:** User")
+            
+        st.markdown("---")
+        st.markdown("**Note:** Contact an administrator to request admin privileges.")
+        
+        if st.button("🚪 Logout"):
+            auth.logout()
+            
     else:
+        # User is authenticated and is admin
         admin_dashboard_page()

@@ -6,8 +6,37 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
-# Import styling
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+# Import styling and authentication
 from streamlit_app.utils.enhanced_styling import apply_enhanced_styling
+from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, init_auth
+from streamlit_app.utils.user_manager import user_manager
+
+def show_login_section():
+    """Display login section with GitLab OAuth"""
+    st.markdown("---")
+    st.markdown("## 🔐 Login to Access Your Dashboard")
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.info("""
+        **Login Required**: Please authenticate with your GitLab account to access:
+        - 👤 Personal User Dashboard
+        - 🛡️ Admin Dashboard (for administrators)
+        - 🤝 Community Features
+        - 📁 Content Management
+        """)
+        
+        render_login_button()
+        
+        st.markdown("""<br>
+        <div style='text-align: center; color: #666;'>
+            <small>By logging in, you agree to our terms of service and privacy policy.</small>
+        </div>
+        """, unsafe_allow_html=True)
 
 def main():
     st.set_page_config(
@@ -17,10 +46,46 @@ def main():
         initial_sidebar_state="expanded"
     )
     
+    # Initialize authentication
+    auth = GitLabAuth()
+    
+    # Initialize auth system (handles OAuth callback)
+    init_auth()
+    
     # Apply enhanced styling
     apply_enhanced_styling()
     
-    # Main header
+    # Check authentication and redirect if logged in
+    if auth.is_authenticated():
+        db_user = auth.get_current_db_user()
+        if db_user:
+            # Show welcome message and redirect button
+            st.markdown("""
+            <div style='text-align: center; padding: 2rem 0;'>
+                <h1 style='color: #FF6B35; font-size: 3.5rem; margin-bottom: 0.5rem;'>🇮🇳 BharatVerse</h1>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.success(f"Welcome back, {db_user.get('name', 'User')}!")
+            
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if db_user.get('role') == 'admin':
+                    st.info("🛡️ You have administrator privileges.")
+                    if st.button("📊 Go to Admin Dashboard", use_container_width=True, type="primary"):
+                        st.switch_page("pages/01_📊_Dashboard.py")
+                else:
+                    st.info("👤 Welcome to your personal dashboard.")
+                    if st.button("📊 Go to My Dashboard", use_container_width=True, type="primary"):
+                        st.switch_page("pages/01_📊_Dashboard.py")
+                
+                if st.button("🚪 Logout", use_container_width=True):
+                    auth.logout()
+                    st.rerun()
+            
+            st.stop()
+    
+    # Main header for non-authenticated users
     st.markdown("""
     <div style='text-align: center; padding: 2rem 0;'>
         <h1 style='color: #FF6B35; font-size: 3.5rem; margin-bottom: 0.5rem;'>🇮🇳 BharatVerse</h1>
@@ -159,6 +224,32 @@ def main():
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Add authentication notice
+    st.markdown("---")
+    st.info("🔐 **Authentication**: This platform uses GitLab OAuth for secure authentication. Login with your GitLab account to access community features and content creation tools.")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**👤 Authenticated Users can access:**")
+        st.markdown("• Community groups and chat")
+        st.markdown("• Discussion forums")
+        st.markdown("• Challenges and leaderboards")
+        st.markdown("• Profile management")
+        st.markdown("• Content creation and upload")
+        
+    with col2:
+        st.markdown("**🛡️ Admin Users can access:**")
+        st.markdown("• All user features")
+        st.markdown("• Admin dashboard")
+        st.markdown("• User management")
+        st.markdown("• System analytics")
+        st.markdown("• Platform configuration")
+        
+    st.markdown("**Note:** Admin privileges are determined by your GitLab account permissions and platform configuration.")
+    
+    # Show login section at the bottom
+    show_login_section()
 
 if __name__ == "__main__":
     main()

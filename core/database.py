@@ -61,7 +61,12 @@ class DatabaseManager:
         self._postgres_pool = None
         self._minio_client = None
         self._redis_client = None
-        self._initialize_connections()
+        self._disabled = os.getenv('DISABLE_DATABASE', 'false').lower() == 'true'
+        
+        if not self._disabled:
+            self._initialize_connections()
+        else:
+            logger.info("Database connections disabled (running in UI-only mode)")
     
     def _initialize_connections(self):
         """Initialize all database connections"""
@@ -103,7 +108,11 @@ class DatabaseManager:
             
         except Exception as e:
             logger.error(f"Failed to initialize database connections: {e}")
-            raise
+            print(f"\nFailed to initialize database connections: {e}")
+            if self._disabled:
+                logger.info("Running in UI-only mode without database")
+            else:
+                raise
     
     def _initialize_buckets(self):
         """Create MinIO buckets if they don't exist"""
@@ -187,20 +196,27 @@ class DatabaseManager:
     
     def get_postgres_connection(self):
         """Get a connection from the pool"""
+        if self._disabled:
+            raise RuntimeError("Database is disabled in UI-only mode")
         return self._postgres_pool.getconn()
     
     def release_postgres_connection(self, conn):
         """Release connection back to pool"""
-        self._postgres_pool.putconn(conn)
+        if not self._disabled and conn:
+            self._postgres_pool.putconn(conn)
     
     @property
     def minio(self):
         """Get MinIO client"""
+        if self._disabled:
+            return None
         return self._minio_client
     
     @property
     def redis(self):
         """Get Redis client"""
+        if self._disabled:
+            return None
         return self._redis_client
     
     def close_all(self):
