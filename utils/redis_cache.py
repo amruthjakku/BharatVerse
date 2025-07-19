@@ -1,6 +1,13 @@
 """
-Redis Cache Utilities for BharatVerse
-Handles caching, session management, and temporary data storage
+Redis Cache Manager for BharatVerse Cloud Deployment
+Caches AI processing results and handles lightweight session data
+
+Module: redis_cache.py
+Purpose: Performance optimization through intelligent caching
+- Caches AI model results to avoid repeated API calls
+- Stores lightweight session data (user preferences, temp state)
+- Manages rate limiting counters and usage tracking
+- Note: Streamlit is stateless, so session data is minimal and optional
 """
 import streamlit as st
 import redis

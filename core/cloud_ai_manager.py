@@ -1,6 +1,13 @@
 """
 Cloud AI Manager for BharatVerse
-Manages AI processing using external cloud APIs instead of local models
+Orchestrates AI processing tasks and routes them to appropriate inference modules
+
+Module: cloud_ai_manager.py
+Purpose: High-level orchestration of AI workflows, caching, and result management
+- Routes tasks to inference_manager.py for actual API calls
+- Manages caching via redis_cache.py  
+- Logs analytics via supabase_db.py
+- Validates configurations via config_validator.py
 """
 import streamlit as st
 import hashlib
@@ -10,9 +17,10 @@ from datetime import datetime
 import asyncio
 
 # Import our cloud utilities
-from utils.inference import get_inference_manager, transcribe_audio, analyze_text, analyze_image, translate_text
+from utils.inference_manager import get_inference_manager, transcribe_audio, analyze_text, analyze_image, translate_text
 from utils.redis_cache import get_cache_manager, cache_ai_result, get_cached_ai_result
-from utils.db import get_database_manager, log_analytics
+from utils.supabase_db import get_database_manager, log_analytics
+from utils.config_validator import get_config_validator
 
 logger = logging.getLogger(__name__)
 

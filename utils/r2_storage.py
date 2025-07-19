@@ -1,6 +1,13 @@
 """
-Cloudflare R2 Object Storage Utilities
-Handles file uploads, downloads, and management for BharatVerse
+Cloudflare R2 Storage Module for BharatVerse Cloud Deployment
+Handles file uploads, downloads, and management using Cloudflare R2 object storage
+
+Module: r2_storage.py
+Purpose: Direct interface to Cloudflare R2 object storage
+- Manages file uploads (audio, images, documents)
+- Handles secure file downloads with signed URLs  
+- Provides file organization and metadata management
+- Compatible with AWS S3 API for easy integration
 """
 import streamlit as st
 import boto3

@@ -8,14 +8,20 @@ Your BharatVerse application has been **successfully transformed** for free clou
 
 ## 🏗️ **What Was Implemented**
 
-### ✅ **Cloud Infrastructure Components**
-| Component | File | Status | Purpose |
-|-----------|------|--------|---------|
-| **Cloud AI Manager** | `core/cloud_ai_manager.py` | ✅ DONE | Orchestrates all AI processing via cloud APIs |
-| **R2 Storage** | `utils/r2.py` | ✅ DONE | Cloudflare R2 object storage integration |
-| **Database Manager** | `utils/db.py` | ✅ DONE | Supabase PostgreSQL operations |
-| **Redis Cache** | `utils/redis_cache.py` | ✅ DONE | Upstash Redis caching and sessions |
-| **AI Inference** | `utils/inference.py` | ✅ DONE | External API calls to HuggingFace |
+### ✅ **Core Infrastructure (Modules)**
+- **`cloud_ai_manager.py`**: Orchestrates all AI processing and model routing
+- **`inference_manager.py`**: Makes API calls to HuggingFace models (text, image, audio) 
+- **`r2_storage.py`**: Handles file uploads/downloads with Cloudflare R2
+- **`supabase_db.py`**: Manages PostgreSQL operations via Supabase
+- **`redis_cache.py`**: Caches AI results and handles optional session data
+- **`config_validator.py`**: Loads & validates credentials from .env
+
+### ✅ **Free Cloud Services Integration**
+- **Streamlit Cloud**: Frontend hosting (free)
+- **HuggingFace Inference API**: AI processing (free-tier models)
+- **Supabase**: PostgreSQL database (500MB free)
+- **Upstash Redis**: Caching (10K requests/day free)
+- **Cloudflare R2**: Object storage (10GB free)
 
 ### ✅ **Configuration & Deployment**
 | File | Status | Purpose |
@@ -44,30 +50,83 @@ Your BharatVerse application has been **successfully transformed** for free clou
 
 ---
 
-## 🌐 **Free Cloud Architecture**
+## 🌐 **System Architecture - Module Interaction Flow**
 
 ```
- 🧑‍💻 Users
-    ⬇️
-🌐 Streamlit Cloud (FREE)
-    ⬇️
-┌─────────────────────────────────────┐
-│         BharatVerse App             │
-│  ├─ Home.py (Cloud Status)          │
-│  ├─ Cloud AI Manager                │
-│  └─ Enhanced Features (Cloud)       │
-└─────────────────────────────────────┘
-    ⬇️
-┌─────────────┬─────────────┬─────────────┬─────────────┐
-│             │             │             │             │
-│ 🔮 HF APIs   │ 🐘 Supabase  │ ⚡ Upstash   │ 🪣 R2       │
-│ (AI Models) │ (Database)  │ (Cache)     │ (Storage)   │
-│             │             │             │             │
-│ • Whisper   │ • Users     │ • Sessions  │ • Files     │
-│ • RoBERTa   │ • Content   │ • AI Cache  │ • Media     │
-│ • BLIP      │ • Analytics │ • Rate Lmt  │ • Assets    │
-│ • NLLB      │ • Logs      │ • Temp Data │ • Uploads   │
-└─────────────┴─────────────┴─────────────┴─────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    🧑‍💻 Users (Web Browser)                        │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────────┐
+│                🌐 Streamlit Cloud (FREE)                       │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │             BharatVerse Application                     │   │
+│  │  ┌─────────────┐  ┌─────────────────────────────────┐   │   │
+│  │  │  Home.py    │  │        Page Components          │   │   │
+│  │  │ (Entry)     │  │ • Audio Capture                 │   │   │
+│  │  └─────────────┘  │ • Text Stories                  │   │   │
+│  │                   │ • Visual Heritage               │   │   │
+│  │                   │ • Enhanced AI Features          │   │   │
+│  │                   └─────────────┬───────────────────┘   │   │
+│  │                                 │                       │   │
+│  │  ┌──────────────────────────────▼───────────────────┐   │   │
+│  │  │       🤖 cloud_ai_manager.py                    │   │   │
+│  │  │              (ORCHESTRATOR)                     │   │   │
+│  │  │  • Routes AI tasks to appropriate modules      │   │   │
+│  │  │  • Manages caching strategy                    │   │   │
+│  │  │  • Handles error recovery                      │   │   │
+│  │  │  • Logs analytics                              │   │   │
+│  │  └──┬────────┬────────────┬──────────┬─────────────┘   │   │
+│  └─────┼────────┼────────────┼──────────┼─────────────────┘   │
+└────────┼────────┼────────────┼──────────┼─────────────────────┘
+         │        │            │          │
+┌────────▼────────▼────────────▼──────────▼─────────────────────┐
+│                    Module Layer                               │
+│                                                               │
+│ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐│
+│ │🔮 inference │ │⚡redis_cache │ │🐘supabase_db │ │🪣r2_storage││
+│ │_manager.py  │ │.py          │ │.py          │ │.py        ││
+│ │             │ │             │ │             │ │           ││
+│ │**EXECUTOR** │ │**CACHE**    │ │**DATABASE** │ │**STORAGE**││
+│ │• HF API     │ │• AI Results │ │• User Data  │ │• Files    ││
+│ │  calls      │ │• Rate Lmts  │ │• Analytics  │ │• Media    ││
+│ │• Response   │ │• Temp Data  │ │• Logs       │ │• Assets   ││
+│ │  parsing    │ │• Sessions   │ │• Metadata   │ │• Uploads  ││
+│ └─────┬───────┘ └─────┬───────┘ └─────┬───────┘ └─────┬─────┘│
+│       │               │               │               │      │
+│ ┌─────▼───────────────▼───────────────▼───────────────▼────┐ │
+│ │             🔧 config_validator.py                        │ │
+│ │                     (CONFIG LAYER)                       │ │
+│ │  • Loads & validates all credentials                     │ │
+│ │  • Handles Streamlit secrets & environment variables    │ │
+│ │  • Provides configuration validation reports            │ │
+│ └─────────────────────────────────────────────────────────┘ │
+└───────┬───────────┬───────────┬───────────┬───────────────────┘
+        │           │           │           │
+┌───────▼─────┐ ┌───▼────┐ ┌────▼─────┐ ┌───▼───────────────────┐
+│🔮 HuggingFace│ │⚡Upstash│ │🐘Supabase│ │🪣 Cloudflare R2       │
+│   Inference │ │  Redis │ │PostgreSQL│ │   Object Storage      │
+│     API     │ │        │ │          │ │                       │
+│   (FREE)    │ │ (FREE) │ │  (FREE)  │ │       (FREE)          │
+│             │ │        │ │          │ │                       │
+│ • Whisper   │ │• Cache │ │• Users   │ │• Audio files          │
+│ • RoBERTa   │ │• Rate  │ │• Content │ │• Images               │
+│ • BLIP-2    │ │  Limit │ │• Logs    │ │• Documents            │
+│ • NLLB      │ │• Temp  │ │• Stats   │ │• Static assets        │
+└─────────────┘ └────────┘ └──────────┘ └───────────────────────┘
+```
+
+### 🔄 **Request Flow Example (Audio Transcription)**
+```
+1. User uploads audio file → Home.py/Audio Capture page
+2. cloud_ai_manager.py receives request
+3. Checks redis_cache.py for cached result
+4. If not cached: routes to inference_manager.py  
+5. inference_manager.py calls HuggingFace Whisper API
+6. Result cached in redis_cache.py for 24 hours
+7. Metadata logged to supabase_db.py  
+8. Audio file stored in r2_storage.py
+9. Response returned to user interface
 ```
 
 **💰 Total Monthly Cost: $0** (All free tiers)

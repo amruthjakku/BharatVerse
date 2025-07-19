@@ -1,6 +1,13 @@
 """
-Supabase PostgreSQL Database Utilities
-Handles all database operations for BharatVerse
+Supabase Database Manager for BharatVerse Cloud Deployment
+Manages PostgreSQL operations via Supabase for user data and analytics
+
+Module: supabase_db.py  
+Purpose: Database operations and data persistence
+- User account management and authentication
+- Content storage (stories, contributions, metadata)
+- Analytics tracking and usage statistics
+- AI processing logs and performance metrics
 """
 import streamlit as st
 import psycopg2

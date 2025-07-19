@@ -316,10 +316,11 @@ def validate_setup():
         "packages.txt",
         ".streamlit/config.toml",
         "streamlit_secrets_template.toml",
-        "utils/r2.py",
-        "utils/db.py", 
-        "utils/inference.py",
+        "utils/r2_storage.py",
+        "utils/supabase_db.py", 
+        "utils/inference_manager.py",
         "utils/redis_cache.py",
+        "utils/config_validator.py",
         "core/cloud_ai_manager.py"
     ]
     
