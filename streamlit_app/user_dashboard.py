@@ -13,57 +13,134 @@ def show_user_stats():
     """Display user statistics and activity"""
     st.markdown("### 📈 Your Activity")
     
-    # Mock user statistics (replace with actual data from database)
+    # Get current user
+    auth = GitLabAuth()
+    db_user = auth.get_current_db_user()
+    
+    if not db_user:
+        st.error("Unable to load user data")
+        return
+    
+    user_id = db_user.get('id')
+    
+    # Get real user statistics from database
+    try:
+        contributions = user_manager.get_user_contributions(user_id)
+        contribution_count = len(contributions) if contributions else 0
+        
+        # Calculate stats from actual data
+        audio_count = len([c for c in contributions if c.get('type') == 'audio']) if contributions else 0
+        photo_count = len([c for c in contributions if c.get('type') == 'photo']) if contributions else 0
+        
+        # Calculate points (simple: 10 points per contribution)
+        total_points = contribution_count * 10
+        
+    except Exception as e:
+        # Fallback if database methods don't exist yet
+        contribution_count = 0
+        audio_count = 0
+        photo_count = 0
+        total_points = 0
+    
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
             label="📝 Contributions",
-            value="12",
-            delta="3 this month"
+            value=str(contribution_count),
+            delta=None
         )
     
     with col2:
         st.metric(
             label="🎵 Audio Uploads",
-            value="8",
-            delta="2 this week"
+            value=str(audio_count),
+            delta=None
         )
     
     with col3:
         st.metric(
             label="📸 Photos Shared",
-            value="25",
-            delta="5 this month"
+            value=str(photo_count),
+            delta=None
         )
     
     with col4:
         st.metric(
             label="⭐ Points Earned",
-            value="340",
-            delta="45 this week"
+            value=str(total_points),
+            delta=None
         )
 
 def show_recent_contributions():
     """Display user's recent contributions"""
     st.markdown("### 📚 Your Recent Contributions")
     
-    # Mock data (replace with actual database queries)
-    contributions_data = {
-        'Date': ['2024-01-15', '2024-01-12', '2024-01-10', '2024-01-08'],
-        'Type': ['Audio Story', 'Photo Collection', 'Cultural Article', 'Folk Song'],
-        'Title': [
-            'Traditional Wedding Songs from Rajasthan',
-            'Holi Festival Celebrations 2024',
-            'The Art of Madhubani Painting',
-            'Bhojpuri Folk Songs Collection'
-        ],
-        'Status': ['Published', 'Under Review', 'Published', 'Published'],
-        'Views': [156, 23, 89, 234]
-    }
+    # Get current user
+    auth = GitLabAuth()
+    db_user = auth.get_current_db_user()
     
-    df = pd.DataFrame(contributions_data)
-    st.dataframe(df, use_container_width=True)
+    if not db_user:
+        st.error("Unable to load user data")
+        return
+    
+    user_id = db_user.get('id')
+    
+    try:
+        # Get real contributions from database
+        contributions = user_manager.get_user_contributions(user_id)
+        
+        if not contributions:
+            st.info("🌟 You haven't made any contributions yet!")
+            st.markdown("""
+            **Get started by:**
+            - 📝 Writing about your cultural experiences
+            - 🎵 Sharing traditional songs or stories
+            - 📸 Uploading photos of cultural events
+            - 🎭 Documenting local traditions
+            """)
+            return
+        
+        # Convert to DataFrame for display
+        contributions_data = []
+        for contrib in contributions[:10]:  # Show last 10
+            contributions_data.append({
+                'Date': contrib.get('created_at', 'Unknown'),
+                'Type': contrib.get('type', 'Unknown').title(),
+                'Title': contrib.get('title', 'Untitled'),
+                'Status': contrib.get('status', 'Unknown'),
+                'Views': contrib.get('views', 0)
+            })
+        
+        if contributions_data:
+            df = pd.DataFrame(contributions_data)
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.info("No contributions found.")
+            
+    except Exception as e:
+        # Fallback if database methods don't exist yet
+        st.info("🌟 You haven't made any contributions yet!")
+        st.markdown("""
+        **Get started by:**
+        - 📝 Writing about your cultural experiences
+        - 🎵 Sharing traditional songs or stories
+        - 📸 Uploading photos of cultural events
+        - 🎭 Documenting local traditions
+        """)
+        
+        # Show placeholder for development
+        if st.checkbox("Show sample data structure (Development Mode)"):
+            st.markdown("*This is how your contributions will appear:*")
+            sample_data = {
+                'Date': ['No contributions yet'],
+                'Type': ['Sample'],
+                'Title': ['Your contributions will appear here'],
+                'Status': ['Ready'],
+                'Views': [0]
+            }
+            df = pd.DataFrame(sample_data)
+            st.dataframe(df, use_container_width=True)
 
 def show_quick_actions():
     """Display quick action buttons for users"""
@@ -87,26 +164,82 @@ def show_community_highlights():
     """Display community highlights and featured content"""
     st.markdown("### 🌟 Community Highlights")
     
-    # Featured content
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        #### 🔥 Trending This Week
-        - **Diwali Celebrations Across India** - 1.2k views
-        - **Traditional Cooking Methods** - 890 views  
-        - **Folk Dance Forms of South India** - 756 views
-        - **Ancient Temple Architecture** - 623 views
-        """)
-    
-    with col2:
-        st.markdown("""
-        #### 🏆 Top Contributors
-        - **Priya Sharma** - 15 contributions this month
-        - **Rajesh Kumar** - 12 audio stories shared
-        - **Meera Patel** - 8 photo collections
-        - **Arjun Singh** - 6 cultural articles
-        """)
+    try:
+        # Get real community data
+        all_users = user_manager.get_all_users(limit=100)
+        
+        # Featured content
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 🔥 Trending This Week")
+            
+            # Try to get trending content from database
+            # For now, show placeholder until content system is implemented
+            trending_content = []
+            
+            if trending_content:
+                for content in trending_content[:5]:
+                    st.markdown(f"- **{content['title']}** - {content['views']} views")
+            else:
+                st.info("📈 Trending content will appear here as the community grows!")
+                st.markdown("""
+                *Coming soon:*
+                - Most viewed contributions
+                - Popular cultural stories
+                - Trending audio recordings
+                - Featured photo collections
+                """)
+        
+        with col2:
+            st.markdown("#### 🏆 Top Contributors")
+            
+            # Get top contributors from real data
+            if all_users:
+                # Sort users by contribution count (when available)
+                top_contributors = []
+                for user in all_users:
+                    try:
+                        contributions = user_manager.get_user_contributions(user['id'])
+                        contrib_count = len(contributions) if contributions else 0
+                        if contrib_count > 0:
+                            top_contributors.append({
+                                'name': user.get('name', user.get('username', 'Unknown')),
+                                'username': user.get('username', 'unknown'),
+                                'count': contrib_count
+                            })
+                    except:
+                        pass
+                
+                # Sort by contribution count
+                top_contributors.sort(key=lambda x: x['count'], reverse=True)
+                
+                if top_contributors:
+                    for contributor in top_contributors[:5]:
+                        st.markdown(f"- **{contributor['name']}** (@{contributor['username']}) - {contributor['count']} contributions")
+                else:
+                    st.info("🏆 Top contributors will appear here!")
+                    st.markdown("""
+                    *Be the first to contribute and see your name here!*
+                    - Share your cultural stories
+                    - Upload traditional music
+                    - Document local festivals
+                    - Preserve heritage knowledge
+                    """)
+            else:
+                st.info("🏆 Top contributors will appear here as the community grows!")
+                
+    except Exception as e:
+        # Fallback display
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### 🔥 Trending This Week")
+            st.info("📈 Trending content will appear here as the community grows!")
+        
+        with col2:
+            st.markdown("#### 🏆 Top Contributors")
+            st.info("🏆 Top contributors will appear here as users start contributing!")
 
 def show_learning_resources():
     """Display learning resources and tutorials"""

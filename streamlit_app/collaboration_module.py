@@ -74,65 +74,24 @@ def active_projects_section():
     with col3:
         sort_by = st.selectbox("Sort by", ["Recent", "Priority", "Progress", "Team Size"])
     
-    # Active projects
-    projects = [
-        {
-            "id": "PROJ001",
-            "title": "Digital Archive of Tribal Music",
-            "description": "Comprehensive documentation of tribal music from Northeast India",
-            "lead": "Dr. Maya Sharma",
-            "team_size": 12,
-            "progress": 68,
-            "priority": "High",
-            "status": "Active",
-            "deadline": "2024-03-15",
-            "type": "Preservation",
-            "tags": ["Music", "Tribal", "Northeast", "Audio"],
-            "recent_activity": "2 hours ago"
-        },
-        {
-            "id": "PROJ002", 
-            "title": "Festival Calendar Documentation",
-            "description": "Creating comprehensive calendar of Indian festivals with regional variations",
-            "lead": "Rajesh Kumar",
-            "team_size": 8,
-            "progress": 45,
-            "priority": "Medium",
-            "status": "Active",
-            "deadline": "2024-04-20",
-            "type": "Documentation",
-            "tags": ["Festivals", "Calendar", "Regional", "Cultural"],
-            "recent_activity": "5 hours ago"
-        },
-        {
-            "id": "PROJ003",
-            "title": "Traditional Craft Techniques",
-            "description": "Video documentation of traditional craft-making processes",
-            "lead": "Artisan Guild",
-            "team_size": 15,
-            "progress": 82,
-            "priority": "High",
-            "status": "Review",
-            "deadline": "2024-02-28",
-            "type": "Documentation",
-            "tags": ["Crafts", "Video", "Traditional", "Techniques"],
-            "recent_activity": "1 day ago"
-        },
-        {
-            "id": "PROJ004",
-            "title": "Endangered Languages Initiative",
-            "description": "Recording and preserving endangered Indian languages",
-            "lead": "Language Preservation Society",
-            "team_size": 20,
-            "progress": 34,
-            "priority": "Critical",
-            "status": "Active",
-            "deadline": "2024-06-30",
-            "type": "Preservation",
-            "tags": ["Languages", "Endangered", "Audio", "Documentation"],
-            "recent_activity": "3 hours ago"
-        }
-    ]
+    # Get real projects from database
+    # TODO: Replace with actual database query when collaboration system is implemented
+    projects = []
+    
+    # For now, show placeholder until collaboration system is built
+    if not projects:
+        st.info("🤝 No collaborative projects yet!")
+        st.markdown("""
+        **Start the first collaborative project in your community:**
+        - 📚 Document local traditions and customs
+        - 🎵 Preserve traditional music and songs
+        - 📸 Create visual archives of cultural events
+        - 🗣️ Record oral histories and stories
+        - 🎭 Document performing arts and crafts
+        
+        Use the "Create New Project" section below to get started!
+        """)
+        return
     
     # Display projects
     for project in projects:

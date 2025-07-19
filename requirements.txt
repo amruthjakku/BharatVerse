@@ -121,3 +121,4 @@ scikit-image>=0.21.0
 #    All dependencies are included in the Docker image
 langdetect
 textblob
+wordcloud
