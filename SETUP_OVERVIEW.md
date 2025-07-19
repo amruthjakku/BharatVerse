@@ -35,7 +35,7 @@ python test_setup.py
 | **🤗 HuggingFace** | 2 min | Free | AI APIs for text/audio/image processing |
 | **🐘 Supabase** | 3 min | Free | PostgreSQL database (500MB) |
 | **⚡ Upstash** | 2 min | Free | Redis caching (10K requests/day) |
-| **🪣 Cloudflare R2** | 3 min | Free | Object storage (10GB) |
+| **🪣 MinIO on Render** | 3 min | Free | Object storage (1GB) |
 | **🐙 GitHub** | 2 min | Free | Code repository for deployment |
 
 **Total: ~12 minutes, $0/month**
@@ -62,11 +62,11 @@ python test_setup.py
 - Rate limiting and performance optimization
 - Real-time application state
 
-### 🪣 **Cloudflare R2**
+### 🪣 **MinIO on Render**
 - Stores uploaded files (audio, images, videos)
-- CDN delivery for fast global access
-- Backup and archival storage
-- Public URL generation
+- S3-compatible object storage
+- Free hosting on Render platform
+- Automatic bucket creation and management
 
 ### 🐙 **GitHub**
 - Hosts your source code

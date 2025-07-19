@@ -13,6 +13,13 @@ from pathlib import Path
 import boto3
 from botocore.exceptions import ClientError
 
+# Optional .env support
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load environment variables from .env file
+except ImportError:
+    pass  # python-dotenv is optional
+
 def print_header(text, emoji="🚀"):
     """Print a formatted header"""
     print(f"\n{emoji} {text}")
@@ -273,9 +280,7 @@ def main():
         test_success = test_and_setup_minio(minio_endpoint, access_key, secret_key)
         
         if test_success:
-            secrets_updates["your-minio-endpoint"] = minio_endpoint
-            secrets_updates["minioadmin"] = access_key
-            secrets_updates["minioadmin-secret"] = secret_key
+            secrets_updates["https://your-minio-endpoint.onrender.com"] = minio_endpoint
             print("✅ MinIO on Render configured and tested successfully!")
         else:
             print("⚠️  MinIO configuration saved but connection test failed.")
@@ -356,7 +361,7 @@ if __name__ == "__main__":
             import boto3
         except ImportError:
             print("📦 Installing required packages...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "boto3", "botocore"])
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "boto3", "botocore", "python-dotenv"])
             import boto3
             from botocore.exceptions import ClientError
             

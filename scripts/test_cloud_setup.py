@@ -18,10 +18,10 @@ def test_imports():
     print("🧪 Testing Imports...")
     
     try:
-        from utils.r2_storage import get_storage_manager
-        print("✅ R2 Storage module imported successfully")
+        from utils.minio_storage import get_storage_manager
+        print("✅ MinIO Storage module imported successfully")
     except Exception as e:
-        print(f"❌ R2 Storage import failed: {e}")
+        print(f"❌ MinIO Storage import failed: {e}")
         return False
     
     try:

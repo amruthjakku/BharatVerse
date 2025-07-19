@@ -8,7 +8,7 @@
                 |
      ┌────────────┬──────────────┬───────────────────┬───────────────────┐
      |            |              |                   |                   |
-[🔮 Inference API]  [🐘 Supabase]   [⚡ Upstash Redis]     [🪣 R2 or MinIO]
+[🔮 Inference API]  [🐘 Supabase]   [⚡ Upstash Redis]     [🪣 MinIO on Render]
 (RunPod/HF Space)   (PostgreSQL)       (Cache)             (Storage)
 
 ✅ Tech Stack
@@ -17,12 +17,12 @@ Frontend	Streamlit Cloud	Free	User interface & interaction
 Inference API	Hugging Face Spaces / RunPod	Free	AI model inference via REST API
 Database	Supabase	Free Tier (500MB)	Stores user data, logs, metadata
 Cache	Upstash Redis	Free Tier (1GB)	Stores temporary/session data
-Object Storage	Cloudflare R2	Free Tier (10GB)	Uploads, model outputs, media
+Object Storage	MinIO on Render	Free Tier (up to 1GB)	Uploads, model outputs, media
 🚀 Features
 * ✅ Host large models via API (up to 47GB via RunPod or optimized HF Space)
 * ✅ Scalable and modular backend
 * ✅ Modern Streamlit frontend (cloud hosted)
-* ✅ Full object upload/download from Cloudflare R2
+* ✅ Full object upload/download from MinIO storage
 * ✅ PostgreSQL support via Supabase (for structured data)
 * ✅ Redis caching with Upstash
 * ✅ Fully open source and serverless-friendly
@@ -72,11 +72,12 @@ password = "your-supabase-password"
 [redis]
 url = "redis://:your-upstash-token@your-endpoint.upstash.io:port"
 
-[r2]
-endpoint_url = "https://<account-id>.r2.cloudflarestorage.com"
-aws_access_key_id = "your-r2-access-key"
-aws_secret_access_key = "your-r2-secret-key"
-bucket_name = "bharatverse-files"
+[minio]
+endpoint_url = "https://your-minio-app.onrender.com"
+aws_access_key_id = "minioadmin"
+aws_secret_access_key = "minioadmin"
+bucket_name = "bharatverse-bucket"
+region_name = "us-east-1"
 
 [inference]
 huggingface_token = "hf_your_token_here"
@@ -138,23 +139,35 @@ Format: `redis://:token@endpoint:port`
 - Session management
 - Rate limiting
 
-## 5. 🪣 Cloudflare R2 Storage Setup
+## 5. 🪣 MinIO on Render Storage Setup
 
-### Step 5.1: Create R2 Bucket
-1. Go to [https://dash.cloudflare.com](https://dash.cloudflare.com)
-2. R2 Object Storage → Create bucket
-3. Bucket name: `bharatverse-files` (or your choice)
-4. Choose location close to users
+### Step 5.1: Deploy MinIO on Render
+1. Go to [https://render.com](https://render.com) and create account
+2. Create new **Web Service** from **Docker Hub**:
+   - Image: `minio/minio:latest`
+   - Service Name: `bharatverse-minio`
+   - Plan: **Free** ($0/month)
+   - Port: `9000`
+3. Add Environment Variables:
+   - `MINIO_ROOT_USER`: `minioadmin`
+   - `MINIO_ROOT_PASSWORD`: `minioadmin`
+   - `MINIO_ADDRESS`: `:9000`
 
-### Step 5.2: Generate Access Keys
-1. Manage R2 API Tokens → Create API token
-2. Permissions: **Admin Read & Write**
-3. Copy **Access Key ID** and **Secret Access Key**
+### Step 5.2: Configure MinIO
+1. Once deployed, visit your service URL (e.g., `https://bharatverse-minio.onrender.com`)
+2. Login with `minioadmin` / `minioadmin`
+3. Create bucket named: `bharatverse-bucket`
+4. Set bucket policy to **Read/Write** for public access if needed
 
-### Step 5.3: Optional Custom Domain
-1. Custom Domains → Connect Domain
-2. Add DNS records as instructed
-3. Provides clean URLs for uploaded files
+### Step 5.3: Auto-Setup via Script
+Use our setup script for automatic configuration:
+```bash
+python setup_accounts.py
+```
+This will automatically:
+- Test connection to your MinIO instance
+- Create the `bharatverse-bucket` if it doesn't exist
+- Configure your secrets file
 
 📦 Folder Structure (Example)
 project-root/
@@ -163,7 +176,7 @@ project-root/
 ├── .streamlit/
 │   └── config.toml
 └── utils/
-    ├── r2.py
+    ├── minio_storage.py
     ├── db.py
     └── inference.py
 
@@ -173,11 +186,11 @@ Use:
 * Postman or curl to test inference API
 * Supabase SQL console for DB tests
 * Upstash dashboard to monitor Redis keys
-* R2 dashboard to inspect uploaded files
+* MinIO console to inspect uploaded files
 
 🛡️ Security Notes
 * Do not hardcode secrets; use st.secrets or environment variables
-* Cloudflare R2 files are private by default — make public if needed
+* MinIO files are private by default — configure bucket policies for public access if needed
 * Hugging Face Spaces may expose logs if not secured
 * Supabase allows IP restriction and row-level security (RLS)
 
@@ -185,7 +198,7 @@ Use:
 * Streamlit
 * Hugging Face Spaces
 * Supabase
-* Cloudflare R2
+* MinIO on Render
 * Upstash Redis
 * RunPod.io
 
