@@ -402,3 +402,118 @@ def log_analytics(**kwargs):
     """Log analytics using global database manager"""
     db = get_database_manager()
     db.log_analytics(**kwargs)
+
+# Enhanced cached database operations
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_cached_contributions(user_id: int = None, limit: int = 50, offset: int = 0):
+    """Get contributions with Streamlit caching"""
+    db_manager = get_database_manager()
+    if db_manager:
+        return db_manager.get_contributions(user_id=user_id, limit=limit, offset=offset)
+    return []
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_cached_user_analytics(user_id: int):
+    """Get user analytics with caching"""
+    db_manager = get_database_manager()
+    if db_manager:
+        return db_manager.get_user_analytics(user_id)
+    return {}
+
+@st.cache_data(ttl=7200, show_spinner=False)
+def get_cached_platform_stats():
+    """Get platform-wide statistics with caching"""
+    db_manager = get_database_manager()
+    if not db_manager:
+        return {}
+    
+    try:
+        stats = {}
+        
+        # Total users
+        result = db_manager.execute_query("SELECT COUNT(*) as count FROM users WHERE is_active = true")
+        stats['total_users'] = result[0]['count'] if result else 0
+        
+        # Total contributions
+        result = db_manager.execute_query("SELECT COUNT(*) as count FROM contributions WHERE is_public = true")
+        stats['total_contributions'] = result[0]['count'] if result else 0
+        
+        # Languages represented
+        result = db_manager.execute_query("SELECT COUNT(DISTINCT language) as count FROM contributions WHERE language IS NOT NULL")
+        stats['languages_count'] = result[0]['count'] if result else 0
+        
+        # Regions covered
+        result = db_manager.execute_query("SELECT COUNT(DISTINCT region) as count FROM contributions WHERE region IS NOT NULL")
+        stats['regions_count'] = result[0]['count'] if result else 0
+        
+        return stats
+        
+    except Exception as e:
+        logger.error(f"Failed to get platform stats: {e}")
+        return {}
+
+# Analytics logging with batching
+def log_analytics_batched(action: str, user_id: int = None, resource_type: str = None, 
+                         resource_id: int = None, metadata: Dict = None):
+    """Log analytics event with batching for better performance"""
+    db_manager = get_database_manager()
+    if not db_manager:
+        return
+    
+    # Store in session state for batching
+    if "analytics_batch" not in st.session_state:
+        st.session_state.analytics_batch = []
+    
+    analytics_event = {
+        "action": action,
+        "user_id": user_id,
+        "resource_type": resource_type,
+        "resource_id": resource_id,
+        "metadata": metadata or {},
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    st.session_state.analytics_batch.append(analytics_event)
+    
+    # Flush batch if it gets too large
+    if len(st.session_state.analytics_batch) >= 10:
+        flush_analytics_batch()
+
+def flush_analytics_batch():
+    """Flush analytics batch to database"""
+    if "analytics_batch" not in st.session_state or not st.session_state.analytics_batch:
+        return
+    
+    db_manager = get_database_manager()
+    if not db_manager:
+        return
+    
+    try:
+        with db_manager.get_connection() as conn:
+            with conn.cursor() as cursor:
+                for event in st.session_state.analytics_batch:
+                    query = """
+                        INSERT INTO analytics (action, user_id, resource_type, resource_id, metadata)
+                        VALUES (%(action)s, %(user_id)s, %(resource_type)s, %(resource_id)s, %(metadata)s)
+                    """
+                    cursor.execute(query, {
+                        'action': event['action'],
+                        'user_id': event['user_id'],
+                        'resource_type': event['resource_type'],
+                        'resource_id': event['resource_id'],
+                        'metadata': json.dumps(event['metadata'])
+                    })
+                
+                conn.commit()
+                logger.info(f"Flushed {len(st.session_state.analytics_batch)} analytics events")
+                
+        # Clear the batch
+        st.session_state.analytics_batch = []
+        
+    except Exception as e:
+        logger.error(f"Failed to flush analytics batch: {e}")
+
+# Cleanup function to be called on app shutdown
+def cleanup_database_connections():
+    """Clean up database connections and flush pending analytics"""
+    flush_analytics_batch()
