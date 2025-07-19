@@ -5,7 +5,7 @@ A scalable cultural heritage platform using **100% free cloud services**.
 ## 🌐 Architecture
 
 ```
-[🧑‍💻 User] → [🌐 Streamlit Cloud] → [🔮 HF Spaces] + [🐘 Supabase] + [⚡ Upstash] + [🪣 R2]
+[🧑‍💻 User] → [🌐 Streamlit Cloud] → [🔮 HF Spaces] + [🐘 Supabase] + [⚡ Upstash] + [🪣 MinIO]
 ```
 
 ## 🚀 Free Services Used
@@ -14,7 +14,7 @@ A scalable cultural heritage platform using **100% free cloud services**.
 - **AI Processing**: Hugging Face Inference API (Free tier)
 - **Database**: Supabase PostgreSQL (500MB free)
 - **Cache**: Upstash Redis (10k commands/day free)
-- **Storage**: Cloudflare R2 (10GB free)
+- **Storage**: MinIO on Render (1GB free)
 
 ## 📦 Deployment Steps
 
@@ -22,7 +22,7 @@ A scalable cultural heritage platform using **100% free cloud services**.
 2. **Set up free services**:
    - Create Supabase project
    - Create Upstash Redis instance
-   - Create Cloudflare R2 bucket
+   - Deploy MinIO on Render
    - Get Hugging Face token
 3. **Deploy to Streamlit Cloud**:
    - Connect GitHub repository

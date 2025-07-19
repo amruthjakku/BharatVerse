@@ -16,6 +16,14 @@ from botocore.exceptions import ClientError
 import io
 from typing import Optional, List, Dict, Any
 import logging
+import os
+
+# Optional .env support
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # Load environment variables from .env file
+except ImportError:
+    pass  # python-dotenv is optional
 
 logger = logging.getLogger(__name__)
 
