@@ -2,9 +2,35 @@ import streamlit as st
 from datetime import datetime
 import sys
 from pathlib import Path
+import time
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
+
+# Performance optimization imports
+from utils.performance_optimizer import get_performance_optimizer
+from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
+from utils.redis_cache import get_cache_manager
+
+# Initialize performance components
+@st.cache_resource
+def get_text_performance_components():
+    """Get cached performance components for text module"""
+    return {
+        'optimizer': get_performance_optimizer(),
+        'memory_manager': get_memory_manager(),
+        'cache_manager': get_cache_manager()
+    }
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_text_processing_config():
+    """Get cached text processing configuration"""
+    return {
+        'max_text_length': 10000,
+        'supported_languages': ['hi', 'en', 'bn', 'te', 'mr', 'ta', 'gu', 'kn', 'ml', 'pa'],
+        'ai_processing_timeout': 30,
+        'batch_size': 5
+    }
 
 # Try to import enhanced AI models
 try:
@@ -30,8 +56,24 @@ def text_page():
     st.markdown("## 📝 Story Keeper")
     st.markdown("Document stories, proverbs, recipes, and wisdom from your culture.")
     
-    # Content type tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["Stories", "Proverbs & Sayings", "Recipes", "Customs & Traditions"])
+    # Initialize performance components
+    perf_components = get_text_performance_components()
+    optimizer = perf_components['optimizer']
+    memory_manager = perf_components['memory_manager']
+    cache_manager = perf_components['cache_manager']
+    
+    # Get text processing configuration
+    text_config = get_text_processing_config()
+    
+    # Performance monitoring for admins
+    if st.session_state.get("user_role") == "admin":
+        with st.expander("⚡ Performance Monitoring", expanded=False):
+            show_memory_dashboard()
+    
+    # Memory tracking for text operations
+    with MemoryTracker("text_page_operations"):
+        # Content type tabs
+        tab1, tab2, tab3, tab4 = st.tabs(["Stories", "Proverbs & Sayings", "Recipes", "Customs & Traditions"])
     
     with tab1:
         story_section()

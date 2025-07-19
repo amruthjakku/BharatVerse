@@ -26,25 +26,97 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseConfig:
-    """Database configuration"""
-    # PostgreSQL
-    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-    POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-    POSTGRES_DB = os.getenv("POSTGRES_DB", "bharatverse")
-    POSTGRES_USER = os.getenv("POSTGRES_USER", "admin")
-    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "secure_password")
+    """Database configuration with safe fallbacks"""
     
-    # MinIO
-    MINIO_HOST = os.getenv("MINIO_HOST", "localhost:9000")
-    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
-    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+    @staticmethod
+    def _is_placeholder(value):
+        """Check if a value is a placeholder"""
+        if not value:
+            return True
+        placeholders = [
+            "your-project-id", "your-supabase-host", "your-password",
+            "your-redis-instance", "localhost", "minioadmin"
+        ]
+        return any(placeholder in str(value).lower() for placeholder in placeholders)
+    
+    @staticmethod
+    def _get_safe_config(key, default=None, required=False):
+        """Get configuration value with placeholder detection"""
+        # Try environment variable first
+        value = os.getenv(key, default)
+        
+        # Try Streamlit secrets if available
+        if not value or DatabaseConfig._is_placeholder(value):
+            try:
+                import streamlit as st
+                if hasattr(st, 'secrets'):
+                    # Map environment keys to secrets structure
+                    secrets_map = {
+                        'POSTGRES_HOST': ['postgres', 'host'],
+                        'POSTGRES_PASSWORD': ['postgres', 'password'],
+                        'POSTGRES_DB': ['postgres', 'database'],
+                        'POSTGRES_USER': ['postgres', 'username'],
+                        'REDIS_URL': ['redis', 'url'],
+                        'MINIO_ENDPOINT': ['minio', 'endpoint_url'],
+                        'MINIO_ACCESS_KEY': ['minio', 'aws_access_key_id'],
+                        'MINIO_SECRET_KEY': ['minio', 'aws_secret_access_key']
+                    }
+                    
+                    if key in secrets_map:
+                        path = secrets_map[key]
+                        try:
+                            secrets_value = st.secrets
+                            for part in path:
+                                secrets_value = secrets_value[part]
+                            if secrets_value and not DatabaseConfig._is_placeholder(secrets_value):
+                                value = secrets_value
+                        except (KeyError, AttributeError):
+                            pass
+            except ImportError:
+                pass
+        
+        # Return None if still a placeholder or invalid
+        if DatabaseConfig._is_placeholder(value):
+            if required:
+                logger.warning(f"Required configuration {key} not properly set (contains placeholder)")
+            return None
+        
+        return value
+    
+    # PostgreSQL - with safe fallbacks
+    POSTGRES_HOST = _get_safe_config("POSTGRES_HOST")
+    POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+    POSTGRES_DB = _get_safe_config("POSTGRES_DB", "bharatverse")
+    POSTGRES_USER = _get_safe_config("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD = _get_safe_config("POSTGRES_PASSWORD")
+    
+    # MinIO - with safe fallbacks
+    MINIO_HOST = _get_safe_config("MINIO_HOST")
+    MINIO_ACCESS_KEY = _get_safe_config("MINIO_ACCESS_KEY")
+    MINIO_SECRET_KEY = _get_safe_config("MINIO_SECRET_KEY")
     MINIO_SECURE = os.getenv("MINIO_SECURE", "False").lower() == "true"
     
-    # Redis
-    REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+    # Redis - with safe fallbacks
+    REDIS_HOST = _get_safe_config("REDIS_HOST")
     REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
     REDIS_DB = int(os.getenv("REDIS_DB", "0"))
-    REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
+    REDIS_PASSWORD = _get_safe_config("REDIS_PASSWORD")
+    REDIS_URL = _get_safe_config("REDIS_URL")
+    
+    @classmethod
+    def is_postgres_configured(cls):
+        """Check if PostgreSQL is properly configured"""
+        return all([cls.POSTGRES_HOST, cls.POSTGRES_PASSWORD])
+    
+    @classmethod
+    def is_redis_configured(cls):
+        """Check if Redis is properly configured"""
+        return cls.REDIS_URL or (cls.REDIS_HOST and cls.REDIS_HOST != "localhost")
+    
+    @classmethod
+    def is_minio_configured(cls):
+        """Check if MinIO is properly configured"""
+        return all([cls.MINIO_HOST, cls.MINIO_ACCESS_KEY, cls.MINIO_SECRET_KEY])
     
     # Buckets
     AUDIO_BUCKET = "bharatverse-audio"

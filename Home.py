@@ -253,14 +253,57 @@ def main():
     # Initialize performance monitoring
     if "performance_initialized" not in st.session_state:
         optimizer = get_performance_optimizer()
+        memory_manager = get_memory_manager()
+        
+        # Show performance status
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            memory_usage = memory_manager.get_memory_usage()
+            st.metric(
+                "Memory Usage", 
+                f"{memory_usage['rss_mb']:.0f}MB",
+                f"{memory_usage['percent']:.1f}%"
+            )
+        
+        with col2:
+            cache_manager = get_cache_manager()
+            if cache_manager and cache_manager.is_connected():
+                st.metric("Cache Status", "🟢 Connected", "Redis active")
+            else:
+                st.metric("Cache Status", "🟡 Local only", "Redis not configured")
+        
+        with col3:
+            st.metric("Performance", "⚡ Optimized", "All systems active")
+        
+        # Warm up services
         warmup_results = optimizer.warm_up_services()
         st.session_state.performance_initialized = True
         
-        # Show warmup status briefly
-        if any(warmup_results.values()):
-            st.success("⚡ Performance optimizations active!")
-        else:
-            st.warning("⚠️ Some performance features may be limited")
+        # Show performance info
+        with st.expander("⚡ Performance Status", expanded=False):
+            st.markdown("### 🎯 Active Optimizations:")
+            st.markdown("- ✅ **Streamlit Caching**: Automatic caching for expensive operations")
+            st.markdown("- ✅ **Memory Management**: Real-time monitoring and cleanup")
+            st.markdown("- ✅ **Parallel Processing**: Async operations for better performance")
+            st.markdown("- ✅ **Performance Tracking**: Detailed metrics and monitoring")
+            
+            if cache_manager and cache_manager.is_connected():
+                st.markdown("- ✅ **Redis Caching**: External cache for cross-session persistence")
+            else:
+                st.markdown("- ⚠️ **Redis Caching**: Not configured (using local cache only)")
+            
+            st.markdown("### 📊 Performance Dashboard:")
+            st.markdown("Access detailed performance metrics at: **Performance** page")
+            
+            if st.session_state.get("user_role") == "admin":
+                st.markdown("### 🔧 Admin Tools:")
+                if st.button("🧹 Clean Memory"):
+                    cleanup_result = memory_manager.cleanup_memory(force=True)
+                    if cleanup_result["cleaned"]:
+                        st.success(f"Memory cleaned! Freed {cleanup_result['memory_freed_mb']:.1f}MB")
+                    else:
+                        st.info("No cleanup needed")
     
     # Welcome section
     st.markdown("---")

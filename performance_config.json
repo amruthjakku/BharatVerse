@@ -1,0 +1,20 @@
+{
+  "performance": {
+    "caching": {
+      "enabled": true,
+      "ttl_hours": 24,
+      "memory_threshold_mb": 500
+    },
+    "parallel_processing": {
+      "max_workers": 4,
+      "max_concurrent_requests": 5
+    },
+    "monitoring": {
+      "enabled": true,
+      "memory_tracking": true,
+      "performance_metrics": true
+    }
+  },
+  "setup_timestamp": 1752967309.687743,
+  "setup_date": "2025-07-20 04:51:49"
+}

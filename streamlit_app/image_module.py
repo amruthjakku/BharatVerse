@@ -5,9 +5,36 @@ from PIL import Image
 import io
 import sys
 from pathlib import Path
+import time
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
+
+# Performance optimization imports
+from utils.performance_optimizer import get_performance_optimizer
+from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
+from utils.redis_cache import get_cache_manager
+
+# Initialize performance components
+@st.cache_resource
+def get_image_performance_components():
+    """Get cached performance components for image module"""
+    return {
+        'optimizer': get_performance_optimizer(),
+        'memory_manager': get_memory_manager(),
+        'cache_manager': get_cache_manager()
+    }
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_image_processing_config():
+    """Get cached image processing configuration"""
+    return {
+        'max_image_size_mb': 10,
+        'supported_formats': ['jpg', 'jpeg', 'png', 'webp', 'bmp'],
+        'max_dimensions': (2048, 2048),
+        'compression_quality': 85,
+        'thumbnail_size': (300, 300)
+    }
 
 # Try to import enhanced AI models
 try:
@@ -32,12 +59,28 @@ def image_page():
     st.markdown("## 📷 Visual Heritage")
     st.markdown("Upload and document images of festivals, art, architecture, and cultural symbols.")
     
-    # Image upload
-    uploaded_file = st.file_uploader(
-        "Choose an image",
-        type=['png', 'jpg', 'jpeg', 'gif', 'webp'],
-        help="Upload images of cultural significance"
-    )
+    # Initialize performance components
+    perf_components = get_image_performance_components()
+    optimizer = perf_components['optimizer']
+    memory_manager = perf_components['memory_manager']
+    cache_manager = perf_components['cache_manager']
+    
+    # Get image processing configuration
+    image_config = get_image_processing_config()
+    
+    # Performance monitoring for admins
+    if st.session_state.get("user_role") == "admin":
+        with st.expander("⚡ Performance Monitoring", expanded=False):
+            show_memory_dashboard()
+    
+    # Memory tracking for image operations
+    with MemoryTracker("image_page_operations"):
+        # Image upload with optimized settings
+        uploaded_file = st.file_uploader(
+            "Choose an image",
+            type=image_config['supported_formats'],
+            help=f"Upload images of cultural significance (Max: {image_config['max_image_size_mb']}MB)"
+        )
     
     if uploaded_file is not None:
         # Display image
