@@ -16,11 +16,11 @@ sys.path.append(str(project_root))
 
 from core.database import DatabaseManager
 from core.community_service import CommunityService
-from streamlit_app.utils.auth_simple import GitLabAuthSimple
-from streamlit_app.utils.community_styling import apply_community_styling
+from streamlit_app.utils.auth import GitLabAuth
+from streamlit_app.utils.main_styling import load_custom_css
 
 # Use GitLab auth for community features
-auth = GitLabAuthSimple()
+auth = GitLabAuth()
 
 def get_current_user():
     """Get current user for community features"""
@@ -48,8 +48,8 @@ def get_community_service():
         return None
 
 def community_page():
-    # Apply community styling
-    apply_community_styling()
+    # Apply styling
+    load_custom_css()
     
     st.markdown("## 🤝 Community Hub")
     st.markdown("Connect with fellow cultural enthusiasts and contributors")

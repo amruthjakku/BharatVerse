@@ -139,6 +139,9 @@ class DatabaseManager:
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             username VARCHAR(100) UNIQUE NOT NULL,
             email VARCHAR(255) UNIQUE NOT NULL,
+            full_name VARCHAR(200),
+            region VARCHAR(100),
+            preferred_language VARCHAR(10),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -146,7 +149,7 @@ class DatabaseManager:
         -- Content metadata table
         CREATE TABLE IF NOT EXISTS content_metadata (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id UUID REFERENCES users(id),
+            user_id VARCHAR(100),
             content_type VARCHAR(50) NOT NULL, -- audio, video, image, text
             title VARCHAR(500) NOT NULL,
             description TEXT,
@@ -177,12 +180,164 @@ class DatabaseManager:
         -- Activity log
         CREATE TABLE IF NOT EXISTS activity_log (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id UUID REFERENCES users(id),
+            user_id VARCHAR(100),
             action VARCHAR(100) NOT NULL,
             content_id UUID REFERENCES content_metadata(id),
             details JSONB,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+        
+        -- Community Groups (Regional, Language, Interest-based)
+        CREATE TABLE IF NOT EXISTS community_groups (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            name VARCHAR(200) NOT NULL,
+            description TEXT,
+            group_type VARCHAR(50) NOT NULL, -- 'regional', 'language', 'interest'
+            group_category VARCHAR(100), -- specific region/language/interest
+            image_url VARCHAR(500),
+            member_count INTEGER DEFAULT 0,
+            is_public BOOLEAN DEFAULT true,
+            created_by UUID REFERENCES users(id),
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Group Memberships
+        CREATE TABLE IF NOT EXISTS group_memberships (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID REFERENCES users(id),
+            group_id UUID REFERENCES community_groups(id),
+            role VARCHAR(50) DEFAULT 'member', -- 'admin', 'moderator', 'member'
+            joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, group_id)
+        );
+
+        -- Discussion Topics/Threads
+        CREATE TABLE IF NOT EXISTS discussion_topics (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            group_id UUID REFERENCES community_groups(id),
+            title VARCHAR(500) NOT NULL,
+            description TEXT,
+            category VARCHAR(100), -- 'general', 'help', 'showcase', 'question'
+            created_by UUID REFERENCES users(id),
+            is_pinned BOOLEAN DEFAULT false,
+            is_locked BOOLEAN DEFAULT false,
+            reply_count INTEGER DEFAULT 0,
+            last_reply_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Discussion Replies
+        CREATE TABLE IF NOT EXISTS discussion_replies (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            topic_id UUID REFERENCES discussion_topics(id),
+            parent_reply_id UUID REFERENCES discussion_replies(id), -- for threaded replies
+            content TEXT NOT NULL,
+            created_by UUID REFERENCES users(id),
+            edited_at TIMESTAMP WITH TIME ZONE,
+            like_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Chat Messages
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            group_id UUID REFERENCES community_groups(id),
+            sender_id UUID REFERENCES users(id),
+            message_type VARCHAR(50) DEFAULT 'text', -- 'text', 'image', 'file', 'system'
+            content TEXT NOT NULL,
+            file_url VARCHAR(500),
+            reply_to_id UUID REFERENCES chat_messages(id),
+            edited_at TIMESTAMP WITH TIME ZONE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Message Reactions
+        CREATE TABLE IF NOT EXISTS message_reactions (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            message_id UUID REFERENCES chat_messages(id),
+            user_id UUID REFERENCES users(id),
+            reaction VARCHAR(50) NOT NULL, -- emoji or reaction type
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(message_id, user_id, reaction)
+        );
+
+        -- User Profiles Extended
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            user_id UUID PRIMARY KEY REFERENCES users(id),
+            bio TEXT,
+            avatar_url VARCHAR(500),
+            location VARCHAR(200),
+            languages_spoken TEXT[],
+            cultural_interests TEXT[],
+            contribution_count INTEGER DEFAULT 0,
+            community_points INTEGER DEFAULT 0,
+            badges TEXT[],
+            is_verified BOOLEAN DEFAULT false,
+            social_links JSONB,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Community Challenges
+        CREATE TABLE IF NOT EXISTS community_challenges (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            title VARCHAR(500) NOT NULL,
+            description TEXT NOT NULL,
+            challenge_type VARCHAR(100), -- 'preservation', 'documentation', 'creative'
+            requirements JSONB,
+            rewards JSONB,
+            start_date TIMESTAMP WITH TIME ZONE,
+            end_date TIMESTAMP WITH TIME ZONE,
+            participant_count INTEGER DEFAULT 0,
+            submission_count INTEGER DEFAULT 0,
+            created_by UUID REFERENCES users(id),
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Challenge Participations
+        CREATE TABLE IF NOT EXISTS challenge_participations (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            challenge_id UUID REFERENCES community_challenges(id),
+            user_id UUID REFERENCES users(id),
+            submission_content_id UUID REFERENCES content_metadata(id),
+            submission_notes TEXT,
+            status VARCHAR(50) DEFAULT 'submitted', -- 'submitted', 'reviewed', 'winner'
+            points_earned INTEGER DEFAULT 0,
+            submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(challenge_id, user_id)
+        );
+
+        -- Activity Feed
+        CREATE TABLE IF NOT EXISTS activity_feed (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID REFERENCES users(id),
+            activity_type VARCHAR(100) NOT NULL,
+            activity_data JSONB,
+            target_id UUID, -- can reference various entities
+            target_type VARCHAR(50), -- 'content', 'discussion', 'challenge', etc.
+            is_public BOOLEAN DEFAULT true,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Create indexes for community features
+        CREATE INDEX IF NOT EXISTS idx_community_groups_type ON community_groups(group_type);
+        CREATE INDEX IF NOT EXISTS idx_community_groups_category ON community_groups(group_category);
+        CREATE INDEX IF NOT EXISTS idx_group_memberships_user ON group_memberships(user_id);
+        CREATE INDEX IF NOT EXISTS idx_group_memberships_group ON group_memberships(group_id);
+        CREATE INDEX IF NOT EXISTS idx_discussion_topics_group ON discussion_topics(group_id);
+        CREATE INDEX IF NOT EXISTS idx_discussion_topics_created_at ON discussion_topics(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_discussion_replies_topic ON discussion_replies(topic_id);
+        CREATE INDEX IF NOT EXISTS idx_discussion_replies_parent ON discussion_replies(parent_reply_id);
+        CREATE INDEX IF NOT EXISTS idx_chat_messages_group ON chat_messages(group_id);
+        CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at ON chat_messages(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_message_reactions_message ON message_reactions(message_id);
+        CREATE INDEX IF NOT EXISTS idx_challenge_participations_challenge ON challenge_participations(challenge_id);
+        CREATE INDEX IF NOT EXISTS idx_challenge_participations_user ON challenge_participations(user_id);
+        CREATE INDEX IF NOT EXISTS idx_activity_feed_user ON activity_feed(user_id);
+        CREATE INDEX IF NOT EXISTS idx_activity_feed_created_at ON activity_feed(created_at DESC);
         """
         
         conn = self.get_postgres_connection()
