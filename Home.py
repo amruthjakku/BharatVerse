@@ -20,6 +20,13 @@ from streamlit_app.utils.main_styling import load_custom_css
 from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, init_auth
 from streamlit_app.utils.user_manager import user_manager
 
+# Import performance optimizations
+from utils.performance_optimizer import (
+    get_performance_optimizer, 
+    show_performance_dashboard,
+    clear_all_caches
+)
+
 # Import cloud AI manager if in cloud mode
 if IS_CLOUD_DEPLOYMENT:
     try:
@@ -30,6 +37,85 @@ if IS_CLOUD_DEPLOYMENT:
         CLOUD_AI_AVAILABLE = False
 else:
     CLOUD_AI_AVAILABLE = False
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_platform_features():
+    """Get platform features (cached for performance)"""
+    return [
+        {
+            "icon": "🎵",
+            "title": "Audio Recording & Preservation",
+            "description": "High-quality audio recording with automatic transcription and metadata tagging"
+        },
+        {
+            "icon": "📚",
+            "title": "Story Documentation",
+            "description": "Rich text editor with multimedia support for comprehensive cultural documentation"
+        },
+        {
+            "icon": "🖼️",
+            "title": "Visual Heritage Archive",
+            "description": "Image upload with AI-powered tagging and cultural context recognition"
+        },
+        {
+            "icon": "🔍",
+            "title": "Smart Discovery",
+            "description": "Advanced search and filtering to explore cultural content by region, type, and theme"
+        },
+        {
+            "icon": "📊",
+            "title": "Analytics & Insights",
+            "description": "Data visualization and trends analysis of cultural contributions and engagement"
+        },
+        {
+            "icon": "🤝",
+            "title": "Community Collaboration",
+            "description": "Connect with cultural enthusiasts, experts, and contributors from across India"
+        },
+        {
+            "icon": "🤖",
+            "title": "AI-Powered Insights",
+            "description": "Machine learning analysis for content categorization, sentiment analysis, and recommendations"
+        },
+        {
+            "icon": "👥",
+            "title": "Project Management",
+            "description": "Collaborative tools for organizing cultural preservation projects and team workflows"
+        }
+    ]
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_system_status():
+    """Get cached system status"""
+    if IS_CLOUD_DEPLOYMENT and CLOUD_AI_AVAILABLE:
+        try:
+            ai_manager = get_cloud_ai_manager()
+            return ai_manager.get_system_status()
+        except Exception as e:
+            return {"error": str(e), "services": {}}
+    return {"services": {}}
+
+def show_performance_section():
+    """Show performance metrics section for admins"""
+    if st.session_state.get("user_role") == "admin":
+        with st.expander("⚡ Performance Dashboard", expanded=False):
+            show_performance_dashboard()
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🧹 Clear All Caches"):
+                    clear_all_caches()
+            
+            with col2:
+                if st.button("🔥 Warm Up Services"):
+                    optimizer = get_performance_optimizer()
+                    warmup_results = optimizer.warm_up_services()
+                    
+                    for service, status in warmup_results.items():
+                        if status:
+                            st.success(f"✅ {service.title()} warmed up")
+                        else:
+                            st.error(f"❌ {service.title()} warmup failed")
 
 def show_login_section():
     """Display login section with GitLab OAuth"""
@@ -113,14 +199,15 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Show cloud deployment status
+    # Show cloud deployment status with caching
     if IS_CLOUD_DEPLOYMENT:
         with st.expander("☁️ Cloud Deployment Status", expanded=False):
             if CLOUD_AI_AVAILABLE:
-                try:
-                    ai_manager = get_cloud_ai_manager()
-                    status = ai_manager.get_system_status()
-                    
+                status = get_system_status()
+                
+                if "error" in status:
+                    st.error(f"Status check failed: {status['error']}")
+                else:
                     col1, col2, col3 = st.columns(3)
                     
                     with col1:
@@ -155,13 +242,25 @@ def main():
                     rate_limits = status.get("rate_limits", {})
                     if rate_limits:
                         st.markdown(f"**Rate Limits:** {rate_limits.get('api_calls_per_minute', 'N/A')} calls/minute")
-                    
-                except Exception as e:
-                    st.error(f"Status check failed: {e}")
             else:
                 st.error("Cloud AI Manager not available. Check configuration.")
     else:
         st.info("💻 Running in local mode")
+    
+    # Show performance section for admins
+    show_performance_section()
+    
+    # Initialize performance monitoring
+    if "performance_initialized" not in st.session_state:
+        optimizer = get_performance_optimizer()
+        warmup_results = optimizer.warm_up_services()
+        st.session_state.performance_initialized = True
+        
+        # Show warmup status briefly
+        if any(warmup_results.values()):
+            st.success("⚡ Performance optimizations active!")
+        else:
+            st.warning("⚠️ Some performance features may be limited")
     
     # Welcome section
     st.markdown("---")
@@ -224,48 +323,8 @@ def main():
     st.markdown("---")
     st.markdown("## ✨ Platform Features")
     
-    features = [
-        {
-            "icon": "🎵",
-            "title": "Audio Recording & Preservation",
-            "description": "High-quality audio recording with automatic transcription and metadata tagging"
-        },
-        {
-            "icon": "📚",
-            "title": "Story Documentation",
-            "description": "Rich text editor with multimedia support for comprehensive cultural documentation"
-        },
-        {
-            "icon": "🖼️",
-            "title": "Visual Heritage Archive",
-            "description": "Image upload with AI-powered tagging and cultural context recognition"
-        },
-        {
-            "icon": "🔍",
-            "title": "Smart Discovery",
-            "description": "Advanced search and filtering to explore cultural content by region, type, and theme"
-        },
-        {
-            "icon": "📊",
-            "title": "Analytics & Insights",
-            "description": "Data visualization and trends analysis of cultural contributions and engagement"
-        },
-        {
-            "icon": "🤝",
-            "title": "Community Collaboration",
-            "description": "Connect with cultural enthusiasts, experts, and contributors from across India"
-        },
-        {
-            "icon": "🤖",
-            "title": "AI-Powered Insights",
-            "description": "Machine learning analysis for content categorization, sentiment analysis, and recommendations"
-        },
-        {
-            "icon": "👥",
-            "title": "Project Management",
-            "description": "Collaborative tools for organizing cultural preservation projects and team workflows"
-        }
-    ]
+    # Use cached features data
+    features = get_platform_features()
     
     cols = st.columns(2)
     for i, feature in enumerate(features):

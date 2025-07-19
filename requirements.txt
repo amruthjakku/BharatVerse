@@ -50,5 +50,13 @@ sentence-transformers>=2.2.2
 # Monitoring
 prometheus-client>=0.19.0
 
-langdetect
->>>>>>> 77f4afe4657cb7c562832bc878c4f13e51bfd97d
+# Performance and async operations
+aiohttp>=3.8.0
+aiofiles>=23.2.1
+psutil>=5.9.0
+
+# Redis for caching
+redis>=4.5.0
+
+# Additional utilities
+langdetect>=1.0.9
