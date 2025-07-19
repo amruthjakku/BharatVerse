@@ -80,10 +80,56 @@ def audio_page():
             st.audio(uploaded_file, format='audio/wav')
             st.success("Audio file uploaded successfully!")
             
-            # Show mock transcription interface
+            # Real transcription interface
             if st.button("🔤 Transcribe Audio"):
-                with st.spinner("Transcribing audio..."):
-                    st.info("Transcription feature would process the uploaded audio here.")
+                with st.spinner("Transcribing audio with advanced AI..."):
+                    try:
+                        # Use enhanced AI models for real transcription
+                        from core.enhanced_ai_models import ai_manager
+                        
+                        # Save uploaded file temporarily
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as tmp_file:
+                            tmp_file.write(uploaded_file.getvalue())
+                            tmp_path = tmp_file.name
+                        
+                        # Transcribe with advanced features
+                        result = ai_manager.transcribe_audio(tmp_path, language)
+                        
+                        if result.get("success"):
+                            st.success("✅ Transcription completed!")
+                            
+                            # Display results
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.metric("Detected Language", result.get("language", "Unknown"))
+                                st.metric("Duration", f"{result.get('duration', 0):.1f}s")
+                            with col2:
+                                st.metric("Confidence", f"{result.get('confidence', 0):.2f}")
+                                st.metric("Word Count", result.get("word_count", 0))
+                            
+                            # Show transcription
+                            st.subheader("📝 Transcription")
+                            st.text_area("Transcribed Text", result.get("transcription", ""), height=150)
+                            
+                            # Show segments if available
+                            if result.get("segments"):
+                                st.subheader("🎯 Detailed Segments")
+                                for i, segment in enumerate(result["segments"][:5]):  # Show first 5 segments
+                                    with st.expander(f"Segment {i+1} ({segment.get('start', 0):.1f}s - {segment.get('end', 0):.1f}s)"):
+                                        st.write(segment.get("text", ""))
+                                        st.caption(f"Confidence: {segment.get('confidence', 0):.2f}")
+                            
+                            # Store transcription for saving
+                            st.session_state.transcription_result = result
+                        else:
+                            st.error(f"❌ Transcription failed: {result.get('error', 'Unknown error')}")
+                        
+                        # Clean up
+                        os.unlink(tmp_path)
+                        
+                    except Exception as e:
+                        st.error(f"❌ Transcription error: {str(e)}")
+                        st.info("💡 Make sure you have the enhanced AI models installed. Run: pip install -r requirements/enhanced_ai.txt")
         
         return
     

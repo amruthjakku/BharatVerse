@@ -11,10 +11,14 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Try to import enhanced AI models
 try:
-    from core.ai_models import ai_manager
+    from core.enhanced_ai_models import ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
-    AI_MODELS_AVAILABLE = False
+    try:
+        from core.ai_models import ai_manager
+        AI_MODELS_AVAILABLE = True
+    except ImportError:
+        AI_MODELS_AVAILABLE = False
 
 # Database imports
 try:
@@ -83,41 +87,41 @@ def image_page():
                         image.save(image_buffer, format=image.format or 'PNG')
                         image_bytes = image_buffer.getvalue()
                         
-                        result = ai_manager.process_image(image_bytes)
+                        # Use enhanced AI for comprehensive image analysis
+                        result = ai_manager.caption_image(image)
                         
                         if result.get('success'):
                             st.success("✅ Image analysis complete!")
                             
                             # Show generated caption
                             caption = result.get('caption', '')
-                            st.text_area("AI-Generated Caption", caption, height=100)
+                            st.text_area("🖼️ AI-Generated Caption", caption, height=100)
                             
                             # Show image analysis details
                             col1, col2, col3 = st.columns(3)
                             
                             with col1:
-                                dimensions = result.get('dimensions', {})
-                                st.metric("Width", f"{dimensions.get('width', 0)}px")
-                                st.metric("Height", f"{dimensions.get('height', 0)}px")
+                                image_size = result.get('image_size', [0, 0])
+                                st.metric("Width", f"{image_size[0]}px")
+                                st.metric("Height", f"{image_size[1]}px")
                             
                             with col2:
-                                aspect_ratio = result.get('aspect_ratio', 0)
-                                st.metric("Aspect Ratio", f"{aspect_ratio:.2f}")
-                                
-                                analysis = result.get('analysis', {})
-                                brightness = analysis.get('brightness', 0)
-                                st.metric("Brightness", f"{brightness:.2%}")
+                                quality_metrics = result.get('quality_metrics', {})
+                                st.metric("Quality Score", f"{quality_metrics.get('quality_score', 0):.1f}")
+                                st.metric("Brightness", f"{quality_metrics.get('brightness', 0):.1f}")
                             
                             with col3:
-                                complexity = analysis.get('complexity', 0)
-                                st.metric("Complexity", f"{complexity:.2%}")
-                                
-                                dominant_colors = analysis.get('dominant_colors', [])
-                                if dominant_colors:
-                                    st.write("**Colors:**")
-                                    st.write(", ".join(dominant_colors[:3]))
+                                st.metric("Contrast", f"{quality_metrics.get('contrast', 0):.1f}")
+                                st.metric("Aspect Ratio", quality_metrics.get('aspect_ratio', '1:1'))
                             
-                            # Cultural elements detected
+                            # Show detected objects
+                            objects = result.get('objects', [])
+                            if objects:
+                                st.markdown("### 🎯 Detected Objects")
+                                for obj in objects[:5]:  # Show top 5 objects
+                                    st.write(f"• {obj.get('label', 'Unknown')} (confidence: {obj.get('confidence', 0):.2%})")
+                            
+                            # Show cultural elements
                             cultural_elements = result.get('cultural_elements', [])
                             if cultural_elements:
                                 st.markdown("### 🏛️ Cultural Elements Detected")

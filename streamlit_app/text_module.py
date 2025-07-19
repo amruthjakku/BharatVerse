@@ -8,10 +8,14 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Try to import enhanced AI models
 try:
-    from core.ai_models import ai_manager
+    from core.enhanced_ai_models import ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
-    AI_MODELS_AVAILABLE = False
+    try:
+        from core.ai_models import ai_manager
+        AI_MODELS_AVAILABLE = True
+    except ImportError:
+        AI_MODELS_AVAILABLE = False
 
 # Database imports
 try:
@@ -97,25 +101,30 @@ def story_section():
                         # Determine language code
                         lang_code = language.lower()[:2] if language != "English" else "en"
                         
-                        result = ai_manager.process_text(
-                            content, 
-                            language=lang_code, 
-                            translate=True
-                        )
+                        # Use enhanced AI for comprehensive analysis
+                        result = ai_manager.analyze_text(content, language=lang_code)
+                        
+                        # Get translation if needed
+                        if language != "English":
+                            translation_result = ai_manager.translate_text(content, "english")
+                            result["translation"] = translation_result
                         
                         if result.get('success'):
                             st.success("✅ Analysis complete!")
                             
                             # Show comprehensive analysis
-                            col1, col2, col3 = st.columns(3)
+                            col1, col2, col3, col4 = st.columns(4)
                             with col1:
                                 st.metric("Word Count", result.get('word_count', 0))
                             with col2:
                                 sentiment = result.get('sentiment', {})
                                 st.metric("Sentiment", sentiment.get('label', 'Unknown'))
                             with col3:
-                                readability = result.get('readability', {})
-                                st.metric("Readability", readability.get('difficulty', 'Unknown'))
+                                emotions = result.get('emotions', {})
+                                st.metric("Primary Emotion", emotions.get('primary_emotion', 'Unknown'))
+                            with col4:
+                                quality = result.get('quality_metrics', {})
+                                st.metric("Readability", quality.get('complexity', 'Unknown'))
                             
                             # Language detection
                             detected_lang = result.get('language', 'unknown')
@@ -125,20 +134,26 @@ def story_section():
                             translation_result = result.get('translation', {})
                             if translation_result and translation_result.get('success'):
                                 translation = translation_result.get('translation', '')
-                                st.text_area("English Translation", translation, height=200)
-                                st.caption(f"🔄 Translation confidence: {translation_result.get('confidence', 0.0):.2%}")
+                                st.text_area("🔄 English Translation", translation, height=200)
+                                st.caption(f"Translation confidence: {translation_result.get('confidence', 0.0):.2%}")
                             
-                            # Cultural indicators
-                            cultural_indicators = result.get('cultural_indicators', [])
-                            if cultural_indicators:
+                            # Cultural elements
+                            cultural_elements = result.get('cultural_elements', [])
+                            if cultural_elements:
                                 st.markdown("### 🏛️ Cultural Elements Detected")
-                                st.write(", ".join(cultural_indicators))
+                                st.write(", ".join(cultural_elements))
                             
-                            # Keywords
-                            keywords = result.get('keywords', [])
-                            if keywords:
-                                st.markdown("### 🔑 Key Terms")
-                                st.write(", ".join(keywords[:15]))
+                            # Themes
+                            themes = result.get('themes', [])
+                            if themes:
+                                st.markdown("### 🎭 Key Themes")
+                                st.write(", ".join(themes))
+                            
+                            # Summary if available
+                            summary = result.get('summary')
+                            if summary and summary != result.get('text', '')[:200]:
+                                st.markdown("### 📋 Summary")
+                                st.write(summary)
                             
                             # Detailed sentiment analysis
                             sentiment = result.get('sentiment', {})
