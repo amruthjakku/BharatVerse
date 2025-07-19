@@ -29,8 +29,32 @@ def get_current_user():
         db_user = auth.get_current_db_user()
         
         if user_info and db_user:
+            # Use PostgreSQL UUID for community features if available
+            user_id = db_user.get('postgres_id') or db_user.get('id')
+            
+            # If we still have an integer ID, it means the user needs to be re-created in PostgreSQL
+            if isinstance(user_id, int):
+                st.warning("🔄 Updating user profile for community features...")
+                try:
+                    from streamlit_app.utils.user_manager import UserManager
+                    user_manager = UserManager()
+                    # Re-create the user to get PostgreSQL ID
+                    updated_user = user_manager.create_or_update_user(user_info)
+                    if updated_user.get('postgres_id'):
+                        # Update session state
+                        st.session_state.db_user = updated_user
+                        user_id = updated_user['postgres_id']
+                        st.success("✅ User profile updated!")
+                        st.rerun()
+                    else:
+                        st.error("Failed to update user profile for community features")
+                        return None
+                except Exception as e:
+                    st.error(f"Error updating user profile: {e}")
+                    return None
+            
             return {
-                'id': db_user['id'],
+                'id': user_id,
                 'username': user_info.get('username', db_user.get('username')),
                 'email': user_info.get('email', db_user.get('email')),
                 'name': user_info.get('name', db_user.get('full_name'))
@@ -88,13 +112,13 @@ def community_page():
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            total_members = sum(group.get('actual_member_count', 0) for group in all_groups)
+            total_members = sum(group.get('actual_member_count', 0) or 0 for group in all_groups)
             st.metric("Active Members", total_members, f"+{len(all_groups)} groups")
         with col2:
             verified_count = len([user for user in leaderboard if user.get('badges')])
             st.metric("Cultural Experts", verified_count, "Verified contributors")
         with col3:
-            total_contributions = sum(user.get('contribution_count', 0) for user in leaderboard)
+            total_contributions = sum(user.get('contribution_count', 0) or 0 for user in leaderboard)
             st.metric("Total Contributions", total_contributions, "Across all users")
         with col4:
             st.metric("Active Challenges", len(active_challenges), "Join now!")

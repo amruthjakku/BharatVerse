@@ -40,7 +40,7 @@ def get_contributions():
                     u.full_name as contributor_name,
                     u.username as contributor_username
                 FROM content_metadata c
-                LEFT JOIN users u ON c.user_id = u.id::text
+                LEFT JOIN users u ON c.user_id = u.id
                 ORDER BY c.created_at DESC
                 LIMIT 20
             """)

@@ -56,16 +56,18 @@ class CommunityService:
         conn = self.db.get_postgres_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                # Convert user_id to string to handle both UUID and integer IDs
+                user_id_str = str(user_id)
                 cursor.execute("""
                     SELECT g.*, gm.role, gm.joined_at,
                            COUNT(gm2.user_id) as actual_member_count
                     FROM community_groups g
                     JOIN group_memberships gm ON g.id = gm.group_id
                     LEFT JOIN group_memberships gm2 ON g.id = gm2.group_id
-                    WHERE gm.user_id = %s
+                    WHERE gm.user_id::text = %s
                     GROUP BY g.id, gm.role, gm.joined_at
                     ORDER BY gm.joined_at DESC
-                """, (user_id,))
+                """, (user_id_str,))
                 return [dict(row) for row in cursor.fetchall()]
         finally:
             self.db.release_postgres_connection(conn)
@@ -75,11 +77,13 @@ class CommunityService:
         conn = self.db.get_postgres_connection()
         try:
             with conn.cursor() as cursor:
+                # Convert user_id to string to handle both UUID and integer IDs
+                user_id_str = str(user_id)
                 cursor.execute("""
                     INSERT INTO group_memberships (user_id, group_id)
-                    VALUES (%s, %s)
+                    VALUES (%s::uuid, %s)
                     ON CONFLICT (user_id, group_id) DO NOTHING
-                """, (user_id, group_id))
+                """, (user_id_str, group_id))
                 
                 # Update member count
                 cursor.execute("""
@@ -104,10 +108,12 @@ class CommunityService:
         conn = self.db.get_postgres_connection()
         try:
             with conn.cursor() as cursor:
+                # Convert user_id to string to handle both UUID and integer IDs
+                user_id_str = str(user_id)
                 cursor.execute("""
                     DELETE FROM group_memberships 
-                    WHERE user_id = %s AND group_id = %s
-                """, (user_id, group_id))
+                    WHERE user_id::text = %s AND group_id = %s
+                """, (user_id_str, group_id))
                 
                 # Update member count
                 cursor.execute("""
@@ -418,7 +424,7 @@ class CommunityService:
                     FROM users u
                     LEFT JOIN user_profiles up ON u.id = up.user_id
                     LEFT JOIN group_memberships gm ON u.id = gm.user_id
-                    LEFT JOIN content_metadata cm ON u.id::text = cm.user_id
+                    LEFT JOIN content_metadata cm ON u.id = cm.user_id
                     LEFT JOIN challenge_participations cp ON u.id = cp.user_id
                     WHERE u.id = %s
                     GROUP BY u.id, up.user_id

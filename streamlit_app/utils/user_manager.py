@@ -11,6 +11,8 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 import hashlib
 import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 class UserManager:
     def __init__(self, db_path: str = "data/users.db"):
@@ -21,6 +23,21 @@ class UserManager:
     def ensure_db_directory(self):
         """Ensure the database directory exists"""
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+    
+    def get_postgres_connection(self):
+        """Get PostgreSQL database connection"""
+        try:
+            conn = psycopg2.connect(
+                host=os.getenv("POSTGRES_HOST", "localhost"),
+                port=os.getenv("POSTGRES_PORT", "5432"),
+                database=os.getenv("POSTGRES_DB", "bharatverse"),
+                user=os.getenv("POSTGRES_USER", "bharatverse_user"),
+                password=os.getenv("POSTGRES_PASSWORD", "secretpassword")
+            )
+            return conn
+        except Exception as e:
+            print(f"Failed to connect to PostgreSQL: {e}")
+            return None
     
     def init_user_db(self):
         """Initialize user database tables"""
@@ -162,8 +179,14 @@ class UserManager:
         user_row = cursor.fetchone()
         conn.close()
         
+        # Also create/update user in PostgreSQL for community features
+        postgres_user_id = self._create_or_update_postgres_user(gitlab_user_data, user_id)
+        
         if user_row:
-            return self._row_to_user_dict(user_row)
+            user_dict = self._row_to_user_dict(user_row)
+            # Add PostgreSQL UUID for community features
+            user_dict['postgres_id'] = postgres_user_id
+            return user_dict
         return {}
     
     def _check_initial_admin(self, username: str, email: str) -> str:
@@ -178,6 +201,55 @@ class UserManager:
             return 'admin'
         
         return 'user'
+    
+    def _create_or_update_postgres_user(self, gitlab_user_data: Dict[str, Any], sqlite_user_id: int) -> Optional[str]:
+        """Create or update user in PostgreSQL database for community features"""
+        try:
+            conn = self.get_postgres_connection()
+            if not conn:
+                return None
+            
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                username = gitlab_user_data.get('username')
+                email = gitlab_user_data.get('email')
+                full_name = gitlab_user_data.get('name')
+                
+                # Check if user exists by username or email
+                cursor.execute("""
+                    SELECT id FROM users 
+                    WHERE username = %s OR email = %s
+                """, (username, email))
+                
+                existing_user = cursor.fetchone()
+                
+                if existing_user:
+                    # Update existing user
+                    cursor.execute("""
+                        UPDATE users 
+                        SET full_name = %s, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                        RETURNING id
+                    """, (full_name, existing_user['id']))
+                    result = cursor.fetchone()
+                    user_id = result['id'] if result else existing_user['id']
+                else:
+                    # Create new user
+                    cursor.execute("""
+                        INSERT INTO users (username, email, full_name)
+                        VALUES (%s, %s, %s)
+                        RETURNING id
+                    """, (username, email, full_name))
+                    result = cursor.fetchone()
+                    user_id = result['id'] if result else None
+                
+                conn.commit()
+            
+            conn.close()
+            return str(user_id) if user_id else None
+            
+        except Exception as e:
+            print(f"Failed to create/update PostgreSQL user: {e}")
+            return None
     
     def get_user_by_gitlab_id(self, gitlab_id: int) -> Optional[Dict[str, Any]]:
         """Get user by GitLab ID"""
