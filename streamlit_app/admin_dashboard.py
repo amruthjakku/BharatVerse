@@ -60,8 +60,9 @@ def admin_dashboard_page():
     st.markdown("---")
     
     # Tabs for different admin functions
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📊 Overview", 
+        "🛡️ Admin Management",
         "👥 User Management", 
         "📁 Content Management", 
         "📈 Analytics", 
@@ -72,15 +73,18 @@ def admin_dashboard_page():
         render_admin_overview(stats)
     
     with tab2:
-        render_user_management()
+        render_admin_management()
     
     with tab3:
-        render_content_management()
+        render_user_management()
     
     with tab4:
-        render_admin_analytics()
+        render_content_management()
     
     with tab5:
+        render_admin_analytics()
+    
+    with tab6:
         render_system_settings()
 
 def render_admin_overview(stats):
@@ -143,6 +147,102 @@ def render_admin_overview(stats):
         # Storage status (placeholder)
         storage_status = "🟢 Available"
         st.markdown(f"**Storage:** {storage_status}")
+
+def render_admin_management():
+    """Render admin management interface"""
+    st.markdown("### 🛡️ Admin Management")
+    
+    # Current admins
+    all_users = user_manager.get_all_users(limit=1000)
+    admins = [user for user in all_users if user['role'] == 'admin']
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown("#### 👑 Current Administrators")
+        
+        if not admins:
+            st.warning("⚠️ No administrators found in the system!")
+            st.info("Use the command line tool or environment variables to create the first admin.")
+        else:
+            for admin in admins:
+                with st.container():
+                    col_a, col_b, col_c = st.columns([3, 1, 1])
+                    
+                    with col_a:
+                        st.markdown(f"**{admin['name']}** (@{admin['username']})")
+                        st.markdown(f"📧 {admin['email']}")
+                        st.markdown(f"🗓️ Admin since: {admin['created_at']}")
+                    
+                    with col_b:
+                        st.markdown("**Status**")
+                        status = "🟢 Active" if admin['is_active'] else "🔴 Inactive"
+                        st.markdown(status)
+                    
+                    with col_c:
+                        st.markdown("**Actions**")
+                        # Don't allow removing the last admin
+                        if len(admins) > 1:
+                            if st.button("⬇️ Remove Admin", key=f"remove_admin_{admin['id']}"):
+                                if user_manager.update_user_role(admin['id'], 'user'):
+                                    st.success(f"Removed admin privileges from {admin['username']}")
+                                    st.rerun()
+                                else:
+                                    st.error("Failed to remove admin privileges")
+                        else:
+                            st.info("Last admin")
+                    
+                    st.markdown("---")
+    
+    with col2:
+        st.markdown("#### ➕ Add New Admin")
+        
+        # Quick add by username
+        with st.form("add_admin_form"):
+            st.markdown("**Promote User to Admin**")
+            username_input = st.text_input("Username", placeholder="Enter GitLab username")
+            
+            if st.form_submit_button("🛡️ Make Admin", type="primary"):
+                if username_input:
+                    user = user_manager.get_user_by_username(username_input.strip())
+                    if user:
+                        if user['role'] == 'admin':
+                            st.warning(f"User '{username_input}' is already an admin!")
+                        else:
+                            if user_manager.update_user_role(user['id'], 'admin'):
+                                st.success(f"✅ Successfully made '{username_input}' an admin!")
+                                st.rerun()
+                            else:
+                                st.error("Failed to update user role")
+                    else:
+                        st.error(f"User '{username_input}' not found. They must login first.")
+                else:
+                    st.error("Please enter a username")
+        
+        # Command line instructions
+        st.markdown("---")
+        st.markdown("#### 💻 Command Line Tool")
+        st.code("""
+# List all users
+python admin_tools.py list
+
+# Make user admin
+python admin_tools.py make-admin <username>
+
+# Remove admin privileges  
+python admin_tools.py remove-admin <username>
+
+# List current admins
+python admin_tools.py admins
+        """, language="bash")
+        
+        # Environment variable instructions
+        st.markdown("#### ⚙️ Environment Setup")
+        st.markdown("Set in `.env` file for auto-admin on first login:")
+        st.code("""
+INITIAL_ADMIN_USERNAME=your_gitlab_username
+INITIAL_ADMIN_EMAIL=your@email.com
+        """, language="bash")
 
 def render_user_management():
     """Render user management interface"""

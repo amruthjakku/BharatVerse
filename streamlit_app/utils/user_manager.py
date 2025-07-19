@@ -137,18 +137,21 @@ class UserManager:
             ))
             user_id = existing_user[0]
         else:
+            # Check if this should be an initial admin
+            initial_role = self._check_initial_admin(username, email)
+            
             # Create new user
             cursor.execute('''
                 INSERT INTO users (
                     gitlab_id, username, email, name, avatar_url,
                     bio, location, organization, job_title, web_url,
-                    last_login, profile_data
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+                    role, last_login, profile_data
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
             ''', (
                 gitlab_id, username, email, name, gitlab_user_data.get('avatar_url'),
                 gitlab_user_data.get('bio'), gitlab_user_data.get('location'),
                 gitlab_user_data.get('organization'), gitlab_user_data.get('job_title'),
-                gitlab_user_data.get('web_url'), json.dumps(gitlab_user_data)
+                gitlab_user_data.get('web_url'), initial_role, json.dumps(gitlab_user_data)
             ))
             user_id = cursor.lastrowid
         
@@ -162,6 +165,19 @@ class UserManager:
         if user_row:
             return self._row_to_user_dict(user_row)
         return {}
+    
+    def _check_initial_admin(self, username: str, email: str) -> str:
+        """Check if user should be made initial admin based on environment variables"""
+        initial_admin_username = os.getenv('INITIAL_ADMIN_USERNAME', '').strip()
+        initial_admin_email = os.getenv('INITIAL_ADMIN_EMAIL', '').strip()
+        
+        # Check if username or email matches initial admin config
+        if initial_admin_username and username == initial_admin_username:
+            return 'admin'
+        if initial_admin_email and email == initial_admin_email:
+            return 'admin'
+        
+        return 'user'
     
     def get_user_by_gitlab_id(self, gitlab_id: int) -> Optional[Dict[str, Any]]:
         """Get user by GitLab ID"""
