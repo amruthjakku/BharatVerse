@@ -207,12 +207,21 @@ class CulturalTextAnalyzer:
                 device=0 if torch.cuda.is_available() else -1
             )
             
-            # Translation
-            self.translator = pipeline(
-                "translation",
-                model="facebook/nllb-200-distilled-600M",
-                device=0 if torch.cuda.is_available() else -1
-            )
+            # Translation - Skip if sentencepiece not available
+            try:
+                import sentencepiece
+                self.translator = pipeline(
+                    "translation",
+                    model="facebook/nllb-200-distilled-600M",
+                    device=0 if torch.cuda.is_available() else -1
+                )
+                logger.info("Translation model loaded successfully")
+            except ImportError:
+                logger.warning("SentencePiece not available, skipping translation model")
+                self.translator = None
+            except Exception as e:
+                logger.warning(f"Translation model failed to load: {e}")
+                self.translator = None
             
             logger.info("Advanced text analysis models loaded successfully")
             
