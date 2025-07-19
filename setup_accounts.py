@@ -10,6 +10,8 @@ import sys
 import subprocess
 import webbrowser
 from pathlib import Path
+import boto3
+from botocore.exceptions import ClientError
 
 def print_header(text, emoji="🚀"):
     """Print a formatted header"""
@@ -57,6 +59,77 @@ def update_secrets_file(secrets_file, updates):
         print(f"❌ Error updating secrets file: {e}")
         return False
 
+def test_and_setup_minio(endpoint_url: str, access_key: str, secret_key: str) -> bool:
+    """Test MinIO connection and create bharatverse-bucket if needed"""
+    print("\n🧪 Testing MinIO connection...")
+    
+    try:
+        # Create MinIO client
+        s3_client = boto3.client(
+            's3',
+            endpoint_url=endpoint_url,
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            region_name='us-east-1'
+        )
+        
+        # Test connection by listing buckets
+        response = s3_client.list_buckets()
+        print("✅ MinIO connection successful!")
+        
+        # Check if bharatverse-bucket exists
+        bucket_name = 'bharatverse-bucket'
+        existing_buckets = [bucket['Name'] for bucket in response.get('Buckets', [])]
+        
+        if bucket_name in existing_buckets:
+            print(f"✅ Bucket '{bucket_name}' already exists!")
+        else:
+            print(f"🪣 Creating bucket '{bucket_name}'...")
+            try:
+                s3_client.create_bucket(Bucket=bucket_name)
+                print(f"✅ Bucket '{bucket_name}' created successfully!")
+            except ClientError as e:
+                print(f"⚠️  Could not create bucket: {e}")
+                return False
+        
+        # Test upload/download
+        try:
+            test_key = 'test/setup-test.txt'
+            test_content = b'BharatVerse setup test file'
+            
+            # Upload test file
+            s3_client.put_object(
+                Bucket=bucket_name,
+                Key=test_key,
+                Body=test_content,
+                ContentType='text/plain'
+            )
+            
+            # Download test file  
+            response = s3_client.get_object(Bucket=bucket_name, Key=test_key)
+            downloaded_content = response['Body'].read()
+            
+            if downloaded_content == test_content:
+                print("✅ File upload/download test successful!")
+                # Clean up test file
+                s3_client.delete_object(Bucket=bucket_name, Key=test_key)
+                return True
+            else:
+                print("❌ File content mismatch in test")
+                return False
+                
+        except ClientError as e:
+            print(f"❌ Upload/download test failed: {e}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ MinIO connection failed: {e}")
+        print("   Please check:")
+        print("   • MinIO endpoint URL is correct")
+        print("   • MinIO service is running")
+        print("   • Credentials are correct")
+        return False
+
 def main():
     """Main setup function"""
     print_header("BharatVerse Complete Setup", "🇮🇳")
@@ -66,7 +139,7 @@ def main():
     print("  • HuggingFace (AI APIs)")
     print("  • Supabase (Database)")
     print("  • Upstash (Redis Cache)")  
-    print("  • Cloudflare R2 (Storage)")
+    print("  • MinIO on Render (Object Storage)")
     print("  • GitHub (Code Repository)")
     
     # Check if secrets file exists
@@ -161,29 +234,51 @@ def main():
         print("✅ Upstash Redis config saved")
     
     # ===========================================
-    # 4. CLOUDFLARE R2 SETUP
+    # 4. MINIO ON RENDER SETUP
     # ===========================================
-    print_step(4, "Cloudflare R2 Storage Setup", "🪣")
-    print("Cloudflare R2 provides 10GB free object storage.")
+    print_step(4, "MinIO on Render Storage Setup", "🪣")
+    print("MinIO on Render provides free object storage compatible with AWS S3.")
+    print("We'll help you deploy MinIO on Render with default credentials.")
     
-    open_url_and_wait("https://dash.cloudflare.com/sign-up", 
-                      "Create your Cloudflare account")
+    has_render = input("\n📋 Do you already have a MinIO instance on Render? (y/n): ").lower() == 'y'
     
-    open_url_and_wait("https://dash.cloudflare.com/?to=/:account/r2/overview",
-                      "Create a new R2 bucket named 'bharatverse-files'")
+    if not has_render:
+        print("\n🚀 Let's deploy MinIO on Render...")
+        open_url_and_wait("https://render.com/", 
+                          "Create your Render account (it's free!)")
+        
+        open_url_and_wait("https://render.com/deploy?repo=https://github.com/minio/minio",
+                          "Deploy MinIO using Render's one-click deploy")
+        
+        print("\n⚙️  Configure your MinIO deployment:")
+        print("   • Service Name: bharatverse-minio")
+        print("   • Environment: Leave defaults (MINIO_ROOT_USER=minioadmin, MINIO_ROOT_PASSWORD=minioadmin)")
+        print("   • Port: 9000")
+        print("   • Plan: Free ($0/month)")
+        
+        input("\n✋ Complete the deployment and wait for it to be live. Press Enter when ready...")
     
-    r2_access_key = get_user_input("Enter your R2 Access Key ID")
-    r2_secret_key = get_user_input("Enter your R2 Secret Access Key")
-    r2_account_id = get_user_input("Enter your Cloudflare Account ID")
-    r2_public_url = get_user_input("Enter your R2 public URL (https://pub-...r2.dev)", required=False)
+    minio_endpoint = get_user_input("Enter your MinIO endpoint URL (https://your-app-name.onrender.com)")
     
-    if r2_access_key and r2_secret_key and r2_account_id:
-        secrets_updates["your-r2-access-key-id"] = r2_access_key
-        secrets_updates["your-r2-secret-key"] = r2_secret_key
-        secrets_updates["your-account-id"] = r2_account_id
-        if r2_public_url:
-            secrets_updates["https://pub-your-id.r2.dev"] = r2_public_url
-        print("✅ Cloudflare R2 config saved")
+    # Use default MinIO credentials
+    access_key = "minioadmin"
+    secret_key = "minioadmin"
+    
+    print(f"\n🔧 Using default MinIO credentials:")
+    print(f"   • Access Key: {access_key}")
+    print(f"   • Secret Key: {secret_key}")
+    
+    if minio_endpoint:
+        # Test MinIO connection and create bucket
+        test_success = test_and_setup_minio(minio_endpoint, access_key, secret_key)
+        
+        if test_success:
+            secrets_updates["your-minio-endpoint"] = minio_endpoint
+            secrets_updates["minioadmin"] = access_key
+            secrets_updates["minioadmin-secret"] = secret_key
+            print("✅ MinIO on Render configured and tested successfully!")
+        else:
+            print("⚠️  MinIO configuration saved but connection test failed.")
     
     # ===========================================
     # 5. GITHUB SETUP
@@ -256,6 +351,15 @@ def main():
 
 if __name__ == "__main__":
     try:
+        # Install required packages if missing
+        try:
+            import boto3
+        except ImportError:
+            print("📦 Installing required packages...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "boto3", "botocore"])
+            import boto3
+            from botocore.exceptions import ClientError
+            
         main()
     except KeyboardInterrupt:
         print("\n\n👋 Setup cancelled by user. Run again when ready!")
