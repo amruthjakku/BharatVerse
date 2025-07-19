@@ -43,3 +43,6 @@ textstat>=0.7.3
 python-dateutil>=2.8.0
 pytz>=2023.3
 aiohttp>=3.9.0
+
+# Additional cloud dependencies 
+toml>=0.10.0

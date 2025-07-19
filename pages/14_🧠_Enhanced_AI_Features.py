@@ -9,9 +9,9 @@ import io
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-# Try to import enhanced AI models
+# Try to import cloud AI manager
 try:
-    from core.enhanced_ai_models import ai_manager
+    from core.cloud_ai_manager import get_cloud_ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
     AI_MODELS_AVAILABLE = False
@@ -23,35 +23,36 @@ def main():
         layout="wide"
     )
     
-    st.markdown("# 🧠 Enhanced AI Features")
-    st.markdown("Experience the latest open-source AI models for cultural heritage preservation")
+    st.markdown("# 🧠 Cloud AI Features")
+    st.markdown("Experience cloud-powered AI for cultural heritage preservation using free services")
     
     if not AI_MODELS_AVAILABLE:
-        st.error("🚫 Enhanced AI models not available")
-        st.info("To enable enhanced AI features, install the required dependencies:")
-        st.code("pip install -r requirements/enhanced_ai.txt")
+        st.error("🚫 Cloud AI manager not available")
+        st.info("Cloud AI features require proper configuration. Check your secrets settings.")
         return
     
+    # Get AI manager and show status
+    ai_manager = get_cloud_ai_manager()
+    
     # Show model information
-    with st.expander("🔧 AI Models Information"):
-        model_info = ai_manager.get_model_info()
+    with st.expander("🔧 Cloud AI Services Status"):
+        status = ai_manager.get_system_status()
         
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("### 🎵 Audio Models")
-            st.write(f"**Whisper**: {model_info['models']['whisper']}")
-            st.write(f"**Available**: {'✅' if model_info['whisper_available'] else '❌'}")
-            
-            st.markdown("### 📝 Text Models")
-            st.write(f"**Sentiment**: {model_info['models']['sentiment']}")
-            st.write(f"**Emotion**: {model_info['models']['emotion']}")
-            st.write(f"**Translation**: {model_info['models']['translation']}")
+            st.markdown("### 🔮 Inference APIs")
+            inference_status = status.get("services", {}).get("inference_api", {})
+            st.write(f"**Whisper API**: {'✅' if inference_status.get('whisper_configured') else '❌'}")
+            st.write(f"**Text Analysis**: {'✅' if inference_status.get('text_analysis_configured') else '❌'}")
+            st.write(f"**Image Analysis**: {'✅' if inference_status.get('image_analysis_configured') else '❌'}")
+            st.write(f"**Translation**: {'✅' if inference_status.get('translation_configured') else '❌'}")
             
         with col2:
-            st.markdown("### 🖼️ Vision Models")
-            st.write(f"**Image Caption**: {model_info['models']['image_caption']}")
-            st.write(f"**Object Detection**: {model_info['models']['object_detection']}")
-            st.write(f"**Available**: {'✅' if model_info['image_analysis_available'] else '❌'}")
+            st.markdown("### 💾 Infrastructure")
+            services = status.get("services", {})
+            st.write(f"**Database**: {services.get('database', {}).get('status', '❌')}")
+            st.write(f"**Cache**: {services.get('redis_cache', {}).get('status', '❌')}")
+            st.write(f"**Rate Limit**: {status.get('rate_limits', {}).get('api_calls_per_minute', 'N/A')} calls/min")
     
     # Create tabs for different AI features
     tab1, tab2, tab3, tab4 = st.tabs(["🎵 Audio AI", "📝 Text AI", "🖼️ Vision AI", "🔬 AI Playground"])
@@ -97,55 +98,44 @@ def audio_ai_demo():
             st.write("• Cultural context detection")
             st.write("• Multi-language support")
         
-        if st.button("🚀 Transcribe with Enhanced AI", type="primary"):
-            with st.spinner("Processing with advanced Whisper model..."):
+        if st.button("🚀 Transcribe with Cloud AI", type="primary"):
+            with st.spinner("Processing with cloud Whisper API..."):
                 try:
-                    # Save uploaded file temporarily
-                    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as tmp_file:
-                        tmp_file.write(uploaded_audio.getvalue())
-                        tmp_path = tmp_file.name
+                    # Get audio data
+                    audio_data = uploaded_audio.getvalue()
                     
-                    # Transcribe with enhanced features
+                    # Transcribe with cloud AI
                     lang = None if language == "Auto-detect" else language
-                    result = ai_manager.transcribe_audio(tmp_path, lang)
+                    result = ai_manager.process_audio(audio_data, lang)
                     
-                    if result.get("success"):
+                    if result.get("status") == "success":
                         st.success("✅ Transcription completed!")
                         
                         # Display comprehensive results
-                        col1, col2, col3, col4 = st.columns(4)
+                        col1, col2, col3 = st.columns(3)
                         with col1:
                             st.metric("Language", result.get("language", "Unknown"))
                         with col2:
-                            st.metric("Duration", f"{result.get('duration', 0):.1f}s")
-                        with col3:
                             st.metric("Confidence", f"{result.get('confidence', 0):.2%}")
-                        with col4:
-                            st.metric("Words", result.get("word_count", 0))
+                        with col3:
+                            st.metric("Processing Time", f"{result.get('processing_time', 0):.1f}s")
                         
                         # Show transcription
-                        st.markdown("### 📝 Full Transcription")
-                        st.text_area("", result.get("transcription", ""), height=150)
+                        st.markdown("### 📝 Transcription")
+                        st.text_area("", result.get("text", ""), height=150)
                         
-                        # Show detailed segments
-                        segments = result.get("segments", [])
-                        if segments:
-                            st.markdown("### 🎯 Detailed Segments")
-                            for i, segment in enumerate(segments[:3]):  # Show first 3
-                                with st.expander(f"Segment {i+1}: {segment.get('start', 0):.1f}s - {segment.get('end', 0):.1f}s"):
-                                    st.write(f"**Text**: {segment.get('text', '')}")
-                                    st.write(f"**Confidence**: {segment.get('confidence', 0):.2%}")
-                                    
-                                    words = segment.get('words', [])
-                                    if words:
-                                        st.write("**Word-level timing**:")
-                                        for word in words[:5]:  # Show first 5 words
-                                            st.caption(f"{word.get('word', '')} ({word.get('start', 0):.1f}s)")
+                        # Show timestamps if available
+                        timestamps = result.get("timestamps", [])
+                        if timestamps:
+                            st.markdown("### ⏰ Timestamps")
+                            for i, timestamp in enumerate(timestamps[:3]):  # Show first 3
+                                st.caption(f"**{timestamp.get('start', 0):.1f}s - {timestamp.get('end', 0):.1f}s**: {timestamp.get('text', '')}")
+                        
+                        # Show caching status
+                        if result.get("cached"):
+                            st.info("⚡ Result served from cache (faster response)")
                     else:
                         st.error(f"❌ Transcription failed: {result.get('error', 'Unknown error')}")
-                    
-                    # Clean up
-                    os.unlink(tmp_path)
                     
                 except Exception as e:
                     st.error(f"❌ Error: {str(e)}")
@@ -177,12 +167,13 @@ def text_ai_demo():
         )
     
     if text_input and st.button("🔍 Analyze Text", type="primary"):
-        with st.spinner("Analyzing with advanced NLP models..."):
+        with st.spinner("Analyzing with cloud NLP APIs..."):
             try:
-                # Analyze text
-                result = ai_manager.analyze_text(text_input, language.lower())
+                # Analyze text with cloud AI
+                lang = None if language == "Auto-detect" else language.lower()
+                result = ai_manager.process_text(text_input, lang)
                 
-                if result.get("success"):
+                if result.get("status") == "success":
                     st.success("✅ Analysis completed!")
                     
                     # Basic metrics
@@ -190,22 +181,37 @@ def text_ai_demo():
                     with col1:
                         st.metric("Language", result.get("language", "Unknown"))
                     with col2:
-                        st.metric("Words", result.get("word_count", 0))
+                        st.metric("Words", len(text_input.split()))
                     with col3:
                         sentiment = result.get("sentiment", {})
                         st.metric("Sentiment", sentiment.get("label", "Unknown"))
                     with col4:
-                        emotions = result.get("emotions", {})
-                        st.metric("Emotion", emotions.get("primary_emotion", "Unknown"))
+                        emotion = result.get("emotion", {})
+                        st.metric("Emotion", emotion.get("label", "Unknown"))
+                    
+                    # Show sentiment and emotion details
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("### 😊 Sentiment Analysis")
+                        st.write(f"**Label**: {sentiment.get('label', 'Unknown')}")
+                        st.write(f"**Confidence**: {sentiment.get('score', 0):.2%}")
+                    
+                    with col2:
+                        st.markdown("### 🎭 Emotion Detection")
+                        st.write(f"**Emotion**: {emotion.get('label', 'Unknown')}")
+                        st.write(f"**Confidence**: {emotion.get('score', 0):.2%}")
                     
                     # Translation
                     if translate_to != "None":
-                        translation_result = ai_manager.translate_text(text_input, translate_to.lower())
-                        if translation_result.get("success"):
+                        source_lang = result.get("language", "auto")
+                        translation_result = ai_manager.translate_text_content(
+                            text_input, source_lang, translate_to.lower()
+                        )
+                        if translation_result.get("status") == "success":
                             st.markdown(f"### 🔄 Translation to {translate_to}")
-                            st.text_area("", translation_result.get("translation", ""), height=100)
+                            st.text_area("", translation_result.get("translated_text", ""), height=100)
                     
-                    # Cultural analysis
+                    # Cultural elements and quality
                     col1, col2 = st.columns(2)
                     with col1:
                         cultural_elements = result.get("cultural_elements", [])
@@ -213,19 +219,19 @@ def text_ai_demo():
                             st.markdown("### 🏛️ Cultural Elements")
                             for element in cultural_elements:
                                 st.write(f"• {element}")
+                        else:
+                            st.markdown("### 🏛️ Cultural Elements")
+                            st.write("No specific cultural elements detected")
                     
                     with col2:
-                        themes = result.get("themes", [])
-                        if themes:
-                            st.markdown("### 🎭 Key Themes")
-                            for theme in themes:
-                                st.write(f"• {theme}")
+                        st.markdown("### 📊 Quality Metrics")
+                        quality_score = result.get("quality_score", 0)
+                        st.write(f"**Text Quality**: {quality_score:.2%}")
+                        st.write(f"**Processing Time**: {result.get('processing_time', 0):.1f}s")
                     
-                    # Summary
-                    summary = result.get("summary")
-                    if summary and len(summary) < len(text_input):
-                        st.markdown("### 📋 AI Summary")
-                        st.write(summary)
+                    # Show caching status
+                    if result.get("cached"):
+                        st.info("⚡ Result served from cache (faster response)")
                     
                     # Quality metrics
                     quality = result.get("quality_metrics", {})
@@ -276,12 +282,17 @@ def vision_ai_demo():
             st.write(f"**Format**: {image.format}")
         
         if st.button("🔍 Analyze Image", type="primary"):
-            with st.spinner("Processing with advanced vision models..."):
+            with st.spinner("Processing with cloud vision APIs..."):
                 try:
-                    # Analyze image
-                    result = ai_manager.caption_image(image)
+                    # Convert image to bytes
+                    img_buffer = io.BytesIO()
+                    image.save(img_buffer, format='JPEG')
+                    image_data = img_buffer.getvalue()
                     
-                    if result.get("success"):
+                    # Analyze image with cloud AI
+                    result = ai_manager.process_image(image_data)
+                    
+                    if result.get("status") == "success":
                         st.success("✅ Image analysis completed!")
                         
                         # Show caption
@@ -289,34 +300,36 @@ def vision_ai_demo():
                         st.markdown("### 🖼️ AI-Generated Caption")
                         st.write(caption)
                         
-                        # Quality metrics
-                        quality = result.get("quality_metrics", {})
-                        if quality:
-                            col1, col2, col3, col4 = st.columns(4)
-                            with col1:
-                                st.metric("Quality Score", f"{quality.get('quality_score', 0):.1f}")
-                            with col2:
-                                st.metric("Brightness", f"{quality.get('brightness', 0):.1f}")
-                            with col3:
-                                st.metric("Contrast", f"{quality.get('contrast', 0):.1f}")
-                            with col4:
-                                st.metric("Aspect Ratio", quality.get('aspect_ratio', '1:1'))
+                        # Processing metrics
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Quality Score", f"{result.get('quality_score', 0):.2%}")
+                        with col2:
+                            st.metric("Processing Time", f"{result.get('processing_time', 0):.1f}s")
                         
                         # Objects detected
                         objects = result.get("objects", [])
                         if objects:
                             st.markdown("### 🎯 Detected Objects")
                             for obj in objects:
-                                confidence = obj.get('confidence', 0)
-                                if confidence > 0.5:  # Only show high-confidence objects
-                                    st.write(f"• **{obj.get('label', 'Unknown')}** (confidence: {confidence:.1%})")
+                                st.write(f"• {obj}")
+                        else:
+                            st.markdown("### 🎯 Objects")
+                            st.write("No specific objects detected")
                         
                         # Cultural elements
                         cultural_elements = result.get("cultural_elements", [])
                         if cultural_elements:
-                            st.markdown("### 🏛️ Cultural Elements Detected")
+                            st.markdown("### 🏛️ Cultural Elements")
                             for element in cultural_elements:
                                 st.write(f"• {element}")
+                        else:
+                            st.markdown("### 🏛️ Cultural Elements")
+                            st.write("No specific cultural elements detected")
+                        
+                        # Show caching status
+                        if result.get("cached"):
+                            st.info("⚡ Result served from cache (faster response)")
                     
                     else:
                         st.error(f"❌ Analysis failed: {result.get('error', 'Unknown error')}")

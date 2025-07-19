@@ -12,13 +12,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Detect deployment mode
-DEPLOYMENT_MODE = os.getenv("AI_MODE", "local")
+DEPLOYMENT_MODE = os.getenv("AI_MODE", "cloud")  # Default to cloud for free deployment
 IS_CLOUD_DEPLOYMENT = DEPLOYMENT_MODE == "cloud"
 
 # Import styling and authentication
 from streamlit_app.utils.main_styling import load_custom_css
 from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, init_auth
 from streamlit_app.utils.user_manager import user_manager
+
+# Import cloud AI manager if in cloud mode
+if IS_CLOUD_DEPLOYMENT:
+    try:
+        from core.cloud_ai_manager import get_cloud_ai_manager
+        CLOUD_AI_AVAILABLE = True
+    except ImportError as e:
+        st.error(f"Cloud AI Manager not available: {e}")
+        CLOUD_AI_AVAILABLE = False
+else:
+    CLOUD_AI_AVAILABLE = False
 
 def show_login_section():
     """Display login section with GitLab OAuth"""
@@ -101,6 +112,56 @@ def main():
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Show cloud deployment status
+    if IS_CLOUD_DEPLOYMENT:
+        with st.expander("☁️ Cloud Deployment Status", expanded=False):
+            if CLOUD_AI_AVAILABLE:
+                try:
+                    ai_manager = get_cloud_ai_manager()
+                    status = ai_manager.get_system_status()
+                    
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.markdown("**🔮 AI Services**")
+                        inference_status = status.get("services", {}).get("inference_api", {})
+                        if inference_status.get("status") == "available":
+                            st.success("AI APIs: Online")
+                        else:
+                            st.error("AI APIs: Offline")
+                    
+                    with col2:
+                        st.markdown("**💾 Database & Cache**")
+                        db_status = status.get("services", {}).get("database", {}).get("status")
+                        cache_status = status.get("services", {}).get("redis_cache", {}).get("status")
+                        
+                        if db_status == "connected":
+                            st.success("Database: Connected")
+                        else:
+                            st.warning("Database: Limited")
+                        
+                        if cache_status == "connected":
+                            st.success("Cache: Active")
+                        else:
+                            st.warning("Cache: Disabled")
+                    
+                    with col3:
+                        st.markdown("**📊 Performance**")
+                        st.info(f"Mode: Free Cloud Tier")
+                        st.info("Storage: Cloudflare R2")
+                    
+                    # Show rate limits
+                    rate_limits = status.get("rate_limits", {})
+                    if rate_limits:
+                        st.markdown(f"**Rate Limits:** {rate_limits.get('api_calls_per_minute', 'N/A')} calls/minute")
+                    
+                except Exception as e:
+                    st.error(f"Status check failed: {e}")
+            else:
+                st.error("Cloud AI Manager not available. Check configuration.")
+    else:
+        st.info("💻 Running in local mode")
     
     # Welcome section
     st.markdown("---")
