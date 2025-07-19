@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: bharatverse-app
+    env: docker
+    dockerfilePath: ./Dockerfile.streamlit
+    plan: free
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: AI_MODE
+        value: free_tier
+      - key: USE_LIGHTWEIGHT_MODELS
+        value: "true"
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: bharatverse-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: bharatverse-db
+          property: port
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: bharatverse-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: bharatverse-db
+          property: password
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: bharatverse-db
+          property: database
+
+  - type: pserv
+    name: bharatverse-db
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.postgres

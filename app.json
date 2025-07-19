@@ -1,0 +1,30 @@
+{
+  "name": "BharatVerse",
+  "description": "Digital Cultural Heritage Platform with AI",
+  "repository": "https://github.com/YOUR_USERNAME/bharatverse",
+  "keywords": [
+    "streamlit",
+    "ai",
+    "cultural-heritage",
+    "india"
+  ],
+  "env": {
+    "AI_MODE": {
+      "description": "AI deployment mode",
+      "value": "free_tier"
+    },
+    "USE_LIGHTWEIGHT_MODELS": {
+      "description": "Use lightweight AI models",
+      "value": "true"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:mini"
+  ]
+}
