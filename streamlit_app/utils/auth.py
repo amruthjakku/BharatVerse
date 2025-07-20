@@ -15,6 +15,17 @@ from .user_manager import user_manager
 
 class GitLabAuth:
     def __init__(self):
+        # Check if GitLab auth is disabled
+        self.disabled = os.getenv('DISABLE_GITLAB_AUTH', '').lower() == 'true'
+        
+        if self.disabled:
+            self.client_id = None
+            self.client_secret = None
+            self.redirect_uri = None
+            self.base_url = None
+            self.scopes = None
+            return
+        
         self.client_id = os.getenv('GITLAB_CLIENT_ID')
         self.client_secret = os.getenv('GITLAB_CLIENT_SECRET')
         self.redirect_uri = os.getenv('GITLAB_REDIRECT_URI')
@@ -22,7 +33,11 @@ class GitLabAuth:
         self.scopes = os.getenv('GITLAB_SCOPES', 'api read_api read_user profile email')
         
         if not all([self.client_id, self.client_secret, self.redirect_uri]):
-            st.error("GitLab OAuth configuration is incomplete. Please check your environment variables.")
+            # Only show error once per session
+            if 'gitlab_config_error_shown' not in st.session_state:
+                st.session_state.gitlab_config_error_shown = True
+                st.error("GitLab OAuth configuration is incomplete. Please check your environment variables.")
+                st.info("💡 Run `python scripts/fix_gitlab_oauth.py` to fix this issue.")
     
     def generate_state(self) -> str:
         """Generate a secure random state parameter for OAuth"""
@@ -98,10 +113,14 @@ class GitLabAuth:
     
     def is_authenticated(self) -> bool:
         """Check if user is currently authenticated"""
+        if self.disabled:
+            return False
         return 'user_info' in st.session_state and 'access_token' in st.session_state
     
     def get_current_user(self) -> Optional[Dict[str, Any]]:
         """Get current authenticated user info (GitLab data)"""
+        if self.disabled:
+            return None
         return st.session_state.get('user_info')
     
     def get_current_db_user(self) -> Optional[Dict[str, Any]]:
@@ -207,8 +226,16 @@ def render_login_button():
     """Render login button for GitLab OAuth"""
     auth = GitLabAuth()
     
+    # If GitLab auth is disabled, don't show anything
+    if auth.disabled:
+        return
+    
     if not all([auth.client_id, auth.client_secret, auth.redirect_uri]):
-        st.error("GitLab OAuth is not properly configured.")
+        # Only show error once per session
+        if 'gitlab_login_error_shown' not in st.session_state:
+            st.session_state.gitlab_login_error_shown = True
+            st.error("GitLab OAuth is not properly configured.")
+            st.info("💡 Run `python scripts/fix_gitlab_oauth.py` to fix this issue.")
         return
     
     col1, col2, col3 = st.columns([1, 2, 1])
