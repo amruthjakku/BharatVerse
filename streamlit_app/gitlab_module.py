@@ -216,6 +216,19 @@ def gitlab_page():
     """Main GitLab page function"""
     auth = GitLabAuth()
     
+    # If GitLab auth is disabled, show disabled message
+    if auth.disabled:
+        st.markdown("## 🦊 GitLab Integration")
+        st.markdown("---")
+        st.info("🚫 GitLab integration is currently disabled for local development.")
+        st.markdown("""
+        **To enable GitLab integration:**
+        1. Run `python scripts/fix_gitlab_oauth.py`
+        2. Choose option 2 to configure GitLab OAuth
+        3. Provide your GitLab application credentials
+        """)
+        return
+    
     if not auth.is_authenticated():
         st.markdown("## 🦊 GitLab Integration")
         st.markdown("---")

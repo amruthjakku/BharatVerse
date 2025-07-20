@@ -26,6 +26,8 @@ from utils.performance_optimizer import (
     show_performance_dashboard,
     clear_all_caches
 )
+from utils.memory_manager import get_memory_manager
+from utils.redis_cache import get_cache_manager
 
 # Import cloud AI manager if in cloud mode
 if IS_CLOUD_DEPLOYMENT:
