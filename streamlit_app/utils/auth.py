@@ -318,18 +318,51 @@ def render_login_button():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Primary GitLab login button (works in Streamlit Cloud)
-        if st.button("🔗 Login with GitLab", use_container_width=True, type="primary", key="gitlab_login_primary"):
-            auth_url = auth.get_authorization_url()
-            st.markdown(f'<meta http-equiv="refresh" content="0; url={auth_url}">', unsafe_allow_html=True)
-            st.info("🔄 Redirecting to GitLab for authentication...")
-            st.markdown(f"**If redirect doesn't work, click here:** [Login with GitLab]({auth_url})")
+        # Get OAuth URL
+        auth_url = auth.get_authorization_url()
+        
+        # Try to use st.link_button if available (Streamlit 1.29+)
+        try:
+            if st.link_button("🔗 Login with GitLab", auth_url, use_container_width=True, type="primary"):
+                pass  # Link button handles the redirect
+        except (AttributeError, TypeError):
+            # Fallback for older Streamlit versions
+            st.markdown(f"""
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{auth_url}" target="_self" style="
+                    display: inline-block;
+                    background-color: #FC6D26;
+                    color: white;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    font-size: 16px;
+                    border: none;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                    width: 100%;
+                    box-sizing: border-box;
+                    text-align: center;
+                ">
+                    🔗 Login with GitLab
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Also show as regular button for backup
+            if st.button("🔗 Login with GitLab (Backup)", use_container_width=True, type="secondary", key="gitlab_login_backup"):
+                st.success("🔄 Please use the orange link above to login with GitLab")
+                st.markdown(f"**Direct link:** {auth_url}")
+        
+        # Always show a direct link as backup
+        st.markdown("---")
+        st.markdown("**Alternative:** If the button above doesn't work, use this direct link:")
+        st.markdown(f"### 🔗 **[Login with GitLab (Direct Link)]({auth_url})**")
         
         # Show the OAuth URL for debugging
         if st.checkbox("🔍 Show OAuth Debug Info", key="oauth_debug"):
-            auth_url = auth.get_authorization_url()
             st.code(f"OAuth URL: {auth_url}")
-            st.markdown(f"**Direct Link:** [Click here to login]({auth_url})")
             
             # Show configuration details
             st.markdown("### Configuration Details:")
