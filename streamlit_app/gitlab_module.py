@@ -11,10 +11,10 @@ import json
 @require_auth
 def gitlab_integration_page():
     """GitLab integration page with authenticated features"""
-    # GitLab header with logo
+    # GitLab header with official logo
     st.markdown("""
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDIwIDEwSDRMMTIgMjJaIiBmaWxsPSIjRkM2RDI2Ii8+CjxwYXRoIGQ9Ik0xMiAyMkw0IDEwSDhMMTIgMjJaIiBmaWxsPSIjRTI0MzI5Ii8+CjxwYXRoIGQ9Ik0xMiAyMkwyMCAxMEgxNkwxMiAyMloiIGZpbGw9IiNFMjQzMjkiLz4KPHA+CjwvcGF0aD4KPC9zdmc+" 
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyMzA1IiB2aWV3Qm94PSIwIDAgMjU2IDIzNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc1bDQ3LjEwNC0xNDQuOTdIODAuOTdsNDcuMTA0IDE0NC45N3oiIGZpbGw9IiNFMjQzMjkiLz48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc0TDgwLjk3IDkxLjEwNEgxNC45NTZsMTEzLjExOSAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDRMLjY0MiAxMzUuMTZhOS43NTIgOS43NTIgMCAwIDAgMy41NDIgMTAuOTAzbDEyMy44OTEgOTAuMDEyLTExMy4xMi0xNDQuOTd6IiBmaWxsPSIjRkNBMzI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDVIODAuOTdMNTIuNjAxIDMuNzljLTEuNDYtNC40OTMtNy44MTYtNC40OTItOS4yNzUgMGwtMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjxwYXRoIGQ9Ik0xMjguMDc1IDIzNi4wNzRsNDcuMTA0LTE0NC45N2g2Ni4wMTVsLTExMy4xMiAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTI0MS4xOTQgOTEuMTA0bDE0LjMxNCA0NC4wNTZhOS43NTIgOS43NTIgMCAwIDEtMy41NDMgMTAuOTAzbC0xMjMuODkgOTAuMDEyIDExMy4xMTktMTQ0Ljk3eiIgZmlsbD0iI0ZDQTMyNiIvPjxwYXRoIGQ9Ik0yNDEuMTk0IDkxLjEwNWgtNjYuMDE1bDI4LjM3LTg3LjMxNWMxLjQ2LTQuNDkzIDcuODE2LTQuNDkyIDkuMjc1IDBsMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjwvc3ZnPg==" 
              style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
         <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
     </div>
@@ -225,10 +225,10 @@ def gitlab_page():
     
     # If GitLab auth is disabled, show disabled message
     if auth.disabled:
-        # GitLab header with logo
+        # GitLab header with official logo
         st.markdown("""
         <div style="display: flex; align-items: center; margin-bottom: 20px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDIwIDEwSDRMMTIgMjJaIiBmaWxsPSIjRkM2RDI2Ii8+CjxwYXRoIGQ9Ik0xMiAyMkw0IDEwSDhMMTIgMjJaIiBmaWxsPSIjRTI0MzI5Ci8+CjxwYXRoIGQ9Ik0xMiAyMkwyMCAxMEgxNkwxMiAyMloiIGZpbGw9IiNFMjQzMjkiLz4KPHA+CjwvcGF0aD4KPC9zdmc+" 
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyMzA1IiB2aWV3Qm94PSIwIDAgMjU2IDIzNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc1bDQ3LjEwNC0xNDQuOTdIODAuOTdsNDcuMTA0IDE0NC45N3oiIGZpbGw9IiNFMjQzMjkiLz48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc0TDgwLjk3IDkxLjEwNEgxNC45NTZsMTEzLjExOSAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDRMLjY0MiAxMzUuMTZhOS43NTIgOS43NTIgMCAwIDAgMy41NDIgMTAuOTAzbDEyMy44OTEgOTAuMDEyLTExMy4xMi0xNDQuOTd6IiBmaWxsPSIjRkNBMzI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDVIODAuOTdMNTIuNjAxIDMuNzljLTEuNDYtNC40OTMtNy44MTYtNC40OTItOS4yNzUgMGwtMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjxwYXRoIGQ9Ik0xMjguMDc1IDIzNi4wNzRsNDcuMTA0LTE0NC45N2g2Ni4wMTVsLTExMy4xMiAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTI0MS4xOTQgOTEuMTA0bDE0LjMxNCA0NC4wNTZhOS43NTIgOS43NTIgMCAwIDEtMy41NDMgMTAuOTAzbC0xMjMuODkgOTAuMDEyIDExMy4xMTktMTQ0Ljk3eiIgZmlsbD0iI0ZDQTMyNiIvPjxwYXRoIGQ9Ik0yNDEuMTk0IDkxLjEwNWgtNjYuMDE1bDI4LjM3LTg3LjMxNWMxLjQ2LTQuNDkzIDcuODE2LTQuNDkyIDkuMjc1IDBsMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjwvc3ZnPg==" 
                  style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
             <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
         </div>
@@ -244,10 +244,10 @@ def gitlab_page():
         return
     
     if not auth.is_authenticated():
-        # GitLab header with logo
+        # GitLab header with official logo
         st.markdown("""
         <div style="display: flex; align-items: center; margin-bottom: 20px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDIwIDEwSDRMMTIgMjJaIiBmaWxsPSIjRkM2RDI2Ii8+CjxwYXRoIGQ9Ik0xMiAyMkw0IDEwSDhMMTIgMjJaIiBmaWxsPSIjRTI0MzI5Ci8+CjxwYXRoIGQ9Ik0xMiAyMkwyMCAxMEgxNkwxMiAyMloiIGZpbGw9IiNFMjQzMjkiLz4KPHA+CjwvcGF0aD4KPC9zdmc+" 
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyMzA1IiB2aWV3Qm94PSIwIDAgMjU2IDIzNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc1bDQ3LjEwNC0xNDQuOTdIODAuOTdsNDcuMTA0IDE0NC45N3oiIGZpbGw9IiNFMjQzMjkiLz48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc0TDgwLjk3IDkxLjEwNEgxNC45NTZsMTEzLjExOSAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDRMLjY0MiAxMzUuMTZhOS43NTIgOS43NTIgMCAwIDAgMy41NDIgMTAuOTAzbDEyMy44OTEgOTAuMDEyLTExMy4xMi0xNDQuOTd6IiBmaWxsPSIjRkNBMzI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDVIODAuOTdMNTIuNjAxIDMuNzljLTEuNDYtNC40OTMtNy44MTYtNC40OTItOS4yNzUgMGwtMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjxwYXRoIGQ9Ik0xMjguMDc1IDIzNi4wNzRsNDcuMTA0LTE0NC45N2g2Ni4wMTVsLTExMy4xMiAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTI0MS4xOTQgOTEuMTA0bDE0LjMxNCA0NC4wNTZhOS43NTIgOS43NTIgMCAwIDEtMy41NDMgMTAuOTAzbC0xMjMuODkgOTAuMDEyIDExMy4xMTktMTQ0Ljk3eiIgZmlsbD0iI0ZDQTMyNiIvPjxwYXRoIGQ9Ik0yNDEuMTk0IDkxLjEwNWgtNjYuMDE1bDI4LjM3LTg3LjMxNWMxLjQ2LTQuNDkzIDcuODE2LTQuNDkyIDkuMjc1IDBsMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjwvc3ZnPg==" 
                  style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
             <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
         </div>

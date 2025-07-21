@@ -1,4 +1,4 @@
-# Free Tier Requirements - Minimal Dependencies
+# Streamlit Cloud Requirements - Ultra Lightweight
 streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
@@ -6,57 +6,20 @@ requests>=2.31.0
 python-dotenv>=1.0.0
 plotly>=5.15.0
 pillow>=10.0.0
-psycopg2-binary>=2.9.7
-sqlalchemy>=2.0.0
-pydantic>=2.0.0
-bcrypt>=4.0.0
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
 
-# Lightweight AI (only if memory allows)
-transformers>=4.30.0
-torch>=2.0.0,<2.1.0  # Smaller version
-psutil>=5.9.0
-
-# Audio processing (lightweight)
-librosa>=0.10.0
-soundfile>=0.12.0
-
-<<<<<<< HEAD
-# Utilities
+# Essential utilities only
 python-dateutil>=2.8.0
 pytz>=2023.3
-=======
-# Performance
+
+# Basic authentication
+pydantic>=2.0.0
+bcrypt>=4.0.0
+
+# Minimal NLP
+langdetect>=1.0.9
+
+# Basic caching
 diskcache>=5.6.0
-aiofiles>=23.2.1
 
-# Audio Processing
-sounddevice>=0.4.6
-
-# Image Processing
-opencv-python>=4.8.0
-scikit-image>=0.21.0
-
-# NLP
-langdetect>=1.0.9
-textstat>=0.7.3
-textblob>=0.18.0
-sentence-transformers>=2.2.2
-
-# Indian Language Support
-# indic-nlp-library>=0.92  # Optional
-
-# Monitoring
-prometheus-client>=0.19.0
-
-# Performance and async operations
-aiohttp>=3.8.0
-aiofiles>=23.2.1
-psutil>=5.9.0
-
-# Redis for caching
-redis>=4.5.0
-
-# Additional utilities
-langdetect>=1.0.9
+# Audio support (minimal)
+soundfile>=0.12.0
