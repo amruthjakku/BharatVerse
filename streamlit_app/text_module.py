@@ -40,6 +40,388 @@ def get_text_processing_config():
         'batch_size': 5
     }
 
+def store_text_contribution_to_supabase(title: str, content: str, language: str, 
+                                       region: str, author: str, keywords: str,
+                                       year_composed: int, analysis_result: dict) -> bool:
+    """Store text contribution directly to Supabase"""
+    try:
+        if not SUPABASE_AVAILABLE:
+            st.warning("Supabase not available, falling back to local storage")
+            return store_text_contribution_locally(title, content, language, region, author, keywords, year_composed, analysis_result)
+        
+        if not AUTH_AVAILABLE:
+            st.error("Authentication not available")
+            return False
+        
+        # Get current user
+        auth = get_auth_manager()
+        if not auth.is_authenticated():
+            st.error("Please login to submit contributions")
+            return False
+        
+        user_info = auth.get_current_user()
+        db_user = auth.get_current_db_user()
+        
+        if not db_user:
+            st.error("User not found in database")
+            return False
+        
+        # Get database manager
+        db = get_database_manager()
+        
+        # Prepare metadata
+        metadata = {
+            'author': author,
+            'year_composed': year_composed,
+            'submitted_by': user_info.get('username', 'unknown'),
+            'submission_timestamp': datetime.now().isoformat(),
+            'word_count': len(content.split()) if content else 0,
+            'character_count': len(content) if content else 0
+        }
+        
+        # Prepare tags
+        tags = [tag.strip() for tag in keywords.split(',') if tag.strip()]
+        tags.extend(['text', 'story', language.lower()])
+        
+        # Store in Supabase
+        contribution_id = db.insert_contribution(
+            user_id=db_user['id'],
+            title=title,
+            content=content,
+            content_type='text',
+            language=language,
+            region=region,
+            tags=tags,
+            metadata=metadata,
+            ai_analysis=analysis_result
+        )
+        
+        if contribution_id:
+            st.success(f"✅ Text contribution stored in Supabase with ID: {contribution_id}")
+            
+            # Log the contribution
+            try:
+                db.log_user_activity(
+                    user_id=db_user['id'],
+                    activity_type='contribution_created',
+                    details={
+                        'contribution_id': contribution_id,
+                        'content_type': 'text',
+                        'title': title,
+                        'language': language,
+                        'region': region
+                    }
+                )
+            except Exception as e:
+                st.warning(f"Failed to log activity: {e}")
+            
+            return True
+        else:
+            st.error("Failed to store contribution in Supabase")
+            return False
+            
+    except Exception as e:
+        st.error(f"Error storing text contribution: {e}")
+        st.info("Falling back to local storage...")
+        return store_text_contribution_locally(title, content, language, region, author, keywords, year_composed, analysis_result)
+
+def store_text_contribution_locally(title: str, content: str, language: str, 
+                                  region: str, author: str, keywords: str,
+                                  year_composed: int, analysis_result: dict) -> bool:
+    """Fallback local storage for text contributions"""
+    try:
+        if not DATABASE_AVAILABLE:
+            # Store in session state as last resort
+            if 'local_text_contributions' not in st.session_state:
+                st.session_state.local_text_contributions = []
+            
+            contribution = {
+                'id': len(st.session_state.local_text_contributions) + 1,
+                'title': title,
+                'content': content,
+                'language': language,
+                'region': region,
+                'author': author,
+                'keywords': keywords,
+                'year_composed': year_composed,
+                'analysis_result': analysis_result,
+                'timestamp': datetime.now().isoformat(),
+                'stored_locally': True
+            }
+            
+            st.session_state.local_text_contributions.append(contribution)
+            st.info("📱 Contribution stored locally (will sync to cloud when available)")
+            return True
+        
+        # Use local database
+        auth = get_auth_manager()
+        user_info = auth.get_current_user() if auth.is_authenticated() else None
+        username = user_info.get('username', 'anonymous') if user_info else 'anonymous'
+        
+        success = add_contribution(
+            user_id=username,
+            contribution_type='text',
+            title=title,
+            content=content,
+            metadata={
+                'language': language,
+                'region': region,
+                'author': author,
+                'keywords': keywords.split(','),
+                'year_composed': year_composed,
+                'analysis_result': analysis_result
+            }
+        )
+        
+        if success:
+            st.info("📱 Contribution stored locally")
+            return True
+        else:
+            st.error("Failed to store contribution locally")
+            return False
+            
+    except Exception as e:
+        st.error(f"Error in local storage: {e}")
+        return False
+
+def store_proverb_to_supabase(proverb: str, transliteration: str, translation: str,
+                             meaning: str, usage: str, language: str, category: str) -> bool:
+    """Store proverb contribution directly to Supabase"""
+    try:
+        if not SUPABASE_AVAILABLE:
+            st.warning("Supabase not available, storing locally")
+            return store_proverb_locally(proverb, transliteration, translation, meaning, usage, language, category)
+        
+        if not AUTH_AVAILABLE:
+            st.error("Authentication not available")
+            return False
+        
+        # Get current user
+        auth = get_auth_manager()
+        if not auth.is_authenticated():
+            st.error("Please login to submit proverbs")
+            return False
+        
+        user_info = auth.get_current_user()
+        db_user = auth.get_current_db_user()
+        
+        if not db_user:
+            st.error("User not found in database")
+            return False
+        
+        # Get database manager
+        db = get_database_manager()
+        
+        # Prepare content
+        content = f"""
+Original: {proverb}
+Transliteration: {transliteration}
+Translation: {translation}
+Meaning: {meaning}
+Usage: {usage}
+        """.strip()
+        
+        # Prepare metadata
+        metadata = {
+            'original_text': proverb,
+            'transliteration': transliteration,
+            'translation': translation,
+            'meaning': meaning,
+            'usage_context': usage,
+            'category': category,
+            'submitted_by': user_info.get('username', 'unknown'),
+            'submission_timestamp': datetime.now().isoformat(),
+            'content_type': 'proverb'
+        }
+        
+        # Prepare tags
+        tags = ['proverb', 'wisdom', category.lower(), language.lower()]
+        
+        # Store in Supabase
+        contribution_id = db.insert_contribution(
+            user_id=db_user['id'],
+            title=f"Proverb: {proverb[:50]}{'...' if len(proverb) > 50 else ''}",
+            content=content,
+            content_type='proverb',
+            language=language,
+            region=None,  # Proverbs might not have specific regions
+            tags=tags,
+            metadata=metadata,
+            ai_analysis={}
+        )
+        
+        if contribution_id:
+            st.success(f"✅ Proverb stored in Supabase with ID: {contribution_id}")
+            
+            # Log the contribution
+            try:
+                db.log_user_activity(
+                    user_id=db_user['id'],
+                    activity_type='contribution_created',
+                    details={
+                        'contribution_id': contribution_id,
+                        'content_type': 'proverb',
+                        'language': language,
+                        'category': category
+                    }
+                )
+            except Exception as e:
+                st.warning(f"Failed to log activity: {e}")
+            
+            return True
+        else:
+            st.error("Failed to store proverb in Supabase")
+            return False
+            
+    except Exception as e:
+        st.error(f"Error storing proverb: {e}")
+        st.info("Falling back to local storage...")
+        return store_proverb_locally(proverb, transliteration, translation, meaning, usage, language, category)
+
+def store_proverb_locally(proverb: str, transliteration: str, translation: str,
+                         meaning: str, usage: str, language: str, category: str) -> bool:
+    """Fallback local storage for proverbs"""
+    try:
+        # Store in session state
+        if 'local_proverbs' not in st.session_state:
+            st.session_state.local_proverbs = []
+        
+        proverb_data = {
+            'id': len(st.session_state.local_proverbs) + 1,
+            'proverb': proverb,
+            'transliteration': transliteration,
+            'translation': translation,
+            'meaning': meaning,
+            'usage': usage,
+            'language': language,
+            'category': category,
+            'timestamp': datetime.now().isoformat(),
+            'stored_locally': True
+        }
+        
+        st.session_state.local_proverbs.append(proverb_data)
+        st.info("📱 Proverb stored locally (will sync to cloud when available)")
+        return True
+        
+    except Exception as e:
+        st.error(f"Error in local proverb storage: {e}")
+        return False
+
+def sync_local_contributions_to_supabase():
+    """Sync locally stored contributions to Supabase when available"""
+    if not SUPABASE_AVAILABLE or not AUTH_AVAILABLE:
+        return False
+    
+    try:
+        # Check for local text contributions
+        local_texts = st.session_state.get('local_text_contributions', [])
+        local_proverbs = st.session_state.get('local_proverbs', [])
+        
+        if not local_texts and not local_proverbs:
+            return True  # Nothing to sync
+        
+        auth = get_auth_manager()
+        if not auth.is_authenticated():
+            return False
+        
+        db_user = auth.get_current_db_user()
+        if not db_user:
+            return False
+        
+        db = get_database_manager()
+        synced_count = 0
+        
+        # Sync text contributions
+        for text_contrib in local_texts:
+            if text_contrib.get('stored_locally'):
+                try:
+                    metadata = {
+                        'author': text_contrib.get('author', 'Anonymous'),
+                        'year_composed': text_contrib.get('year_composed'),
+                        'synced_from_local': True,
+                        'original_timestamp': text_contrib.get('timestamp'),
+                        'word_count': len(text_contrib.get('content', '').split()),
+                        'character_count': len(text_contrib.get('content', ''))
+                    }
+                    
+                    tags = [tag.strip() for tag in text_contrib.get('keywords', '').split(',') if tag.strip()]
+                    tags.extend(['text', 'story', text_contrib.get('language', '').lower()])
+                    
+                    contribution_id = db.insert_contribution(
+                        user_id=db_user['id'],
+                        title=text_contrib.get('title', 'Untitled'),
+                        content=text_contrib.get('content', ''),
+                        content_type='text',
+                        language=text_contrib.get('language'),
+                        region=text_contrib.get('region'),
+                        tags=tags,
+                        metadata=metadata,
+                        ai_analysis=text_contrib.get('analysis_result', {})
+                    )
+                    
+                    if contribution_id:
+                        synced_count += 1
+                        
+                except Exception as e:
+                    st.warning(f"Failed to sync text contribution: {e}")
+        
+        # Sync proverbs
+        for proverb in local_proverbs:
+            if proverb.get('stored_locally'):
+                try:
+                    content = f"""
+Original: {proverb.get('proverb', '')}
+Transliteration: {proverb.get('transliteration', '')}
+Translation: {proverb.get('translation', '')}
+Meaning: {proverb.get('meaning', '')}
+Usage: {proverb.get('usage', '')}
+                    """.strip()
+                    
+                    metadata = {
+                        'original_text': proverb.get('proverb', ''),
+                        'transliteration': proverb.get('transliteration', ''),
+                        'translation': proverb.get('translation', ''),
+                        'meaning': proverb.get('meaning', ''),
+                        'usage_context': proverb.get('usage', ''),
+                        'category': proverb.get('category', ''),
+                        'synced_from_local': True,
+                        'original_timestamp': proverb.get('timestamp'),
+                        'content_type': 'proverb'
+                    }
+                    
+                    tags = ['proverb', 'wisdom', proverb.get('category', '').lower(), proverb.get('language', '').lower()]
+                    
+                    contribution_id = db.insert_contribution(
+                        user_id=db_user['id'],
+                        title=f"Proverb: {proverb.get('proverb', '')[:50]}",
+                        content=content,
+                        content_type='proverb',
+                        language=proverb.get('language'),
+                        region=None,
+                        tags=tags,
+                        metadata=metadata,
+                        ai_analysis={}
+                    )
+                    
+                    if contribution_id:
+                        synced_count += 1
+                        
+                except Exception as e:
+                    st.warning(f"Failed to sync proverb: {e}")
+        
+        if synced_count > 0:
+            # Clear local storage after successful sync
+            st.session_state.local_text_contributions = []
+            st.session_state.local_proverbs = []
+            st.success(f"✅ Synced {synced_count} contributions to Supabase!")
+            return True
+        
+        return False
+        
+    except Exception as e:
+        st.error(f"Error syncing to Supabase: {e}")
+        return False
+
 # Try to import enhanced AI models
 try:
     from core.enhanced_ai_models import ai_manager
@@ -53,6 +435,18 @@ except ImportError:
 
 # Database imports
 try:
+    from utils.supabase_db import get_database_manager
+    SUPABASE_AVAILABLE = True
+except ImportError:
+    SUPABASE_AVAILABLE = False
+
+# Authentication imports
+try:
+    from streamlit_app.utils.auth import get_auth_manager
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
+try:
     from streamlit_app.utils.database import add_contribution
     from core.database import DatabaseManager, ContentRepository
     DATABASE_AVAILABLE = True
@@ -63,6 +457,16 @@ except ImportError:
 def text_page():
     st.markdown("## 📝 Story Keeper")
     st.markdown("Document stories, proverbs, recipes, and wisdom from your culture.")
+    
+    # Check for local contributions to sync
+    local_texts = st.session_state.get('local_text_contributions', [])
+    local_proverbs = st.session_state.get('local_proverbs', [])
+    
+    if (local_texts or local_proverbs) and SUPABASE_AVAILABLE and AUTH_AVAILABLE:
+        st.info(f"📱 You have {len(local_texts + local_proverbs)} local contributions that can be synced to cloud")
+        if st.button("☁️ Sync to Supabase", type="secondary"):
+            with st.spinner("Syncing contributions to cloud..."):
+                sync_local_contributions_to_supabase()
     
     # Initialize performance components
     perf_components = get_text_performance_components()
@@ -320,20 +724,41 @@ def story_section():
     # Submit button
     if consent:
         if st.button("📤 Submit Contribution", type="primary", use_container_width=True):
-            st.success("🎉 Thank you for your contribution! Your story has been added to BharatVerse.")
-            st.balloons()
+            # Store in Supabase
+            success = store_text_contribution_to_supabase(
+                title=title,
+                content=content,
+                language=language,
+                region=region,
+                author=author,
+                keywords=keywords,
+                year_composed=year_composed,
+                analysis_result=st.session_state.get('text_analysis_result', {})
+            )
             
-            # Show contribution summary
-            st.markdown("### 📋 Contribution Summary")
-            st.json({
-                "type": "text",
-                "title": title,
-                "language": language,
-                "region": region,
-                "author": author,
-                "keywords": keywords.split(", "),
-                "timestamp": datetime.now().isoformat()
-            })
+            if success:
+                st.success("🎉 Thank you for your contribution! Your story has been added to BharatVerse.")
+                st.balloons()
+                
+                # Show contribution summary
+                st.markdown("### 📋 Contribution Summary")
+                st.json({
+                    "type": "text",
+                    "title": title,
+                    "language": language,
+                    "region": region,
+                    "author": author,
+                    "keywords": keywords.split(", "),
+                    "timestamp": datetime.now().isoformat(),
+                    "stored_in": "Supabase Cloud Database"
+                })
+                
+                # Clear the form
+                st.session_state.pop('text_analysis_result', None)
+                st.rerun()
+            else:
+                st.error("❌ Failed to submit contribution. Please try again.")
+                st.info("Your contribution will be saved locally and synced when connection is restored.")
 
     # Storytelling tips
     with st.expander("💡 Storytelling Tips"):
@@ -393,11 +818,23 @@ def proverbs_section():
     
     # Submit
     if st.button("📤 Add Proverb", type="primary", use_container_width=True):
-        st.success("✅ Proverb added successfully!")
-        st.json({
-            "type": "proverb",
-            "text": proverb,
-            "language": language,
+        # Store proverb in Supabase
+        success = store_proverb_to_supabase(
+            proverb=proverb,
+            transliteration=transliteration,
+            translation=translation,
+            meaning=meaning,
+            usage=usage,
+            language=language,
+            category=category
+        )
+        
+        if success:
+            st.success("✅ Proverb added successfully to Supabase!")
+            st.json({
+                "type": "proverb",
+                "text": proverb,
+                "language": language,
             "category": category,
             "translation": translation,
             "meaning": meaning

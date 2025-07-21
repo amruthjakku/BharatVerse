@@ -20,12 +20,24 @@ from utils.performance_optimizer import (
 )
 
 # Database imports with caching
-from utils.supabase_db import (
-    get_cached_platform_stats,
-    get_cached_contributions,
-    get_cached_user_analytics,
-    log_analytics_batched
-)
+try:
+    from utils.supabase_db import (
+        get_database_manager,
+        get_cached_platform_stats,
+        get_cached_contributions,
+        get_cached_user_analytics,
+        log_analytics_batched
+    )
+    SUPABASE_AVAILABLE = True
+except ImportError:
+    SUPABASE_AVAILABLE = False
+
+# Authentication imports
+try:
+    from streamlit_app.utils.auth import get_auth_manager
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
 
 # Try to import existing modules with fallback
 try:
@@ -34,6 +46,36 @@ try:
     LEGACY_MODULES_AVAILABLE = True
 except ImportError:
     LEGACY_MODULES_AVAILABLE = False
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def get_supabase_analytics_data():
+    """Get analytics data from Supabase"""
+    if not SUPABASE_AVAILABLE:
+        return None, None
+    
+    try:
+        db = get_database_manager()
+        
+        # Get contributions
+        contributions = db.get_contributions(limit=1000)
+        
+        # Calculate statistics
+        stats = {
+            'total_contributions': len(contributions),
+            'text_count': len([c for c in contributions if c.get('content_type') == 'text']),
+            'audio_count': len([c for c in contributions if c.get('content_type') == 'audio']),
+            'image_count': len([c for c in contributions if c.get('content_type') == 'image']),
+            'proverb_count': len([c for c in contributions if c.get('content_type') == 'proverb']),
+            'languages': list(set([c.get('language', 'Unknown') for c in contributions if c.get('language')])),
+            'regions': list(set([c.get('region', 'Unknown') for c in contributions if c.get('region')])),
+            'recent_contributions': len([c for c in contributions if c.get('created_at', '') > (datetime.now() - timedelta(days=7)).isoformat()])
+        }
+        
+        return stats, contributions
+        
+    except Exception as e:
+        st.error(f"Error loading Supabase analytics: {e}")
+        return None, None
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def generate_analytics_charts(stats_data, contributions_data):
@@ -133,7 +175,16 @@ def analytics_page():
         status_text.text("Loading platform statistics...")
         progress_bar.progress(0.2)
         
-        stats = get_cached_platform_stats()
+        # Try to get data from Supabase first
+        supabase_stats, supabase_contributions = get_supabase_analytics_data()
+        
+        if supabase_stats:
+            stats = supabase_stats
+            st.success("📊 Analytics loaded from Supabase Cloud Database")
+        else:
+            # Fallback to cached platform stats
+            stats = get_cached_platform_stats()
+            st.info("📊 Using cached analytics data")
         
         # Step 2: Load contributions data conditionally
         status_text.text("Loading contributions data...")
@@ -148,7 +199,12 @@ def analytics_page():
         
         contributions = []
         if load_detailed_data:
-            contributions = get_cached_contributions(limit=1000)  # Limit for performance
+            if supabase_contributions:
+                contributions = supabase_contributions
+                st.success("📈 Detailed analytics from Supabase")
+            else:
+                contributions = get_cached_contributions(limit=1000)  # Limit for performance
+                st.info("📈 Using cached contributions data")
         
         progress_bar.progress(0.6)
     

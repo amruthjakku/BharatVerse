@@ -454,27 +454,80 @@ async def store_audio_contribution(audio_data: bytes, analysis_result: dict, fil
         logger.error(f"Failed to store audio contribution: {e}")
 
 async def store_text_contribution(text: str, analysis_result: dict):
-    """Store text contribution in background"""
-    if not content_repo:
-        return
-    
+    """Store text contribution directly to Supabase"""
     try:
+        # Import Supabase manager
+        from utils.supabase_db import get_database_manager
+        
+        db = get_database_manager()
+        
+        # Prepare metadata
         metadata = {
-            'title': f"Text: {text[:50]}...",
-            'description': text,
-            'language': analysis_result.get('language', 'unknown'),
-            'region': 'Unknown',
-            'tags': analysis_result.get('keywords', []),
-            'file_extension': 'txt',
-            'ai_analysis': analysis_result,
-            'user_id': 'api_user'
+            'submitted_via': 'api',
+            'api_timestamp': datetime.now().isoformat(),
+            'word_count': len(text.split()) if text else 0,
+            'character_count': len(text) if text else 0,
+            'processing_method': 'api_analysis'
         }
         
-        content_repo.save_content('text', text.encode('utf-8'), metadata)
-        logger.info("Stored text contribution")
+        # Prepare tags from analysis
+        tags = ['text', 'api_submission']
+        if analysis_result.get('language'):
+            tags.append(analysis_result['language'].lower())
+        if analysis_result.get('keywords'):
+            tags.extend(analysis_result['keywords'][:5])  # Limit tags
+        
+        # Store in Supabase
+        contribution_id = db.insert_contribution(
+            user_id=1,  # Default API user - should be configurable
+            title=f"API Text: {text[:50]}{'...' if len(text) > 50 else ''}",
+            content=text,
+            content_type='text',
+            language=analysis_result.get('language', 'unknown'),
+            region=analysis_result.get('region', 'Unknown'),
+            tags=tags,
+            metadata=metadata,
+            ai_analysis=analysis_result
+        )
+        
+        if contribution_id:
+            logger.info(f"Stored text contribution in Supabase with ID: {contribution_id}")
+        else:
+            logger.error("Failed to store text contribution in Supabase")
+            # Fallback to local storage
+            if content_repo:
+                fallback_metadata = {
+                    'title': f"Text: {text[:50]}...",
+                    'description': text,
+                    'language': analysis_result.get('language', 'unknown'),
+                    'region': 'Unknown',
+                    'tags': analysis_result.get('keywords', []),
+                    'file_extension': 'txt',
+                    'ai_analysis': analysis_result,
+                    'user_id': 'api_user'
+                }
+                content_repo.save_content('text', text.encode('utf-8'), fallback_metadata)
+                logger.info("Stored text contribution locally as fallback")
         
     except Exception as e:
         logger.error(f"Failed to store text contribution: {e}")
+        # Fallback to original method
+        if content_repo:
+            try:
+                metadata = {
+                    'title': f"Text: {text[:50]}...",
+                    'description': text,
+                    'language': analysis_result.get('language', 'unknown'),
+                    'region': 'Unknown',
+                    'tags': analysis_result.get('keywords', []),
+                    'file_extension': 'txt',
+                    'ai_analysis': analysis_result,
+                    'user_id': 'api_user'
+                }
+                content_repo.save_content('text', text.encode('utf-8'), metadata)
+                logger.info("Stored text contribution locally")
+            except Exception as fallback_error:
+                logger.error(f"Fallback storage also failed: {fallback_error}")
 
 async def store_image_contribution(image_data: bytes, analysis_result: dict, filename: str):
     """Store image contribution in background"""
