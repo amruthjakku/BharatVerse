@@ -318,60 +318,29 @@ def render_login_button():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        # Custom GitLab login button with logo
-        gitlab_button_html = """
-        <style>
-        .gitlab-login-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #FC6D26;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .gitlab-login-btn:hover {
-            background-color: #E24329;
-            color: white;
-            text-decoration: none;
-        }
-        .gitlab-logo {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            filter: brightness(0) invert(1);
-        }
-        </style>
-        """
-        st.markdown(gitlab_button_html, unsafe_allow_html=True)
-        
-        # Custom GitLab login button with official logo
-        gitlab_login_html = f"""
-        <div style="margin-bottom: 16px;">
-            <button onclick="window.location.href='{auth.get_authorization_url()}'" 
-                    class="gitlab-login-btn" 
-                    style="display: flex; align-items: center; justify-content: center; background-color: #FC6D26; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; width: 100%; box-sizing: border-box;">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyMzA1IiB2aWV3Qm94PSIwIDAgMjU2IDIzNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc1bDQ3LjEwNC0xNDQuOTdIODAuOTdsNDcuMTA0IDE0NC45N3oiIGZpbGw9IiNFMjQzMjkiLz48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc0TDgwLjk3IDkxLjEwNEgxNC45NTZsMTEzLjExOSAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDRMLjY0MiAxMzUuMTZhOS43NTIgOS43NTIgMCAwIDAgMy41NDIgMTAuOTAzbDEyMy44OTEgOTAuMDEyLTExMy4xMi0xNDQuOTd6IiBmaWxsPSIjRkNBMzI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDVIODAuOTdMNTIuNjAxIDMuNzljLTEuNDYtNC40OTMtNy44MTYtNC40OTItOS4yNzUgMGwtMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjxwYXRoIGQ9Ik0xMjguMDc1IDIzNi4wNzRsNDcuMTA0LTE0NC45N2g2Ni4wMTVsLTExMy4xMiAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTI0MS4xOTQgOTEuMTA0bDE0LjMxNCA0NC4wNTZhOS43NTIgOS43NTIgMCAwIDEtMy41NDMgMTAuOTAzbC0xMjMuODkgOTAuMDEyIDExMy4xMTktMTQ0Ljk3eiIgZmlsbD0iI0ZDQTMyNiIvPjxwYXRoIGQ9Ik0yNDEuMTk0IDkxLjEwNWgtNjYuMDE1bDI4LjM3LTg3LjMxNWMxLjQ2LTQuNDkzIDcuODE2LTQuNDkyIDkuMjc1IDBsMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjwvc3ZnPg==" 
-                     style="width: 24px; height: 24px; margin-right: 12px; filter: brightness(0) invert(1);" alt="GitLab Logo">
-                Login with GitLab
-            </button>
-        </div>
-        """
-        st.markdown(gitlab_login_html, unsafe_allow_html=True)
-        
-        # Fallback button for cases where HTML button doesn't work
-        if st.button("🔗 Login with GitLab (Fallback)", use_container_width=True, type="secondary", key="gitlab_login_fallback"):
+        # Primary GitLab login button (works in Streamlit Cloud)
+        if st.button("🔗 Login with GitLab", use_container_width=True, type="primary", key="gitlab_login_primary"):
             auth_url = auth.get_authorization_url()
             st.markdown(f'<meta http-equiv="refresh" content="0; url={auth_url}">', unsafe_allow_html=True)
-            st.info("Redirecting to GitLab for authentication...")
+            st.info("🔄 Redirecting to GitLab for authentication...")
+            st.markdown(f"**If redirect doesn't work, click here:** [Login with GitLab]({auth_url})")
+        
+        # Show the OAuth URL for debugging
+        if st.checkbox("🔍 Show OAuth Debug Info", key="oauth_debug"):
+            auth_url = auth.get_authorization_url()
+            st.code(f"OAuth URL: {auth_url}")
+            st.markdown(f"**Direct Link:** [Click here to login]({auth_url})")
+            
+            # Show configuration details
+            st.markdown("### Configuration Details:")
+            st.code(f"""
+Client ID: {'✅ Set' if auth.client_id else '❌ Missing'}
+Client Secret: {'✅ Set' if auth.client_secret else '❌ Missing'}
+Redirect URI: {auth.redirect_uri}
+Base URL: {auth.base_url}
+Scopes: {auth.scopes}
+Environment: {os.getenv('APP_ENV', 'Not set')}
+""")
 
 
 def render_user_info():
