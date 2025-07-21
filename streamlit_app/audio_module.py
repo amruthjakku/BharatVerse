@@ -24,8 +24,17 @@ from utils.performance_optimizer import (
     show_loading_placeholder,
     progressive_loading_container
 )
-from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
 from utils.redis_cache import get_cache_manager
+
+# Safe memory manager import
+try:
+    from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
+except ImportError:
+    from utils.fallback_memory import (
+        get_fallback_memory_manager as get_memory_manager, 
+        show_fallback_memory_dashboard as show_memory_dashboard,
+        FallbackMemoryTracker as MemoryTracker
+    )
 
 # Initialize performance components
 @st.cache_resource

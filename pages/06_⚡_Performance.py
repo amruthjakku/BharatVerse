@@ -11,7 +11,11 @@ sys.path.append(str(project_root))
 
 # Import performance utilities
 from utils.performance_optimizer import get_performance_optimizer, show_performance_dashboard
-from utils.memory_manager import get_memory_manager, show_memory_dashboard
+# Safe memory manager import
+try:
+    from utils.memory_manager import get_memory_manager, show_memory_dashboard
+except ImportError:
+    from utils.fallback_memory import get_fallback_memory_manager as get_memory_manager, show_fallback_memory_dashboard as show_memory_dashboard
 from utils.redis_cache import get_cache_manager
 from utils.async_client import run_parallel_api_calls
 
