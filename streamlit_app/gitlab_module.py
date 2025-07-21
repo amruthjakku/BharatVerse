@@ -11,7 +11,14 @@ import json
 @require_auth
 def gitlab_integration_page():
     """GitLab integration page with authenticated features"""
-    st.markdown("## 🦊 GitLab Integration")
+    # GitLab header with logo
+    st.markdown("""
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDIwIDEwSDRMMTIgMjJaIiBmaWxsPSIjRkM2RDI2Ii8+CjxwYXRoIGQ9Ik0xMiAyMkw0IDEwSDhMMTIgMjJaIiBmaWxsPSIjRTI0MzI5Ii8+CjxwYXRoIGQ9Ik0xMiAyMkwyMCAxMEgxNkwxMiAyMloiIGZpbGw9IiNFMjQzMjkiLz4KPHA+CjwvcGF0aD4KPC9zdmc+" 
+             style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
+        <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("---")
     
     auth = GitLabAuth()
@@ -218,7 +225,14 @@ def gitlab_page():
     
     # If GitLab auth is disabled, show disabled message
     if auth.disabled:
-        st.markdown("## 🦊 GitLab Integration")
+        # GitLab header with logo
+        st.markdown("""
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDIwIDEwSDRMMTIgMjJaIiBmaWxsPSIjRkM2RDI2Ii8+CjxwYXRoIGQ9Ik0xMiAyMkw0IDEwSDhMMTIgMjJaIiBmaWxsPSIjRTI0MzI5Ci8+CjxwYXRoIGQ9Ik0xMiAyMkwyMCAxMEgxNkwxMiAyMloiIGZpbGw9IiNFMjQzMjkiLz4KPHA+CjwvcGF0aD4KPC9zdmc+" 
+                 style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
+            <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown("---")
         st.info("🚫 GitLab integration is currently disabled for local development.")
         st.markdown("""
@@ -230,7 +244,14 @@ def gitlab_page():
         return
     
     if not auth.is_authenticated():
-        st.markdown("## 🦊 GitLab Integration")
+        # GitLab header with logo
+        st.markdown("""
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyTDIwIDEwSDRMMTIgMjJaIiBmaWxsPSIjRkM2RDI2Ii8+CjxwYXRoIGQ9Ik0xMiAyMkw0IDEwSDhMMTIgMjJaIiBmaWxsPSIjRTI0MzI5Ci8+CjxwYXRoIGQ9Ik0xMiAyMkwyMCAxMEgxNkwxMiAyMloiIGZpbGw9IiNFMjQzMjkiLz4KPHA+CjwvcGF0aD4KPC9zdmc+" 
+                 style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
+            <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown("---")
         st.info("Please login with GitLab to access integration features.")
         

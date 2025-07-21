@@ -13,7 +13,7 @@ from streamlit_app.utils.main_styling import load_custom_css
 def main():
     st.set_page_config(
         page_title="GitLab Integration - BharatVerse",
-        page_icon="🦊",
+        page_icon="🔗",
         layout="wide"
     )
     
