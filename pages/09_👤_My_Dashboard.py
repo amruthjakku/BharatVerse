@@ -18,6 +18,20 @@ from streamlit_app.utils.auth import get_auth_manager
 from streamlit_app.utils.database import get_db_connection
 from streamlit_app.utils.main_styling import load_custom_css
 
+# Database imports
+try:
+    from utils.supabase_db import get_database_manager
+    SUPABASE_AVAILABLE = True
+except ImportError:
+    SUPABASE_AVAILABLE = False
+
+# Authentication imports
+try:
+    from streamlit_app.utils.auth import get_auth_manager
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
+
 def check_user_access():
     """Check if user is authenticated"""
     auth = get_auth_manager()
@@ -32,8 +46,67 @@ def check_user_access():
     return user_info, auth
 
 def get_user_contributions(username: str):
-    """Get user's contributions from database"""
+    """Get user's contributions from Supabase or local database"""
     try:
+        # Try Supabase first
+        if SUPABASE_AVAILABLE and AUTH_AVAILABLE:
+            auth = get_auth_manager()
+            if auth.is_authenticated():
+                db_user = auth.get_current_db_user()
+                if db_user:
+                    db = get_database_manager()
+                    
+                    # Get user's contributions from Supabase
+                    contributions = db.get_contributions(user_id=db_user['id'], limit=1000)
+                    
+                    if contributions:
+                        # Process contributions to get stats
+                        contrib_stats = {}
+                        recent_contribs = []
+                        
+                        for contrib in contributions:
+                            content_type = contrib.get('content_type', 'unknown')
+                            created_at = contrib.get('created_at', '')
+                            
+                            # Update stats
+                            if content_type not in contrib_stats:
+                                contrib_stats[content_type] = {
+                                    'count': 0,
+                                    'first': created_at,
+                                    'latest': created_at
+                                }
+                            
+                            contrib_stats[content_type]['count'] += 1
+                            if created_at < contrib_stats[content_type]['first']:
+                                contrib_stats[content_type]['first'] = created_at
+                            if created_at > contrib_stats[content_type]['latest']:
+                                contrib_stats[content_type]['latest'] = created_at
+                            
+                            # Add to recent contributions
+                            if len(recent_contribs) < 10:
+                                recent_contribs.append((
+                                    content_type,
+                                    contrib.get('title', 'Untitled'),
+                                    created_at
+                                ))
+                        
+                        # Convert stats to expected format
+                        stats_list = []
+                        for content_type, stats in contrib_stats.items():
+                            stats_list.append((
+                                content_type,
+                                stats['count'],
+                                stats['first'],
+                                stats['latest']
+                            ))
+                        
+                        # Sort by count
+                        stats_list.sort(key=lambda x: x[1], reverse=True)
+                        
+                        st.success("📊 Contributions loaded from Supabase")
+                        return stats_list, recent_contribs
+        
+        # Fallback to local database
         conn = get_db_connection()
         cursor = conn.cursor()
         
@@ -62,6 +135,9 @@ def get_user_contributions(username: str):
         recent_contribs = cursor.fetchall()
         
         conn.close()
+        
+        if contrib_stats or recent_contribs:
+            st.info("📊 Contributions loaded from local database")
         
         return contrib_stats, recent_contribs
         
