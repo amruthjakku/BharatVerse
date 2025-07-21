@@ -250,7 +250,15 @@ def main():
                             st.warning("Cache: Disabled")
                     
                     with col3:
-                        st.markdown("**📊 Performance**")
+                        st.markdown("**🎤 Audio & Performance**")
+                        # Check audio availability
+                        try:
+                            import sounddevice as sd
+                            import soundfile as sf
+                            st.success("Audio: Available")
+                        except (ImportError, OSError):
+                            st.warning("Audio: Upload Only")
+                        
                         st.info(f"Mode: Free Cloud Tier")
                         st.info("Storage: Cloudflare R2")
                     
