@@ -520,37 +520,86 @@ def story_section():
     # Story content
     st.markdown("---")
     st.markdown("### 📝 Write Your Story")
-    use_real_data = st.session_state.get('use_real_data', False)
     
-    if use_real_data:
-        title = st.text_input("Title", "", placeholder="Enter your story title...")
-        content = st.text_area(
-            "Story Content",
-            "",
-            height=200,
-            placeholder="Write your story here..."
-        )
-    else:
-        title = st.text_input("Title", "A Journey to the Village Fair")
-        content = st.text_area(
-            "Story Content",
-            "It was a bright sunny morning when we decided to go to the village fair... "
-            "The fair was bustling with people, vibrant colors, and the smell of delicious food in the air.",
-            height=200
-        )
+    # Language-specific placeholders
+    language_placeholders = {
+        "Hindi": {
+            "title": "अपनी कहानी का शीर्षक लिखें...",
+            "content": "यहाँ अपनी कहानी लिखें... (अपने परिवार, गाँव, या संस्कृति की कोई यादगार घटना साझा करें)"
+        },
+        "Bengali": {
+            "title": "আপনার গল্পের শিরোনাম লিখুন...",
+            "content": "এখানে আপনার গল্প লিখুন... (আপনার পরিবার, গ্রাম বা সংস্কৃতির কোনো স্মরণীয় ঘটনা শেয়ার করুন)"
+        },
+        "Tamil": {
+            "title": "உங்கள் கதையின் தலைப்பை எழுதுங்கள்...",
+            "content": "இங்கே உங்கள் கதையை எழுதுங்கள்... (உங்கள் குடும்பம், கிராமம் அல்லது கலாச்சாரத்தின் நினைவுகூரத்தக்க நிகழ்வைப் பகிருங்கள்)"
+        },
+        "Telugu": {
+            "title": "మీ కథ యొక్క శీర్షిక రాయండి...",
+            "content": "ఇక్కడ మీ కథను రాయండి... (మీ కుటుంబం, గ్రామం లేదా సంస్కృతికి సంబంధించిన గుర్తుండిపోయే సంఘటనను పంచుకోండి)"
+        },
+        "Marathi": {
+            "title": "तुमच्या कथेचे शीर्षक लिहा...",
+            "content": "इथे तुमची कथा लिहा... (तुमच्या कुटुंबाची, गावाची किंवा संस्कृतीची आठवणीजोगी घटना सामायिक करा)"
+        },
+        "Gujarati": {
+            "title": "તમારી વાર્તાનું શીર્ષક લખો...",
+            "content": "અહીં તમારી વાર્તા લખો... (તમારા કુટુંબ, ગામ અથવા સંસ્કૃતિની યાદગાર ઘટના શેર કરો)"
+        },
+        "Kannada": {
+            "title": "ನಿಮ್ಮ ಕಥೆಯ ಶೀರ್ಷಿಕೆ ಬರೆಯಿರಿ...",
+            "content": "ಇಲ್ಲಿ ನಿಮ್ಮ ಕಥೆಯನ್ನು ಬರೆಯಿರಿ... (ನಿಮ್ಮ ಕುಟುಂಬ, ಹಳ್ಳಿ ಅಥವಾ ಸಂಸ್ಕೃತಿಯ ನೆನಪಿನ ಘಟನೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ)"
+        },
+        "Malayalam": {
+            "title": "നിങ്ങളുടെ കഥയുടെ തലക്കെട്ട് എഴുതുക...",
+            "content": "ഇവിടെ നിങ്ങളുടെ കഥ എഴുതുക... (നിങ്ങളുടെ കുടുംബം, ഗ്രാമം അല്ലെങ്കിൽ സംസ്കാരത്തിന്റെ അവിസ്മരണീയമായ സംഭവം പങ്കിടുക)"
+        },
+        "Punjabi": {
+            "title": "ਆਪਣੀ ਕਹਾਣੀ ਦਾ ਸਿਰਲੇਖ ਲਿਖੋ...",
+            "content": "ਇੱਥੇ ਆਪਣੀ ਕਹਾਣੀ ਲਿਖੋ... (ਆਪਣੇ ਪਰਿਵਾਰ, ਪਿੰਡ ਜਾਂ ਸੱਭਿਆਚਾਰ ਦੀ ਕੋਈ ਯਾਦਗਾਰ ਘਟਨਾ ਸਾਂਝੀ ਕਰੋ)"
+        },
+        "Odia": {
+            "title": "ଆପଣଙ୍କ କାହାଣୀର ଶୀର୍ଷକ ଲେଖନ୍ତୁ...",
+            "content": "ଏଠାରେ ଆପଣଙ୍କ କାହାଣୀ ଲେଖନ୍ତୁ... (ଆପଣଙ୍କ ପରିବାର, ଗାଁ କିମ୍ବା ସଂସ୍କୃତିର କୌଣସି ସ୍ମରଣୀୟ ଘଟଣା ସାଝା କରନ୍ତୁ)"
+        },
+        "Assamese": {
+            "title": "আপোনাৰ কাহিনীৰ শিৰোনাম লিখক...",
+            "content": "ইয়াত আপোনাৰ কাহিনী লিখক... (আপোনাৰ পৰিয়াল, গাঁও বা সংস্কৃতিৰ কোনো স্মৰণীয় ঘটনা ভাগ কৰক)"
+        },
+        "Urdu": {
+            "title": "اپنی کہانی کا عنوان لکھیں...",
+            "content": "یہاں اپنی کہانی لکھیں... (اپنے خاندان، گاؤں یا ثقافت کا کوئی یادگار واقعہ شیئر کریں)"
+        },
+        "English": {
+            "title": "Enter your story title...",
+            "content": "Write your story here... (Share a memorable event from your family, village, or culture)"
+        }
+    }
+    
+    placeholders = language_placeholders.get(language, language_placeholders["English"])
+    
+    title = st.text_input("Title", "", placeholder=placeholders["title"])
+    content = st.text_area(
+        "Story Content",
+        "",
+        height=200,
+        placeholder=placeholders["content"]
+    )
 
     # Translation and Analysis option
     if st.checkbox("Analyze & Translate Text"):
         st.markdown("---")
         st.markdown("### 🔄 AI Analysis & Translation")
         if st.button("Analyze Text", key="analyze_story"):
-            with st.spinner("Analyzing text..."):
-                use_real_data = st.session_state.get('use_real_data', False)
-                
-                if use_real_data and AI_MODELS_AVAILABLE:
-                    try:
-                        # Use enhanced AI models for text analysis
-                        st.info("🤖 Using real AI models for text analysis...")
+            if not content.strip():
+                st.warning("Please enter some content to analyze.")
+            else:
+                with st.spinner("Analyzing text..."):
+                    if AI_MODELS_AVAILABLE:
+                        try:
+                            # Use enhanced AI models for text analysis
+                            st.info("🤖 Using real AI models for text analysis...")
                         
                         # Determine language code
                         lang_code = language.lower()[:2] if language != "English" else "en"
@@ -787,58 +836,122 @@ def proverbs_section():
             ["Wisdom", "Life Lessons", "Nature", "Family", "Work", "Humor"]
         )
     
-    # Proverb input
+    # Proverb input with language-specific placeholders
     st.markdown("---")
+    
+    # Language-specific placeholders for proverbs
+    proverb_placeholders = {
+        "Hindi": {
+            "proverb": "अपनी कहावत या सूक्ति लिखें...",
+            "transliteration": "Roman script mein likhiye...",
+            "meaning": "इस कहावत का अर्थ और संदेश बताएं...",
+            "usage": "यह कब और कैसे इस्तेमाल होती है?"
+        },
+        "Bengali": {
+            "proverb": "আপনার প্রবাদ বা বাণী লিখুন...",
+            "transliteration": "Romanized form e likhun...",
+            "meaning": "এই প্রবাদের অর্থ ও বার্তা ব্যাখ্যা করুন...",
+            "usage": "এটি কখন এবং কীভাবে ব্যবহৃত হয়?"
+        },
+        "Tamil": {
+            "proverb": "உங்கள் பழமொழி அல்லது வாக்கியத்தை எழுதுங்கள்...",
+            "transliteration": "Roman script-il ezhuthungal...",
+            "meaning": "இந்த பழமொழியின் பொருள் மற்றும் செய்தியை விளக்குங்கள்...",
+            "usage": "இது எப்போது மற்றும் எப்படி பயன்படுத்தப்படுகிறது?"
+        },
+        "Telugu": {
+            "proverb": "మీ సామెత లేదా వాక్యాన్ని రాయండి...",
+            "transliteration": "Roman script lo rayandi...",
+            "meaning": "ఈ సామెత యొక్క అర్థం మరియు సందేశాన్ని వివరించండి...",
+            "usage": "ఇది ఎప్పుడు మరియు ఎలా ఉపయోగించబడుతుంది?"
+        },
+        "Marathi": {
+            "proverb": "तुमची म्हण किंवा वाक्य लिहा...",
+            "transliteration": "Roman script madhe lihaa...",
+            "meaning": "या म्हणीचा अर्थ आणि संदेश स्पष्ट करा...",
+            "usage": "हे कधी आणि कसे वापरले जाते?"
+        },
+        "Sanskrit": {
+            "proverb": "अपनं श्लोकं वा सुभाषितं लिखत...",
+            "transliteration": "Roman script mein likhiye...",
+            "meaning": "अस्य श्लोकस्य अर्थं संदेशं च व्याख्यातु...",
+            "usage": "एतत् कदा कथं च प्रयुज्यते?"
+        },
+        "Urdu": {
+            "proverb": "اپنا محاورہ یا کہاوت لکھیں...",
+            "transliteration": "Roman script mein likhiye...",
+            "meaning": "اس کہاوت کا مطلب اور پیغام بیان کریں...",
+            "usage": "یہ کب اور کیسے استعمال ہوتا ہے؟"
+        }
+    }
+    
+    placeholders = proverb_placeholders.get(language, {
+        "proverb": "Enter your proverb or saying...",
+        "transliteration": "Write in Roman script...",
+        "meaning": "Explain the meaning and message...",
+        "usage": "When and how is it used?"
+    })
+    
     proverb = st.text_input(
         "Proverb/Saying (in original language)",
-        "जैसी करनी वैसी भरनी"
+        "",
+        placeholder=placeholders["proverb"]
     )
     
     transliteration = st.text_input(
         "Transliteration",
-        "Jaisi karni waisi bharni"
+        "",
+        placeholder=placeholders["transliteration"]
     )
     
     translation = st.text_input(
         "English Translation",
-        "As you sow, so shall you reap"
+        "",
+        placeholder="Enter English translation..."
     )
     
     meaning = st.text_area(
         "Meaning/Explanation",
-        "This proverb teaches that our actions have consequences. Good deeds lead to good outcomes, while bad deeds lead to negative results.",
-        height=100
+        "",
+        height=100,
+        placeholder=placeholders["meaning"]
     )
     
     usage = st.text_area(
         "When is it used?",
-        "Often used to teach children about karma and responsibility for their actions.",
-        height=80
+        "",
+        height=80,
+        placeholder=placeholders["usage"]
     )
     
     # Submit
     if st.button("📤 Add Proverb", type="primary", use_container_width=True):
-        # Store proverb in Supabase
-        success = store_proverb_to_supabase(
-            proverb=proverb,
-            transliteration=transliteration,
-            translation=translation,
-            meaning=meaning,
-            usage=usage,
-            language=language,
-            category=category
-        )
-        
-        if success:
-            st.success("✅ Proverb added successfully to Supabase!")
-            st.json({
-                "type": "proverb",
-                "text": proverb,
-                "language": language,
-            "category": category,
-            "translation": translation,
-            "meaning": meaning
-        })
+        if not proverb.strip():
+            st.warning("Please enter a proverb or saying.")
+        elif not translation.strip():
+            st.warning("Please provide an English translation.")
+        else:
+            # Store proverb in Supabase
+            success = store_proverb_to_supabase(
+                proverb=proverb,
+                transliteration=transliteration,
+                translation=translation,
+                meaning=meaning,
+                usage=usage,
+                language=language,
+                category=category
+            )
+            
+            if success:
+                st.success("✅ Proverb added successfully to Supabase!")
+                st.json({
+                    "type": "proverb",
+                    "text": proverb,
+                    "language": language,
+                    "category": category,
+                    "translation": translation,
+                    "meaning": meaning
+                })
 
 
 def recipes_section():

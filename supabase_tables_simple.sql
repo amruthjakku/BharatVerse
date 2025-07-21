@@ -1,7 +1,7 @@
--- 🗄️ BharatVerse Supabase Database Schema
--- Copy and paste this SQL into your Supabase SQL Editor
+-- 🗄️ BharatVerse Supabase Database Schema (Simple Version)
+-- Execute this step by step in your Supabase SQL Editor
 
--- 1. Users table - Store user accounts and profiles
+-- Step 1: Create Users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) UNIQUE NOT NULL,
@@ -17,21 +17,21 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Contributions table - Store all user contributions (text, proverbs, etc.)
+-- Step 2: Create Contributions table
 CREATE TABLE IF NOT EXISTS contributions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(500) NOT NULL,
     content TEXT,
-    content_type VARCHAR(50), -- 'text', 'proverb', 'audio', 'image', etc.
+    content_type VARCHAR(50),
     file_url TEXT,
     file_type VARCHAR(100),
     file_size INTEGER,
     language VARCHAR(50),
     region VARCHAR(100),
-    tags TEXT[], -- Array of tags
-    metadata JSONB DEFAULT '{}', -- Flexible metadata storage
-    ai_analysis JSONB DEFAULT '{}', -- AI analysis results
+    tags TEXT[],
+    metadata JSONB DEFAULT '{}',
+    ai_analysis JSONB DEFAULT '{}',
     is_public BOOLEAN DEFAULT true,
     view_count INTEGER DEFAULT 0,
     like_count INTEGER DEFAULT 0,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS contributions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Analytics table - Track user activity and system events
+-- Step 3: Create Analytics table
 CREATE TABLE IF NOT EXISTS analytics (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -54,18 +54,18 @@ CREATE TABLE IF NOT EXISTS analytics (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Community interactions table - Likes, comments, shares, follows
+-- Step 4: Create Community interactions table
 CREATE TABLE IF NOT EXISTS community_interactions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     target_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     contribution_id INTEGER REFERENCES contributions(id) ON DELETE CASCADE,
-    interaction_type VARCHAR(50), -- 'like', 'comment', 'share', 'follow'
+    interaction_type VARCHAR(50),
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Create indexes for better performance
+-- Step 5: Create indexes
 CREATE INDEX IF NOT EXISTS idx_contributions_user_id ON contributions(user_id);
 CREATE INDEX IF NOT EXISTS idx_contributions_language ON contributions(language);
 CREATE INDEX IF NOT EXISTS idx_contributions_region ON contributions(region);
@@ -74,17 +74,12 @@ CREATE INDEX IF NOT EXISTS idx_contributions_created_at ON contributions(created
 CREATE INDEX IF NOT EXISTS idx_analytics_user_id ON analytics(user_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON analytics(event_type);
 CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics(created_at);
-CREATE INDEX IF NOT EXISTS idx_community_interactions_user_id ON community_interactions(user_id);
-CREATE INDEX IF NOT EXISTS idx_community_interactions_contribution_id ON community_interactions(contribution_id);
 
--- 6. Insert sample data for testing
+-- Step 6: Insert demo user
 INSERT INTO users (username, email, full_name, provider, role) 
 VALUES ('demo_user', 'demo@bharatverse.com', 'Demo User', 'demo', 'user')
 ON CONFLICT (username) DO NOTHING;
 
--- 7. Verify the setup
-SELECT 'Tables created successfully!' as status;
+-- Step 7: Verify setup
+SELECT 'Setup complete!' as message;
 SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name;
-SELECT 'Sample data inserted!' as status;
-SELECT COUNT(*) as user_count FROM users;
-SELECT COUNT(*) as contribution_count FROM contributions;
