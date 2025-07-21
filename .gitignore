@@ -53,11 +53,48 @@ ENV/
 *.swp
 *.swo
 
+# AI Coding Assistants & IDE Extensions
+.zencoder/
+.cursor/
+.continue/
+.aider/
+.copilot/
+.codeium/
+.tabnine/
+.windsurf/
+*.ai-session
+*.ai-chat
+.ai-context/
+
+# VS Code specific files
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
+.vscode/*.code-workspace
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Git internals (should not be tracked)
+.git/hooks/
+.git/objects/
+.git/refs/
+.git/logs/
+
+# Bare/mirror repositories (deployment artifacts)
+*.git/
+bharatverse.git/
 
 # Local development
 docker-compose.override.yml
 local_models/
 temp/
+
+# Debug and test files
+debug_*.py
+test_oauth_*.py
+verify_oauth_*.py
+*_debug.py
+*_test.py
