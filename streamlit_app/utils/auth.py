@@ -26,18 +26,24 @@ class GitLabAuth:
             self.scopes = None
             return
         
+        # Detect environment and set appropriate redirect URI
+        self.redirect_uri = self._detect_redirect_uri()
+        
         # Try to get from Streamlit secrets first, then environment variables
         try:
             self.client_id = st.secrets.get("gitlab", {}).get("client_id") or os.getenv('GITLAB_CLIENT_ID')
             self.client_secret = st.secrets.get("gitlab", {}).get("client_secret") or os.getenv('GITLAB_CLIENT_SECRET')
-            self.redirect_uri = st.secrets.get("gitlab", {}).get("redirect_uri") or os.getenv('GITLAB_REDIRECT_URI')
+            # Use detected redirect URI, fallback to secrets/env if detection fails
+            detected_uri = self._detect_redirect_uri()
+            self.redirect_uri = detected_uri or st.secrets.get("gitlab", {}).get("redirect_uri") or os.getenv('GITLAB_REDIRECT_URI')
             self.base_url = st.secrets.get("gitlab", {}).get("base_url") or os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
             self.scopes = st.secrets.get("gitlab", {}).get("scopes") or os.getenv('GITLAB_SCOPES', 'api read_user profile email')
         except Exception:
             # Fallback to environment variables only
             self.client_id = os.getenv('GITLAB_CLIENT_ID')
             self.client_secret = os.getenv('GITLAB_CLIENT_SECRET')
-            self.redirect_uri = os.getenv('GITLAB_REDIRECT_URI')
+            detected_uri = self._detect_redirect_uri()
+            self.redirect_uri = detected_uri or os.getenv('GITLAB_REDIRECT_URI')
             self.base_url = os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
             self.scopes = os.getenv('GITLAB_SCOPES', 'api read_user profile email')
         
@@ -47,6 +53,49 @@ class GitLabAuth:
                 st.session_state.gitlab_config_error_shown = True
                 st.error("GitLab OAuth configuration is incomplete. Please check your environment variables.")
                 st.info("💡 Run `python scripts/fix_gitlab_oauth.py` to fix this issue.")
+    
+    def _detect_redirect_uri(self) -> Optional[str]:
+        """Detect the appropriate redirect URI based on the current environment"""
+        try:
+            # Get the current URL from Streamlit
+            if hasattr(st, 'get_option') and st.get_option('server.baseUrlPath'):
+                # Running on Streamlit Cloud or with custom base URL
+                base_url = st.get_option('server.baseUrlPath')
+                return f"{base_url}/callback"
+            
+            # Check environment variables for explicit environment setting
+            app_env = os.getenv("APP_ENV", "").lower()
+            
+            if app_env == "local" or app_env == "development":
+                return "http://localhost:8501/callback"
+            elif app_env == "render":
+                return "https://bharatverse.onrender.com/callback"
+            elif app_env == "streamlit" or app_env == "streamlit_cloud":
+                return "https://amruth-bharatverse.streamlit.app/callback"
+            
+            # Try to detect from current URL context
+            try:
+                # This is a fallback method - may not always work in Streamlit
+                import streamlit.web.server.server as server
+                if hasattr(server, 'Server') and server.Server._singleton:
+                    port = server.Server._singleton._port
+                    if port == 8501:
+                        return "http://localhost:8501/callback"
+            except:
+                pass
+            
+            # Check for common deployment indicators
+            if os.getenv("RENDER"):
+                return "https://bharatverse.onrender.com/callback"
+            elif os.getenv("STREAMLIT_SHARING") or "streamlit.app" in os.getenv("HOSTNAME", ""):
+                return "https://amruth-bharatverse.streamlit.app/callback"
+            
+            # Default fallback
+            return "http://localhost:8501/callback"
+            
+        except Exception as e:
+            # If detection fails, return None to use fallback from env/secrets
+            return None
     
     def generate_state(self) -> str:
         """Generate a secure random state parameter for OAuth"""
