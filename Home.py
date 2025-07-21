@@ -47,6 +47,13 @@ def main():
         except Exception:
             pass
     
+    # Initialize authentication (handle OAuth callbacks)
+    if AUTH_AVAILABLE:
+        try:
+            init_auth()
+        except Exception:
+            pass
+    
     # Header
     st.markdown("""
     <div style="text-align: center; padding: 2rem 0;">
