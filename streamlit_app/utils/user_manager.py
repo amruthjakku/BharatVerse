@@ -11,8 +11,15 @@ from typing import Optional, Dict, Any, List
 from pathlib import Path
 import hashlib
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    POSTGRES_AVAILABLE = False
+    # Create mock classes for when PostgreSQL is not available
+    class RealDictCursor:
+        pass
 
 class UserManager:
     def __init__(self, db_path: str = "data/users.db"):
