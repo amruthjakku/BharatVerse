@@ -82,6 +82,57 @@ INSERT INTO users (username, email, full_name, provider, role)
 VALUES ('demo_user', 'demo@bharatverse.com', 'Demo User', 'demo', 'user')
 ON CONFLICT (username) DO NOTHING;
 
+-- Get the demo user ID for sample contributions
+DO $$
+DECLARE
+    demo_user_id INTEGER;
+BEGIN
+    SELECT id INTO demo_user_id FROM users WHERE username = 'demo_user';
+    
+    -- Insert sample text contribution
+    INSERT INTO contributions (
+        user_id, title, content, content_type, language, region, tags, metadata, ai_analysis
+    ) VALUES (
+        demo_user_id,
+        'Sample Bengali Folk Tale',
+        'এক সময় এক ছোট গ্রামে একটি সুন্দর গল্প ছিল... (Once upon a time in a small village, there was a beautiful story...)',
+        'text',
+        'Bengali',
+        'West Bengal',
+        ARRAY['folk', 'story', 'bengali', 'traditional'],
+        '{"author": "Traditional", "word_count": 25, "sample_data": true}',
+        '{"sentiment": "positive", "themes": ["tradition", "culture", "storytelling"], "cultural_significance": 0.85}'
+    ) ON CONFLICT DO NOTHING;
+    
+    -- Insert sample proverb
+    INSERT INTO contributions (
+        user_id, title, content, content_type, language, region, tags, metadata
+    ) VALUES (
+        demo_user_id,
+        'Sample Hindi Proverb',
+        'जैसी करनी वैसी भरनी - As you sow, so shall you reap',
+        'proverb',
+        'Hindi',
+        'North India',
+        ARRAY['proverb', 'wisdom', 'hindi', 'karma'],
+        '{"original_text": "जैसी करनी वैसी भरनी", "translation": "As you sow, so shall you reap", "meaning": "Your actions determine your consequences", "category": "wisdom", "sample_data": true}'
+    ) ON CONFLICT DO NOTHING;
+    
+    -- Insert sample Tamil story
+    INSERT INTO contributions (
+        user_id, title, content, content_type, language, region, tags, metadata
+    ) VALUES (
+        demo_user_id,
+        'Sample Tamil Cultural Story',
+        'ஒரு காலத்தில் ஒரு சிறிய கிராமத்தில் ஒரு பழைய கதை இருந்தது... (Once upon a time in a small village, there was an old story...)',
+        'text',
+        'Tamil',
+        'Tamil Nadu',
+        ARRAY['story', 'culture', 'village', 'tamil'],
+        '{"author": "Village Elder", "word_count": 30, "sample_data": true}'
+    ) ON CONFLICT DO NOTHING;
+END $$;
+
 -- 7. Verify the setup
 SELECT 'Tables created successfully!' as status;
 SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name;
