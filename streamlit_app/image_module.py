@@ -12,7 +12,15 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 # Performance optimization imports
 from utils.performance_optimizer import get_performance_optimizer
-from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
+# Safe memory manager import
+try:
+    from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
+except ImportError:
+    from utils.fallback_memory import (
+        get_fallback_memory_manager as get_memory_manager, 
+        show_fallback_memory_dashboard as show_memory_dashboard,
+        FallbackMemoryTracker as MemoryTracker
+    )
 from utils.redis_cache import get_cache_manager
 
 # Initialize performance components

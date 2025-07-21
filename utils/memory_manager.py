@@ -4,7 +4,6 @@ Optimizes memory usage and prevents memory leaks in Streamlit apps
 """
 
 import streamlit as st
-import psutil
 import gc
 import sys
 import pandas as pd
@@ -15,6 +14,14 @@ from datetime import datetime, timedelta
 import weakref
 from functools import wraps
 import tracemalloc
+
+# Safe psutil import
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +42,39 @@ class MemoryManager:
     
     def get_memory_usage(self) -> Dict[str, float]:
         """Get current memory usage statistics"""
-        process = psutil.Process()
-        memory_info = process.memory_info()
+        if not PSUTIL_AVAILABLE:
+            # Fallback memory stats without psutil
+            return {
+                "rss_mb": 0.0,
+                "vms_mb": 0.0,
+                "percent": 0.0,
+                "available_mb": 1024.0,  # Assume 1GB available
+                "total_mb": 2048.0,      # Assume 2GB total
+                "psutil_available": False
+            }
         
-        return {
-            "rss_mb": memory_info.rss / 1024 / 1024,  # Resident Set Size
-            "vms_mb": memory_info.vms / 1024 / 1024,  # Virtual Memory Size
-            "percent": process.memory_percent(),
-            "available_mb": psutil.virtual_memory().available / 1024 / 1024,
-            "total_mb": psutil.virtual_memory().total / 1024 / 1024
-        }
+        try:
+            process = psutil.Process()
+            memory_info = process.memory_info()
+            
+            return {
+                "rss_mb": memory_info.rss / 1024 / 1024,  # Resident Set Size
+                "vms_mb": memory_info.vms / 1024 / 1024,  # Virtual Memory Size
+                "percent": process.memory_percent(),
+                "available_mb": psutil.virtual_memory().available / 1024 / 1024,
+                "total_mb": psutil.virtual_memory().total / 1024 / 1024,
+                "psutil_available": True
+            }
+        except Exception as e:
+            logger.warning(f"Failed to get memory stats: {e}")
+            return {
+                "rss_mb": 0.0,
+                "vms_mb": 0.0,
+                "percent": 0.0,
+                "available_mb": 1024.0,
+                "total_mb": 2048.0,
+                "psutil_available": False
+            }
     
     def get_memory_top_stats(self, limit: int = 10) -> List[Dict]:
         """Get top memory consuming objects"""
@@ -254,6 +284,10 @@ def show_memory_dashboard():
     memory_usage = memory_manager.get_memory_usage()
     
     st.subheader("💾 Memory Usage")
+    
+    # Show warning if psutil is not available
+    if not memory_usage.get('psutil_available', True):
+        st.warning("⚠️ Advanced memory monitoring unavailable (psutil not installed). Showing basic stats only.")
     
     col1, col2, col3, col4 = st.columns(4)
     
