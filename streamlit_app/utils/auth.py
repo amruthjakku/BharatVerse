@@ -51,8 +51,28 @@ class GitLabAuth:
             # Only show error once per session
             if 'gitlab_config_error_shown' not in st.session_state:
                 st.session_state.gitlab_config_error_shown = True
-                st.error("GitLab OAuth configuration is incomplete. Please check your environment variables.")
-                st.info("💡 Run `python scripts/fix_gitlab_oauth.py` to fix this issue.")
+                st.error("🚨 GitLab OAuth configuration is incomplete!")
+                
+                # Show debug information
+                st.markdown("### 🔍 Debug Information:")
+                st.code(f"""
+Client ID: {'✅ Set' if self.client_id else '❌ Missing'}
+Client Secret: {'✅ Set' if self.client_secret else '❌ Missing'}
+Redirect URI: {'✅ Set' if self.redirect_uri else '❌ Missing'}
+Base URL: {self.base_url or '❌ Missing'}
+Detected Environment: {os.getenv('APP_ENV', 'Not set')}
+""")
+                
+                st.markdown("### 🔧 Required Environment Variables for Render:")
+                st.code("""
+GITLAB_CLIENT_ID=your_application_id_from_gitlab
+GITLAB_CLIENT_SECRET=your_secret_from_gitlab
+GITLAB_BASE_URL=https://code.swecha.org
+GITLAB_SCOPES=api read_user profile email
+APP_ENV=render
+""")
+                
+                st.info("💡 Set these environment variables in your Render dashboard → Environment tab")
     
     def _detect_redirect_uri(self) -> Optional[str]:
         """Detect the appropriate redirect URI based on the current environment"""
