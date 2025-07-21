@@ -14,10 +14,16 @@ from typing import Any, Dict, List, Optional, Callable
 import logging
 from datetime import datetime, timedelta
 
-# Import existing utilities
+# Import existing utilities with fallbacks
 from utils.redis_cache import get_cache_manager
 from utils.supabase_db import get_database_manager
-from utils.minio_storage import get_storage_manager
+
+try:
+    from utils.minio_storage import get_storage_manager
+    MINIO_AVAILABLE = True
+except ImportError:
+    MINIO_AVAILABLE = False
+    from utils.fallback_storage import get_fallback_storage_manager as get_storage_manager
 
 logger = logging.getLogger(__name__)
 

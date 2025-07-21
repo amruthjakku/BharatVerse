@@ -11,12 +11,28 @@ Purpose: Direct interface to MinIO object storage hosted on Render
 - Auto-creates buckets and handles connection management
 """
 import streamlit as st
-import boto3
-from botocore.exceptions import ClientError
 import io
 from typing import Optional, List, Dict, Any
 import logging
 import os
+
+try:
+    import boto3
+    from botocore.exceptions import ClientError
+    BOTO3_AVAILABLE = True
+except ImportError:
+    BOTO3_AVAILABLE = False
+    boto3 = None
+    ClientError = Exception
+
+try:
+    from minio import Minio
+    from minio.error import S3Error
+    MINIO_AVAILABLE = True
+except ImportError:
+    MINIO_AVAILABLE = False
+    Minio = None
+    S3Error = Exception
 
 # Optional .env support
 try:
@@ -32,9 +48,22 @@ class MinIOStorageManager:
     
     def __init__(self):
         """Initialize MinIO client using Streamlit secrets"""
+        self.available = False
+        self.client = None
+        self.bucket_name = None
+        self.endpoint_url = None
+        
+        if not BOTO3_AVAILABLE:
+            logger.warning("boto3 not available - MinIO storage disabled")
+            return
+            
         try:
             # Try both minio and r2 sections for backward compatibility
             config = st.secrets.get("minio", st.secrets.get("r2", {}))
+            
+            if not config:
+                logger.info("No MinIO/S3 configuration found - storage disabled")
+                return
             
             self.client = boto3.client(
                 's3',
@@ -45,6 +74,7 @@ class MinIOStorageManager:
             )
             self.bucket_name = config.get("bucket_name", "bharatverse-bucket")
             self.endpoint_url = config.get("endpoint_url", "")
+            self.available = True
             
             # Ensure bucket exists
             self._ensure_bucket_exists()
@@ -87,7 +117,7 @@ class MinIOStorageManager:
         Returns:
             Public URL of uploaded file or None if failed
         """
-        if not self.client:
+        if not self.available or not self.client:
             logger.error("MinIO client not initialized")
             return None
             
