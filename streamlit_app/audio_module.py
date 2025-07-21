@@ -244,29 +244,95 @@ def audio_page():
     # Check if audio libraries are available
     if not AUDIO_AVAILABLE:
         st.error("🚫 Audio recording is not available on this system.")
-        st.info("""
-        **To enable audio recording, you need to install:**
-        - PortAudio library (system dependency)
-        - Python audio packages: `pip install sounddevice soundfile`
         
+        # Detailed installation instructions
+        with st.expander("🔧 How to Enable Audio Recording", expanded=True):
+            st.markdown("""
+            ### System Dependencies Required:
+            
+            **For macOS:**
+            ```bash
+            brew install portaudio
+            ```
+            
+            **For Ubuntu/Debian:**
+            ```bash
+            sudo apt-get install portaudio19-dev python3-pyaudio
+            ```
+            
+            **For CentOS/RHEL:**
+            ```bash
+            sudo yum install portaudio-devel
+            ```
+            
+            **For Windows:**
+            - Download and install PortAudio from: https://www.portaudio.com/
+            - Or use conda: `conda install portaudio`
+            
+            ### Python Packages (already in requirements.txt):
+            ```bash
+            pip install sounddevice soundfile
+            ```
+            
+            ### For Streamlit Cloud Deployment:
+            Add to `packages.txt` file:
+            ```
+            portaudio19-dev
+            python3-pyaudio
+            ```
+            """)
+        
+        st.info("""
         **For now, you can:**
-        - Upload pre-recorded audio files
-        - Use the text and image modules
-        - Explore other features of BharatVerse
+        - 📁 Upload pre-recorded audio files (supported below)
+        - 📝 Use the text stories module
+        - 📸 Use the visual heritage module
+        - 🔍 Explore other features of BharatVerse
         """)
         
         # Show file upload as alternative
         st.markdown("---")
-        st.markdown("### 📁 Upload Audio File")
+        st.markdown("### 📁 Upload Audio File Alternative")
+        st.markdown("*Since live recording is not available, you can upload pre-recorded audio files*")
+        
+        # Language selection for uploaded audio
+        col1, col2 = st.columns(2)
+        with col1:
+            upload_language = st.selectbox(
+                "Audio Language",
+                ["Hindi", "Bengali", "Tamil", "Telugu", "Marathi", "Gujarati", 
+                 "Kannada", "Malayalam", "Punjabi", "Odia", "Assamese", "Urdu", "English"],
+                key="upload_language"
+            )
+        
+        with col2:
+            audio_type = st.selectbox(
+                "Content Type",
+                ["Story", "Song", "Poem", "Proverb", "Interview", "Speech", "Other"],
+                key="upload_audio_type"
+            )
+        
         uploaded_file = st.file_uploader(
             "Choose an audio file", 
-            type=['wav', 'mp3', 'ogg', 'm4a'],
-            help="Upload a pre-recorded audio file for transcription"
+            type=['wav', 'mp3', 'ogg', 'm4a', 'flac'],
+            help="Upload a pre-recorded audio file for transcription and cultural preservation"
         )
         
         if uploaded_file is not None:
-            st.audio(uploaded_file, format='audio/wav')
-            st.success("Audio file uploaded successfully!")
+            # Show file info
+            file_details = {
+                "Filename": uploaded_file.name,
+                "File size": f"{uploaded_file.size / 1024:.1f} KB",
+                "File type": uploaded_file.type
+            }
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.json(file_details)
+            with col2:
+                st.audio(uploaded_file, format='audio/wav')
+            
+            st.success("✅ Audio file uploaded successfully!")
             
             # Real transcription interface
             if st.button("🔤 Transcribe Audio"):
