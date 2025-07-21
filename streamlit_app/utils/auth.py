@@ -493,6 +493,11 @@ def render_user_info():
             st.markdown("✅ **Login remembered**")
             st.caption("You'll stay logged in for 7 days")
         
+        # User dashboard link
+        st.markdown("---")
+        if st.button("👤 My Dashboard", use_container_width=True, type="primary"):
+            st.switch_page("pages/09_👤_My_Dashboard.py")
+        
         # Logout options
         col1, col2 = st.columns(2)
         
@@ -508,11 +513,12 @@ def render_user_info():
                 st.success("Logged out and login forgotten!")
                 st.rerun()
         
-        # Database status for admins
+        # Admin panel for admins only
         if auth.is_admin():
             st.markdown("---")
-            st.markdown("### 🗄️ Database Status")
+            st.markdown("### 🛡️ Admin Panel")
             
+            # Quick admin stats
             try:
                 from utils.database_viewer import get_sqlite_user_stats
                 stats = get_sqlite_user_stats()
@@ -520,14 +526,24 @@ def render_user_info():
                 if 'error' not in stats:
                     st.metric("Total Users", stats['total_users'])
                     st.metric("Active Users", stats['active_users'])
-                    
-                    if st.button("📊 View Database Admin", use_container_width=True):
-                        st.switch_page("pages/07_🗄️_Database_Admin.py")
                 else:
-                    st.error("DB Error")
+                    st.caption("Stats unavailable")
                     
             except Exception as e:
-                st.caption(f"DB Status: {str(e)[:30]}...")
+                st.caption("Stats loading...")
+            
+            # Admin dashboard button
+            if st.button("🛡️ Admin Dashboard", use_container_width=True, type="primary"):
+                st.switch_page("pages/08_🛡️_Admin_Dashboard.py")
+            
+            # Quick admin links
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🗄️ Database", use_container_width=True):
+                    st.switch_page("pages/07_🗄️_Database_Admin.py")
+            with col2:
+                if st.button("⚡ Performance", use_container_width=True):
+                    st.switch_page("pages/06_⚡_Performance.py")
 
 
 def require_auth(func):

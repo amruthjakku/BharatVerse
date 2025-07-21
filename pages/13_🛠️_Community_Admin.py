@@ -25,15 +25,31 @@ def main():
             st.info("You will be redirected to GitLab for authentication.")
         return
     
-    # Check if user is admin (you can implement admin check logic here)
+    # Check if user is admin
+    if not auth.is_admin():
+        st.error("🚫 **Admin Access Required**")
+        st.warning("This page is restricted to administrators only.")
+        
+        current_user = auth.get_current_user()
+        if current_user:
+            st.info(f"👤 Logged in as: **{current_user.get('name', 'Unknown')}**")
+            st.markdown("Contact an administrator if you need access to this panel.")
+        
+        # Show available pages for regular users
+        st.markdown("### 📋 Available Pages:")
+        st.markdown("- 🎤 **Audio Capture** - Record and contribute audio")
+        st.markdown("- 📝 **Text Stories** - Share cultural stories")
+        st.markdown("- 🖼️ **Visual Heritage** - Upload cultural images")
+        st.markdown("- 📊 **Analytics** - View your contributions")
+        st.markdown("- 🏘️ **Community** - Join community discussions")
+        return
+    
     current_user = auth.get_current_user()
     if not current_user:
         st.error("Failed to get user information")
         return
     
-    # For now, allow all authenticated users to access admin panel
-    # In production, you should check if user has admin privileges
-    st.info(f"👋 Welcome, {current_user.get('name', current_user.get('username', 'User'))}!")
+    st.success(f"👋 Welcome, Admin {current_user.get('name', current_user.get('username', 'User'))}!")
     
     # Show admin interface
     community_admin_page()

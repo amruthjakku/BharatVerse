@@ -33,15 +33,32 @@ def check_admin_access():
     auth = get_auth_manager()
     if not auth.is_authenticated():
         st.error("🔒 Please login to access the Database Admin panel")
+        st.markdown("### 🔗 Login Required")
+        from streamlit_app.utils.auth import render_login_button
+        render_login_button()
+        st.stop()
+    
+    # Check if user is admin
+    if not auth.is_admin():
+        st.error("🚫 **Admin Access Required**")
+        st.warning("This page is restricted to administrators only.")
+        
+        user_info = auth.get_current_user()
+        if user_info:
+            st.info(f"👤 Logged in as: **{user_info.get('name', 'Unknown')}**")
+            st.markdown("Contact an administrator if you need access to this panel.")
+        
+        # Show available pages for regular users
+        st.markdown("### 📋 Available Pages:")
+        st.markdown("- 🎤 **Audio Capture** - Record and contribute audio")
+        st.markdown("- 📝 **Text Stories** - Share cultural stories")
+        st.markdown("- 🖼️ **Visual Heritage** - Upload cultural images")
+        st.markdown("- 📊 **Analytics** - View your contributions")
+        st.markdown("- ⚡ **Performance** - System performance")
+        
         st.stop()
     
     user_info = auth.get_current_user()
-    if not user_info:
-        st.error("❌ Unable to verify user information")
-        st.stop()
-    
-    # For now, allow any authenticated user to view database
-    # In production, you'd check for admin role
     return user_info
 
 def show_sqlite_users():
