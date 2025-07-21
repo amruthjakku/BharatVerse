@@ -10,12 +10,18 @@ Purpose: Performance optimization through intelligent caching
 - Note: Streamlit is stateless, so session data is minimal and optional
 """
 import streamlit as st
-import redis
 import json
 import pickle
 from typing import Any, Optional, Dict, List
 import logging
 from datetime import datetime, timedelta
+
+try:
+    import redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    redis = None
 
 logger = logging.getLogger(__name__)
 
