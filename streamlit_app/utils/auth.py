@@ -26,11 +26,20 @@ class GitLabAuth:
             self.scopes = None
             return
         
-        self.client_id = os.getenv('GITLAB_CLIENT_ID')
-        self.client_secret = os.getenv('GITLAB_CLIENT_SECRET')
-        self.redirect_uri = os.getenv('GITLAB_REDIRECT_URI')
-        self.base_url = os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
-        self.scopes = os.getenv('GITLAB_SCOPES', 'api read_api read_user profile email')
+        # Try to get from Streamlit secrets first, then environment variables
+        try:
+            self.client_id = st.secrets.get("gitlab", {}).get("client_id") or os.getenv('GITLAB_CLIENT_ID')
+            self.client_secret = st.secrets.get("gitlab", {}).get("client_secret") or os.getenv('GITLAB_CLIENT_SECRET')
+            self.redirect_uri = st.secrets.get("gitlab", {}).get("redirect_uri") or os.getenv('GITLAB_REDIRECT_URI')
+            self.base_url = st.secrets.get("gitlab", {}).get("base_url") or os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
+            self.scopes = st.secrets.get("gitlab", {}).get("scopes") or os.getenv('GITLAB_SCOPES', 'api read_user profile email')
+        except Exception:
+            # Fallback to environment variables only
+            self.client_id = os.getenv('GITLAB_CLIENT_ID')
+            self.client_secret = os.getenv('GITLAB_CLIENT_SECRET')
+            self.redirect_uri = os.getenv('GITLAB_REDIRECT_URI')
+            self.base_url = os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
+            self.scopes = os.getenv('GITLAB_SCOPES', 'api read_user profile email')
         
         if not all([self.client_id, self.client_secret, self.redirect_uri]):
             # Only show error once per session
