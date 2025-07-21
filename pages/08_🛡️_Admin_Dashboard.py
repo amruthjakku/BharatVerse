@@ -140,6 +140,157 @@ def show_admin_tools():
         if st.button("🔧 System Settings", use_container_width=True):
             st.info("System settings panel coming soon")
 
+def show_user_role_management():
+    """Show user role management interface"""
+    st.subheader("👑 User Role Management")
+    
+    try:
+        user_manager = UserManager()
+        
+        # Get all users
+        import sqlite3
+        conn = sqlite3.connect(user_manager.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id, username, email, full_name, role, created_at, last_login
+            FROM users 
+            ORDER BY created_at DESC
+        """)
+        
+        users = cursor.fetchall()
+        conn.close()
+        
+        if not users:
+            st.warning("No users found in the database")
+            return
+        
+        # Show current admins
+        admins = [user for user in users if user['role'] == 'admin']
+        if admins:
+            st.markdown("### 🛡️ Current Admins")
+            for admin in admins:
+                col1, col2, col3 = st.columns([2, 2, 1])
+                with col1:
+                    st.write(f"**{admin['full_name'] or admin['username']}**")
+                with col2:
+                    st.write(f"@{admin['username']}")
+                with col3:
+                    st.write("🛡️ Admin")
+        
+        st.markdown("---")
+        
+        # Promote user to admin
+        st.markdown("### 👑 Promote User to Admin")
+        
+        # Create user selection dropdown
+        regular_users = [user for user in users if user['role'] != 'admin']
+        
+        if regular_users:
+            user_options = {}
+            for user in regular_users:
+                display_name = f"{user['full_name'] or user['username']} (@{user['username']})"
+                user_options[display_name] = user
+            
+            selected_display = st.selectbox(
+                "Select user to promote:",
+                options=list(user_options.keys()),
+                key="promote_user_select"
+            )
+            
+            if selected_display:
+                selected_user = user_options[selected_display]
+                
+                # Show user details
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.write(f"**Name:** {selected_user['full_name'] or 'Not set'}")
+                    st.write(f"**Username:** @{selected_user['username']}")
+                    st.write(f"**Email:** {selected_user['email'] or 'Not set'}")
+                
+                with col2:
+                    st.write(f"**Current Role:** {selected_user['role'] or 'user'}")
+                    st.write(f"**Member Since:** {selected_user['created_at']}")
+                    st.write(f"**Last Login:** {selected_user['last_login'] or 'Never'}")
+                
+                # Promotion button
+                if st.button(f"👑 Make {selected_user['username']} an Admin", type="primary"):
+                    try:
+                        # Update user role
+                        conn = sqlite3.connect(user_manager.db_path)
+                        cursor = conn.cursor()
+                        
+                        cursor.execute("""
+                            UPDATE users 
+                            SET role = 'admin', updated_at = CURRENT_TIMESTAMP
+                            WHERE id = ?
+                        """, (selected_user['id'],))
+                        
+                        conn.commit()
+                        conn.close()
+                        
+                        st.success(f"✅ Successfully promoted {selected_user['username']} to admin!")
+                        st.balloons()
+                        
+                        # Log the action
+                        st.info(f"🛡️ {selected_user['username']} now has admin privileges and can access all admin panels.")
+                        
+                        # Refresh the page
+                        st.rerun()
+                        
+                    except Exception as e:
+                        st.error(f"❌ Failed to promote user: {e}")
+        else:
+            st.info("All users are already admins!")
+        
+        # Demote admin section
+        if len(admins) > 1:  # Don't allow demoting the last admin
+            st.markdown("---")
+            st.markdown("### ⬇️ Demote Admin to User")
+            
+            demotable_admins = admins  # Could exclude current user if needed
+            
+            admin_options = {}
+            for admin in demotable_admins:
+                display_name = f"{admin['full_name'] or admin['username']} (@{admin['username']})"
+                admin_options[display_name] = admin
+            
+            selected_admin_display = st.selectbox(
+                "Select admin to demote:",
+                options=list(admin_options.keys()),
+                key="demote_admin_select"
+            )
+            
+            if selected_admin_display:
+                selected_admin = admin_options[selected_admin_display]
+                
+                st.warning(f"⚠️ This will remove admin privileges from {selected_admin['username']}")
+                
+                if st.button(f"⬇️ Demote {selected_admin['username']} to User", type="secondary"):
+                    try:
+                        conn = sqlite3.connect(user_manager.db_path)
+                        cursor = conn.cursor()
+                        
+                        cursor.execute("""
+                            UPDATE users 
+                            SET role = 'user', updated_at = CURRENT_TIMESTAMP
+                            WHERE id = ?
+                        """, (selected_admin['id'],))
+                        
+                        conn.commit()
+                        conn.close()
+                        
+                        st.success(f"✅ Successfully demoted {selected_admin['username']} to regular user")
+                        st.rerun()
+                        
+                    except Exception as e:
+                        st.error(f"❌ Failed to demote user: {e}")
+        
+    except Exception as e:
+        st.error(f"Error loading user management: {e}")
+        st.code(str(e))
+
 def show_recent_activity():
     """Show recent system activity"""
     st.subheader("📈 Recent Activity")
@@ -244,7 +395,8 @@ def main():
         "Choose section:",
         [
             "📊 Overview",
-            "🛠️ Admin Tools", 
+            "🛠️ Admin Tools",
+            "👑 User Roles", 
             "📈 Recent Activity",
             "🏥 System Health",
             "⚙️ Quick Actions"
@@ -256,6 +408,9 @@ def main():
         
     elif menu_option == "🛠️ Admin Tools":
         show_admin_tools()
+        
+    elif menu_option == "👑 User Roles":
+        show_user_role_management()
         
     elif menu_option == "📈 Recent Activity":
         show_recent_activity()
