@@ -215,7 +215,84 @@ APP_ENV=render
         db_user = self.get_current_db_user()
         return db_user and db_user.get('role') in ['admin', 'moderator']
     
-    def logout(self):
+    def save_persistent_login(self):
+        """Save login state for persistence across sessions"""
+        if not self.is_authenticated():
+            return
+            
+        # Save to a persistent key in session state that survives page reloads
+        persistent_data = {
+            'user_info': st.session_state.get('user_info'),
+            'access_token': st.session_state.get('access_token'),
+            'refresh_token': st.session_state.get('refresh_token'),
+            'token_expires_at': st.session_state.get('token_expires_at'),
+            'saved_at': datetime.now().isoformat(),
+            'remember_login': True
+        }
+        
+        # Use a special key that's less likely to be cleared
+        st.session_state['_persistent_auth'] = persistent_data
+    
+    def restore_persistent_login(self) -> bool:
+        """Restore login state from persistent storage"""
+        if self.disabled:
+            return False
+            
+        persistent_data = st.session_state.get('_persistent_auth')
+        if not persistent_data or not persistent_data.get('remember_login'):
+            return False
+        
+        # Check if saved data is not too old (7 days max)
+        saved_at = persistent_data.get('saved_at')
+        if saved_at:
+            saved_time = datetime.fromisoformat(saved_at)
+            if datetime.now() - saved_time > timedelta(days=7):
+                # Clear old persistent data
+                if '_persistent_auth' in st.session_state:
+                    del st.session_state['_persistent_auth']
+                return False
+        
+        # Check if token is still valid
+        token_expires_at = persistent_data.get('token_expires_at')
+        if token_expires_at:
+            expires_time = datetime.fromisoformat(token_expires_at)
+            if datetime.now() > expires_time:
+                # Try to refresh token if available
+                refresh_token = persistent_data.get('refresh_token')
+                if refresh_token:
+                    token_data = self.refresh_token(refresh_token)
+                    if token_data:
+                        # Update with new token data
+                        persistent_data['access_token'] = token_data['access_token']
+                        if 'refresh_token' in token_data:
+                            persistent_data['refresh_token'] = token_data['refresh_token']
+                        
+                        expires_in = token_data.get('expires_in', 7200)
+                        expires_at = datetime.now() + timedelta(seconds=expires_in)
+                        persistent_data['token_expires_at'] = expires_at.isoformat()
+                        
+                        # Save updated data
+                        st.session_state['_persistent_auth'] = persistent_data
+                    else:
+                        # Refresh failed, clear persistent data
+                        if '_persistent_auth' in st.session_state:
+                            del st.session_state['_persistent_auth']
+                        return False
+                else:
+                    # No refresh token, clear persistent data
+                    if '_persistent_auth' in st.session_state:
+                        del st.session_state['_persistent_auth']
+                    return False
+        
+        # Restore session state
+        st.session_state['user_info'] = persistent_data.get('user_info')
+        st.session_state['access_token'] = persistent_data.get('access_token')
+        st.session_state['refresh_token'] = persistent_data.get('refresh_token')
+        st.session_state['token_expires_at'] = persistent_data.get('token_expires_at')
+        
+        return True
+    
+    def logout(self, clear_persistent: bool = True):
         """Clear authentication session"""
         keys_to_remove = [
             'user_info', 'access_token', 'refresh_token', 
@@ -224,6 +301,10 @@ APP_ENV=render
         for key in keys_to_remove:
             if key in st.session_state:
                 del st.session_state[key]
+        
+        # Also clear persistent login if requested
+        if clear_persistent and '_persistent_auth' in st.session_state:
+            del st.session_state['_persistent_auth']
     
     def is_token_expired(self) -> bool:
         """Check if access token is expired"""
@@ -283,7 +364,11 @@ def handle_oauth_callback():
                     {'method': 'gitlab_oauth', 'ip': 'unknown'}
                 )
                 
+                # Save persistent login (remember me is enabled by default)
+                auth.save_persistent_login()
+                
                 st.success(f"Successfully authenticated as {user_info.get('name', 'Unknown User')}!")
+                st.info("✅ Login will be remembered for 7 days")
                 # Clear query parameters using new API
                 st.query_params.clear()
                 st.rerun()
@@ -360,6 +445,10 @@ def render_login_button():
         st.markdown("**Alternative:** If the button above doesn't work, use this direct link:")
         st.markdown(f"### 🔗 **[Login with GitLab (Direct Link)]({auth_url})**")
         
+        # Remember me info
+        st.markdown("---")
+        st.info("🔒 **Auto-Remember:** Your login will be automatically remembered for 7 days for convenience.")
+        
         # Show the OAuth URL for debugging
         if st.checkbox("🔍 Show OAuth Debug Info", key="oauth_debug"):
             st.code(f"OAuth URL: {auth_url}")
@@ -398,10 +487,26 @@ def render_user_info():
         if user_info.get('email'):
             st.markdown(f"📧 {user_info['email']}")
         
-        # Logout button
-        if st.button("🚪 Logout", use_container_width=True):
-            auth.logout()
-            st.rerun()
+        # Login persistence status
+        persistent_data = st.session_state.get('_persistent_auth')
+        if persistent_data and persistent_data.get('remember_login'):
+            st.markdown("✅ **Login remembered**")
+            st.caption("You'll stay logged in for 7 days")
+        
+        # Logout options
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if st.button("🚪 Logout", use_container_width=True, help="Logout but keep login remembered"):
+                auth.logout(clear_persistent=False)
+                st.success("Logged out! Login will be restored next visit.")
+                st.rerun()
+        
+        with col2:
+            if st.button("🗑️ Forget", use_container_width=True, help="Logout and forget login", type="secondary"):
+                auth.logout(clear_persistent=True)
+                st.success("Logged out and login forgotten!")
+                st.rerun()
 
 
 def require_auth(func):
@@ -474,6 +579,17 @@ def make_gitlab_api_request(endpoint: str, method: str = 'GET', data: Optional[D
 # Initialize authentication on module import
 def init_auth():
     """Initialize authentication system"""
+    auth = GitLabAuth()
+    
+    # Try to restore persistent login first (if not already authenticated)
+    if not auth.is_authenticated():
+        restored = auth.restore_persistent_login()
+        if restored:
+            # Successfully restored login
+            user_info = auth.get_current_user()
+            if user_info:
+                st.toast(f"Welcome back, {user_info.get('name', 'User')}! 👋", icon="✅")
+    
     # Handle OAuth callback if present
     if 'code' in st.query_params:
         handle_oauth_callback()

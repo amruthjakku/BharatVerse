@@ -48,6 +48,22 @@ def gitlab_integration_page():
         
         if user_info.get('web_url'):
             st.markdown(f"**Profile:** [{user_info['web_url']}]({user_info['web_url']})")
+        
+        # Logout section
+        st.markdown("---")
+        col_logout1, col_logout2 = st.columns(2)
+        
+        with col_logout1:
+            if st.button("🚪 Logout", use_container_width=True, help="Logout but remember login"):
+                auth.logout(clear_persistent=False)
+                st.success("Logged out! You'll be automatically logged in next time.")
+                st.rerun()
+        
+        with col_logout2:
+            if st.button("🗑️ Forget Login", use_container_width=True, type="secondary", help="Logout and forget login"):
+                auth.logout(clear_persistent=True)
+                st.success("Logged out and login forgotten!")
+                st.rerun()
     
     st.markdown("---")
     
