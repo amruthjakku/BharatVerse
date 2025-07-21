@@ -477,12 +477,52 @@ class CloudAIManager:
         }
         
         # Check inference APIs
+        # Test actual API connectivity
+        inference_status = "unavailable"
+        api_tests = {
+            "whisper_configured": False,
+            "text_analysis_configured": False,
+            "image_analysis_configured": False,
+            "translation_configured": False
+        }
+        
+        if self.inference_manager:
+            try:
+                # Test if APIs are actually working
+                inference_config = st.secrets.get("inference", {})
+                token = inference_config.get("huggingface_token", "")
+                
+                if token:
+                    # Quick test of text analysis API
+                    import requests
+                    headers = {"Authorization": f"Bearer {token}"}
+                    test_url = inference_config.get("text_analysis_api", "")
+                    
+                    if test_url:
+                        try:
+                            response = requests.post(
+                                test_url,
+                                headers=headers,
+                                json={"inputs": "test"},
+                                timeout=5
+                            )
+                            if response.status_code in [200, 503]:  # 503 = model loading
+                                inference_status = "available"
+                                api_tests["text_analysis_configured"] = True
+                        except:
+                            pass
+                
+                # Check if endpoints are configured
+                api_tests["whisper_configured"] = bool(inference_config.get("whisper_api"))
+                api_tests["image_analysis_configured"] = bool(inference_config.get("image_analysis_api"))
+                api_tests["translation_configured"] = bool(inference_config.get("translation_api"))
+                
+            except Exception as e:
+                logger.warning(f"API status check failed: {e}")
+        
         status["services"]["inference_api"] = {
-            "status": "available" if self.inference_manager else "unavailable",
-            "whisper_configured": bool(st.secrets.get("inference", {}).get("whisper_api")),
-            "text_analysis_configured": bool(st.secrets.get("inference", {}).get("text_analysis_api")),
-            "image_analysis_configured": bool(st.secrets.get("inference", {}).get("image_analysis_api")),
-            "translation_configured": bool(st.secrets.get("inference", {}).get("translation_api"))
+            "status": inference_status,
+            **api_tests
         }
         
         # Check cache
