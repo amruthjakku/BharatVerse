@@ -249,7 +249,43 @@ def render_login_button():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🔐 Login with GitLab", use_container_width=True, type="primary"):
+        # Custom GitLab login button with logo
+        gitlab_button_html = """
+        <style>
+        .gitlab-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #FC6D26;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .gitlab-login-btn:hover {
+            background-color: #E24329;
+            color: white;
+            text-decoration: none;
+        }
+        .gitlab-logo {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            filter: brightness(0) invert(1);
+        }
+        </style>
+        """
+        st.markdown(gitlab_button_html, unsafe_allow_html=True)
+        
+        # Use the standard button but with custom styling
+        if st.button("🔐 Login with GitLab", use_container_width=True, type="primary", key="gitlab_login"):
             auth_url = auth.get_authorization_url()
             st.markdown(f'<meta http-equiv="refresh" content="0; url={auth_url}">', unsafe_allow_html=True)
             st.info("Redirecting to GitLab for authentication...")

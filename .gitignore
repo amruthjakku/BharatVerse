@@ -92,6 +92,9 @@ docker-compose.override.yml
 local_models/
 temp/
 
+# Assets (keep logos and images)
+# assets/ - commented out to track logos
+
 # Debug and test files
 debug_*.py
 test_oauth_*.py

@@ -60,7 +60,7 @@ with st.sidebar:
 
     # Navigation
     auth = GitLabAuth()
-    nav_options = ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "🔍 Discover", "📊 Analytics", "🤝 Community", "🤖 AI Insights", "👥 Collaboration", "🦊 GitLab", "Browse Contributions", "About"]
+    nav_options = ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "🔍 Discover", "📊 Analytics", "🤝 Community", "🤖 AI Insights", "👥 Collaboration", "🔗 GitLab", "Browse Contributions", "About"]
     
     # Add authenticated user options
     if auth.is_authenticated():
@@ -255,7 +255,7 @@ elif page == "🤖 AI Insights":
 elif page == "👥 Collaboration":
     collaboration_page()
 
-elif page == "🦊 GitLab":
+elif page == "🔗 GitLab":
     gitlab_page()
 
 elif page == "👤 My Profile":

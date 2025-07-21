@@ -379,11 +379,16 @@ def audio_page():
                         
                         # Use enhanced AI models for transcription
                         st.info("🤖 Using real AI models for transcription...")
-                        result = ai_manager.process_audio(
-                            audio_data, 
-                            language=lang_code, 
-                            translate=True
-                        )
+                        
+                        # Check if ai_manager is actually available
+                        if 'ai_manager' in globals():
+                            result = ai_manager.process_audio(
+                                audio_data, 
+                                language=lang_code, 
+                                translate=True
+                            )
+                        else:
+                            raise NameError("ai_manager not available")
                         
                         if result.get('success'):
                             st.success("✅ Transcription complete!")
@@ -442,10 +447,10 @@ def audio_page():
                             
                     except Exception as e:
                         st.error(f"Error during transcription: {str(e)}")
-                        # Fallback to API call
-                        st.info("Falling back to API transcription...")
+                        # Fallback to basic transcription placeholder
+                        st.info("Falling back to basic transcription...")
                         try:
-                            # Prepare audio file for API
+                            # Try API call first
                             if st.session_state.get('recorded_audio') is not None:
                                 # Convert numpy array to audio file
                                 audio_buffer = io.BytesIO()
@@ -465,7 +470,8 @@ def audio_page():
                                 data={
                                     'language': lang_code or '',
                                     'translate': 'true'
-                                }
+                                },
+                                timeout=10
                             )
                             
                             if response.status_code == 200:
@@ -481,10 +487,44 @@ def audio_page():
                                 st.error(f"API error: {response.status_code}")
                         except Exception as api_e:
                             st.error(f"API fallback also failed: {str(api_e)}")
+                            # Provide manual transcription option
+                            st.info("💡 **Manual Transcription Available**")
+                            st.markdown("Since automatic transcription is not available, you can manually transcribe the audio:")
+                            manual_transcription = st.text_area(
+                                "Manual Transcription", 
+                                "", 
+                                height=150,
+                                placeholder="Please listen to the audio and type the transcription here..."
+                            )
+                            if manual_transcription.strip():
+                                st.session_state.transcription_result = {
+                                    'success': True,
+                                    'transcription': manual_transcription,
+                                    'language': language if language != "Auto-detect" else "unknown",
+                                    'confidence': 1.0,
+                                    'method': 'manual'
+                                }
+                                st.success("✅ Manual transcription saved!")
                 
                 else:
                     st.warning("🚧 AI models not available. Install dependencies with: pip install -r requirements.txt")
-                    st.info("Please provide manual transcription below or install AI models for automatic transcription.")
+                    st.info("💡 **Manual Transcription Available**")
+                    st.markdown("You can still contribute by manually transcribing the audio:")
+                    manual_transcription = st.text_area(
+                        "Manual Transcription", 
+                        "", 
+                        height=150,
+                        placeholder="Please listen to the audio and type the transcription here..."
+                    )
+                    if manual_transcription.strip():
+                        st.session_state.transcription_result = {
+                            'success': True,
+                            'transcription': manual_transcription,
+                            'language': language if language != "Auto-detect" else "unknown",
+                            'confidence': 1.0,
+                            'method': 'manual'
+                        }
+                        st.success("✅ Manual transcription saved!")
                 
                 # Metadata
                 st.markdown("### 🏷️ Metadata & Tags")
