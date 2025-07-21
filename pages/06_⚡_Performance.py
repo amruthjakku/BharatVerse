@@ -30,9 +30,30 @@ def main():
     st.markdown("Monitor and optimize BharatVerse performance in real-time")
     
     # Check admin access
-    if st.session_state.get("user_role") != "admin":
-        st.error("🔒 Admin access required for performance dashboard")
-        st.info("Please log in as an administrator to access performance monitoring features.")
+    from streamlit_app.utils.auth import get_auth_manager
+    auth = get_auth_manager()
+    
+    if not auth.is_authenticated():
+        st.error("🔒 Please login to access the Performance dashboard")
+        from streamlit_app.utils.auth import render_login_button
+        render_login_button()
+        return
+    
+    if not auth.is_admin():
+        st.error("🚫 **Admin Access Required**")
+        st.warning("Performance monitoring is restricted to administrators only.")
+        
+        user_info = auth.get_current_user()
+        if user_info:
+            st.info(f"👤 Logged in as: **{user_info.get('name', 'Unknown')}**")
+            st.markdown("Contact an administrator if you need access to performance monitoring.")
+        
+        # Show available pages for regular users
+        st.markdown("### 📋 Available Pages:")
+        st.markdown("- 🎤 **Audio Capture** - Record and contribute audio")
+        st.markdown("- 📝 **Text Stories** - Share cultural stories")
+        st.markdown("- 🖼️ **Visual Heritage** - Upload cultural images")
+        st.markdown("- 📊 **Analytics** - View your contributions")
         return
     
     # Initialize performance components
