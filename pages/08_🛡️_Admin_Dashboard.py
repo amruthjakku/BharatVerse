@@ -13,10 +13,24 @@ from datetime import datetime, timedelta
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-# Import utilities
-from streamlit_app.utils.auth import get_auth_manager
-from streamlit_app.utils.user_manager import UserManager
-from streamlit_app.utils.main_styling import load_custom_css
+# Import utilities with error handling
+try:
+    from streamlit_app.utils.auth import get_auth_manager
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
+
+try:
+    from streamlit_app.utils.user_manager import UserManager
+    USER_MANAGER_AVAILABLE = True
+except ImportError:
+    USER_MANAGER_AVAILABLE = False
+
+try:
+    from streamlit_app.utils.main_styling import load_custom_css
+    STYLING_AVAILABLE = True
+except ImportError:
+    STYLING_AVAILABLE = False
 
 # Safe imports
 try:
@@ -27,12 +41,38 @@ except ImportError:
 
 def check_admin_access():
     """Check if current user has admin access"""
+    if not AUTH_AVAILABLE:
+        # Use fallback auth
+        try:
+            from utils.fallback_auth import get_fallback_auth_manager, render_fallback_login
+            auth = get_fallback_auth_manager()
+            
+            if not auth.is_authenticated():
+                st.error("🔒 Please login to access the Admin Dashboard")
+                render_fallback_login()
+                st.stop()
+            
+            if not auth.is_admin():
+                st.error("🚫 **Admin Access Required**")
+                st.warning("Enable admin demo mode to access this dashboard.")
+                render_fallback_login()
+                st.stop()
+            
+            return auth.get_current_user()
+        except ImportError:
+            st.error("🔒 Authentication system not available")
+            st.warning("Admin dashboard requires authentication to be configured.")
+            st.stop()
+    
     auth = get_auth_manager()
     if not auth.is_authenticated():
         st.error("🔒 Please login to access the Admin Dashboard")
         st.markdown("### 🔗 Login Required")
-        from streamlit_app.utils.auth import render_login_button
-        render_login_button()
+        try:
+            from streamlit_app.utils.auth import render_login_button
+            render_login_button()
+        except ImportError:
+            st.info("Please configure authentication to access this dashboard.")
         st.stop()
     
     # Check if user is admin

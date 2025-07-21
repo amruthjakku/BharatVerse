@@ -16,8 +16,17 @@ try:
     from utils.memory_manager import get_memory_manager, show_memory_dashboard
 except ImportError:
     from utils.fallback_memory import get_fallback_memory_manager as get_memory_manager, show_fallback_memory_dashboard as show_memory_dashboard
-from utils.redis_cache import get_cache_manager
-from utils.async_client import run_parallel_api_calls
+try:
+    from utils.redis_cache import get_cache_manager
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+
+try:
+    from utils.async_client import run_parallel_api_calls
+    ASYNC_CLIENT_AVAILABLE = True
+except ImportError:
+    ASYNC_CLIENT_AVAILABLE = False
 
 def main():
     st.set_page_config(
@@ -59,7 +68,12 @@ def main():
     # Initialize performance components
     optimizer = get_performance_optimizer()
     memory_manager = get_memory_manager()
-    cache_manager = get_cache_manager()
+    
+    # Initialize cache manager conditionally
+    if REDIS_AVAILABLE:
+        cache_manager = get_cache_manager()
+    else:
+        cache_manager = None
     
     # Performance overview
     st.markdown("## 📊 System Overview")
@@ -248,14 +262,18 @@ def main():
                     {"method": "GET", "url": "https://httpbin.org/delay/1"},
                 ]
                 
-                start_time = time.time()
-                results = run_parallel_api_calls(test_apis)
-                end_time = time.time()
-                
-                successful = len([r for r in results if r.get("status") != "error"])
-                
-                st.success(f"✅ API test completed in {end_time - start_time:.2f}s")
-                st.info(f"Successful requests: {successful}/{len(test_apis)}")
+                if ASYNC_CLIENT_AVAILABLE:
+                    start_time = time.time()
+                    results = run_parallel_api_calls(test_apis)
+                    end_time = time.time()
+                    
+                    successful = len([r for r in results if r.get("status") != "error"])
+                    
+                    st.success(f"✅ API test completed in {end_time - start_time:.2f}s")
+                    st.info(f"Successful requests: {successful}/{len(test_apis)}")
+                else:
+                    st.warning("⚠️ Async client not available. Install aiohttp to enable API testing.")
+                    st.info("Run: `pip install aiohttp` to enable this feature.")
         
         # Performance test runner
         st.markdown("#### 🏃‍♂️ Performance Test Suite")
