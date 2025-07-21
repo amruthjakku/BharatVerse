@@ -20,14 +20,28 @@ from streamlit_app.utils.main_styling import load_custom_css
 from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, init_auth
 from streamlit_app.utils.user_manager import user_manager
 
-# Import performance optimizations
-from utils.performance_optimizer import (
-    get_performance_optimizer, 
-    show_performance_dashboard,
-    clear_all_caches
-)
-from utils.memory_manager import get_memory_manager
-from utils.redis_cache import get_cache_manager
+# Import performance optimizations (with fallbacks for cloud deployment)
+try:
+    from utils.performance_optimizer import (
+        get_performance_optimizer, 
+        show_performance_dashboard,
+        clear_all_caches
+    )
+    PERFORMANCE_AVAILABLE = True
+except ImportError:
+    PERFORMANCE_AVAILABLE = False
+
+try:
+    from utils.memory_manager import get_memory_manager
+    MEMORY_MANAGER_AVAILABLE = True
+except ImportError:
+    MEMORY_MANAGER_AVAILABLE = False
+
+try:
+    from utils.redis_cache import get_cache_manager
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
 
 # Import cloud AI manager if in cloud mode
 if IS_CLOUD_DEPLOYMENT:
