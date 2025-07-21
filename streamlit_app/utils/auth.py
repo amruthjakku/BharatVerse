@@ -507,6 +507,27 @@ def render_user_info():
                 auth.logout(clear_persistent=True)
                 st.success("Logged out and login forgotten!")
                 st.rerun()
+        
+        # Database status for admins
+        if auth.is_admin():
+            st.markdown("---")
+            st.markdown("### 🗄️ Database Status")
+            
+            try:
+                from utils.database_viewer import get_sqlite_user_stats
+                stats = get_sqlite_user_stats()
+                
+                if 'error' not in stats:
+                    st.metric("Total Users", stats['total_users'])
+                    st.metric("Active Users", stats['active_users'])
+                    
+                    if st.button("📊 View Database Admin", use_container_width=True):
+                        st.switch_page("pages/07_🗄️_Database_Admin.py")
+                else:
+                    st.error("DB Error")
+                    
+            except Exception as e:
+                st.caption(f"DB Status: {str(e)[:30]}...")
 
 
 def require_auth(func):
