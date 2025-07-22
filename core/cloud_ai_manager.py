@@ -525,12 +525,32 @@ class CloudAIManager:
             **api_tests
         }
         
-        # Check cache
-        status["services"]["redis_cache"] = {
-            "status": "connected" if self.cache_manager.is_connected() else "disconnected",
-            "caching_enabled": self.cache_enabled,
-            "cache_ttl_hours": self.cache_ttl_hours
-        }
+        # Check cache with enhanced error handling
+        try:
+            cache_connected = self.cache_manager.is_connected() if self.cache_manager else False
+            cache_status = "connected" if cache_connected else "disconnected"
+            
+            # Additional cache info for debugging
+            cache_info = {
+                "status": cache_status,
+                "caching_enabled": self.cache_enabled,
+                "cache_ttl_hours": self.cache_ttl_hours
+            }
+            
+            # Add debug info if cache is disconnected
+            if not cache_connected and hasattr(self.cache_manager, 'use_rest_api'):
+                cache_info["fallback_mode"] = "REST API" if self.cache_manager.use_rest_api else "Direct Redis"
+                cache_info["debug"] = "Check Streamlit logs for connection details"
+            
+            status["services"]["redis_cache"] = cache_info
+            
+        except Exception as e:
+            logger.error(f"Error checking cache status: {e}")
+            status["services"]["redis_cache"] = {
+                "status": "error",
+                "caching_enabled": self.cache_enabled,
+                "error": str(e)
+            }
         
         # Check database
         try:
