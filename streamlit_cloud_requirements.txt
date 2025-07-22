@@ -24,9 +24,10 @@ torch>=2.0.0
 torchaudio>=2.0.0
 torchvision>=0.15.0
 
-# Audio processing (lightweight)
+# Audio processing (lightweight - file processing only, no live recording)
 librosa>=0.10.0
 soundfile>=0.12.0
+# Note: sounddevice is NOT included as live recording is not supported in Streamlit Cloud
 
 # Image processing
 opencv-python-headless>=4.8.0

@@ -5,8 +5,6 @@ Provides live audio recording functionality with visualization
 
 import streamlit as st
 import numpy as np
-import sounddevice as sd
-import soundfile as sf
 import threading
 import time
 import queue
@@ -16,6 +14,47 @@ from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
 
+# Try to import audio libraries with proper error handling
+try:
+    import sounddevice as sd
+    import soundfile as sf
+    AUDIO_RECORDING_AVAILABLE = True
+except (ImportError, OSError) as e:
+    AUDIO_RECORDING_AVAILABLE = False
+    # Create dummy modules for compatibility
+    class DummySD:
+        @staticmethod
+        def InputStream(*args, **kwargs):
+            raise RuntimeError("Audio recording not available in this environment")
+        @staticmethod
+        def query_devices():
+            return []
+    
+    class DummySF:
+        @staticmethod
+        def write(*args, **kwargs):
+            raise RuntimeError("Audio file writing not available")
+    
+    sd = DummySD()
+    sf = DummySF()
+
+# Detect if running in cloud environment
+def is_cloud_environment():
+    """Detect if running in a cloud environment where audio recording is not supported"""
+    import os
+    # Check for common cloud environment indicators
+    cloud_indicators = [
+        '/mount/src/',  # Streamlit Cloud
+        '/app/',        # Heroku
+        '/workspace/',  # GitHub Codespaces
+        'STREAMLIT_CLOUD' in os.environ,
+        'HEROKU' in os.environ,
+        'CODESPACE_NAME' in os.environ
+    ]
+    
+    current_path = os.getcwd()
+    return any(indicator in current_path if isinstance(indicator, str) else indicator for indicator in cloud_indicators)
+
 class AudioRecorder:
     def __init__(self, sample_rate=44100, channels=1):
         self.sample_rate = sample_rate
@@ -24,9 +63,14 @@ class AudioRecorder:
         self.audio_data = []
         self.audio_queue = queue.Queue()
         self.recording_thread = None
+        self.cloud_env = is_cloud_environment()
         
     def start_recording(self):
         """Start audio recording"""
+        # Check if recording is available
+        if self.cloud_env or not AUDIO_RECORDING_AVAILABLE:
+            raise RuntimeError("Live audio recording is not available in this environment. Please use file upload instead.")
+            
         if self.recording:
             return False
             
@@ -39,21 +83,25 @@ class AudioRecorder:
             if self.recording:
                 self.audio_queue.put(indata.copy())
         
-        # Start recording stream
-        self.stream = sd.InputStream(
-            samplerate=self.sample_rate,
-            channels=self.channels,
-            callback=audio_callback,
-            dtype=np.float32
-        )
-        
-        self.stream.start()
-        
-        # Start data collection thread
-        self.recording_thread = threading.Thread(target=self._collect_audio_data)
-        self.recording_thread.start()
-        
-        return True
+        try:
+            # Start recording stream
+            self.stream = sd.InputStream(
+                samplerate=self.sample_rate,
+                channels=self.channels,
+                callback=audio_callback,
+                dtype=np.float32
+            )
+            
+            self.stream.start()
+            
+            # Start data collection thread
+            self.recording_thread = threading.Thread(target=self._collect_audio_data)
+            self.recording_thread.start()
+            
+            return True
+        except Exception as e:
+            self.recording = False
+            raise RuntimeError(f"Failed to start audio recording: {str(e)}")
     
     def stop_recording(self):
         """Stop audio recording"""
@@ -163,6 +211,36 @@ def create_audio_spectrum(audio_data, sample_rate):
 
 def audio_recorder_component():
     """Main audio recorder component"""
+    # Check if we're in a cloud environment
+    cloud_env = is_cloud_environment()
+    recording_available = AUDIO_RECORDING_AVAILABLE and not cloud_env
+    
+    if not recording_available:
+        st.markdown("### 📁 Audio File Upload")
+        st.info("🌐 Live audio recording is not available in cloud environments. Please upload an audio file instead.")
+        
+        uploaded_file = st.file_uploader(
+            "Upload Audio File", 
+            type=['wav', 'mp3', 'ogg', 'm4a', 'flac'],
+            help="Upload your audio recording (folk songs, stories, oral traditions)"
+        )
+        
+        if uploaded_file:
+            st.session_state.uploaded_audio = uploaded_file
+            st.audio(uploaded_file)
+            st.success("✅ Audio file uploaded successfully!")
+            
+            # Try to extract basic info
+            try:
+                # For WAV files, we can get some basic info
+                if uploaded_file.name.lower().endswith('.wav'):
+                    file_size = len(uploaded_file.getvalue())
+                    st.info(f"📊 File size: {file_size / 1024:.1f} KB")
+            except:
+                pass
+        
+        return None, None
+    
     st.markdown("### 🎤 Live Audio Recording")
     
     # Initialize recorder in session state
@@ -195,18 +273,25 @@ def audio_recorder_component():
     
     with col1:
         if st.button("🔴 Start Recording", disabled=recorder.recording):
-            if recorder.start_recording():
-                st.session_state.recording_start_time = time.time()
-                st.rerun()
+            try:
+                if recorder.start_recording():
+                    st.session_state.recording_start_time = time.time()
+                    st.rerun()
+            except RuntimeError as e:
+                st.error(f"❌ Recording failed: {str(e)}")
+                st.info("💡 Try uploading an audio file instead using the file uploader below.")
     
     with col2:
         if st.button("⏹️ Stop Recording", disabled=not recorder.recording):
-            audio_data = recorder.stop_recording()
-            if audio_data is not None:
-                st.session_state.recorded_audio = audio_data
-                st.session_state.sample_rate = recorder.sample_rate
-                st.success("✅ Recording saved!")
-            st.rerun()
+            try:
+                audio_data = recorder.stop_recording()
+                if audio_data is not None:
+                    st.session_state.recorded_audio = audio_data
+                    st.session_state.sample_rate = recorder.sample_rate
+                    st.success("✅ Recording saved!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Failed to stop recording: {str(e)}")
     
     with col3:
         if st.button("🗑️ Clear Recording"):
@@ -285,6 +370,24 @@ def audio_recorder_component():
             os.unlink(tmp_file.name)
         except:
             pass
+    
+    # Add file upload option as alternative
+    if recording_available:
+        st.markdown("---")
+        st.markdown("### 📁 Alternative: Upload Audio File")
+        st.info("💡 You can also upload a pre-recorded audio file instead of recording live.")
+        
+        uploaded_file = st.file_uploader(
+            "Upload Audio File", 
+            type=['wav', 'mp3', 'ogg', 'm4a', 'flac'],
+            help="Upload your audio recording (folk songs, stories, oral traditions)",
+            key="fallback_uploader"
+        )
+        
+        if uploaded_file:
+            st.session_state.uploaded_audio = uploaded_file
+            st.audio(uploaded_file)
+            st.success("✅ Audio file uploaded successfully!")
     
     return st.session_state.get('recorded_audio'), st.session_state.get('sample_rate', 44100)
 
