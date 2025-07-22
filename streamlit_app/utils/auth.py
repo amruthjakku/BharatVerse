@@ -86,6 +86,13 @@ APP_ENV=render
             # Check environment variables for explicit environment setting
             app_env = os.getenv("APP_ENV", "").lower()
             
+            # Also check Streamlit secrets for APP_ENV
+            try:
+                if not app_env:
+                    app_env = st.secrets.get("app", {}).get("APP_ENV", "").lower()
+            except:
+                pass
+            
             if app_env == "local" or app_env == "development":
                 return "http://localhost:8501/callback"
             elif app_env == "render":
@@ -107,7 +114,10 @@ APP_ENV=render
             # Check for common deployment indicators
             if os.getenv("RENDER"):
                 return "https://bharatverse.onrender.com/callback"
-            elif os.getenv("STREAMLIT_SHARING") or "streamlit.app" in os.getenv("HOSTNAME", ""):
+            elif (os.getenv("STREAMLIT_SHARING") or 
+                  "streamlit.app" in os.getenv("HOSTNAME", "") or
+                  "streamlit" in os.getenv("SERVER_NAME", "") or
+                  os.getenv("STREAMLIT_SERVER_PORT")):
                 return "https://amruth-bharatverse.streamlit.app/callback"
             
             # Default fallback
