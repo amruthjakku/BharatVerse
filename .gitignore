@@ -101,3 +101,4 @@ test_oauth_*.py
 verify_oauth_*.py
 *_debug.py
 *_test.py
+.streamlit/secrets.toml
