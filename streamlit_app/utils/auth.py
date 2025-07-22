@@ -33,9 +33,25 @@ class GitLabAuth:
         try:
             self.client_id = st.secrets.get("gitlab", {}).get("client_id") or os.getenv('GITLAB_CLIENT_ID')
             self.client_secret = st.secrets.get("gitlab", {}).get("client_secret") or os.getenv('GITLAB_CLIENT_SECRET')
-            # Use detected redirect URI, fallback to secrets/env if detection fails
+            
+            # Priority order for redirect URI:
+            # 1. Explicit redirect_uri in secrets (highest priority)
+            # 2. Auto-detected URI based on environment
+            # 3. Environment variable fallback
+            secrets_redirect_uri = st.secrets.get("gitlab", {}).get("redirect_uri")
             detected_uri = self._detect_redirect_uri()
-            self.redirect_uri = detected_uri or st.secrets.get("gitlab", {}).get("redirect_uri") or os.getenv('GITLAB_REDIRECT_URI')
+            env_redirect_uri = os.getenv('GITLAB_REDIRECT_URI')
+            
+            self.redirect_uri = secrets_redirect_uri or detected_uri or env_redirect_uri
+            
+            # Debug logging for redirect URI selection
+            if hasattr(st, 'write') and st.secrets.get("app", {}).get("debug"):
+                st.write("🔍 OAuth Debug Info:")
+                st.write(f"- Secrets redirect URI: {secrets_redirect_uri}")
+                st.write(f"- Detected redirect URI: {detected_uri}")
+                st.write(f"- Env redirect URI: {env_redirect_uri}")
+                st.write(f"- Final redirect URI: {self.redirect_uri}")
+            
             self.base_url = st.secrets.get("gitlab", {}).get("base_url") or os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
             self.scopes = st.secrets.get("gitlab", {}).get("scopes") or os.getenv('GITLAB_SCOPES', 'api read_user profile email')
         except Exception:
@@ -77,6 +93,14 @@ APP_ENV=render
     def _detect_redirect_uri(self) -> Optional[str]:
         """Detect the appropriate redirect URI based on the current environment"""
         try:
+            # First check if we have an explicit override in secrets
+            try:
+                explicit_uri = st.secrets.get("gitlab", {}).get("redirect_uri")
+                if explicit_uri:
+                    return explicit_uri
+            except:
+                pass
+            
             # Get the current URL from Streamlit
             if hasattr(st, 'get_option') and st.get_option('server.baseUrlPath'):
                 # Running on Streamlit Cloud or with custom base URL
