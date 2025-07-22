@@ -374,12 +374,12 @@ graph TD
 
 | 🎵 **Audio Files** | 📝 **Stories** | 📷 **Images** | 🌍 **Languages** |
 |:---:|:---:|:---:|:---:|
-| **12,456** | **8,923** | **15,678** | **22+** |
+| **10+** | **10+** | **15+** | **22+** |
 | *Transcribed & Preserved* | *Documented & Tagged* | *Analyzed & Cataloged* | *Supported Natively* |
 
 | 👥 **Contributors** | 🏛️ **Institutions** | 📍 **Regions** | ⚡ **AI Processes** |
 |:---:|:---:|:---:|:---:|
-| **1,234** | **89** | **All 28 States** | **45,789** |
+| **4** | **5** | **All 28 States** | **100** |
 | *Active Community* | *Partner Organizations* | *Complete Coverage* | *AI Operations* |
 
 </div>
@@ -644,10 +644,10 @@ git checkout -b feature/amazing-feature
 
 | Type | Channel | Response Time |
 |:---:|:---:|:---:|
-| 🐛 **Bug Reports** | [GitHub Issues](https://github.com/bharatverse/bharatverse/issues) | 24-48 hours |
-| 💡 **Feature Requests** | [GitHub Discussions](https://github.com/bharatverse/bharatverse/discussions) | 1-3 days |
+| 🐛 **Bug Reports** | [GitLab Issues](https://code.swecha.org/amruth_jakku/bharatverse/-/issues) | 24 hours |
+| 💡 **Feature Requests** | [GitLab Discussions](https://code.swecha.org/amruth_jakku/bharatverse/-/issues) | 1-2 days |
 | ❓ **Questions** | [Discord Community](https://discord.gg/bharatverse) | Real-time |
-| 📧 **Business Inquiries** | team@bharatverse.org | 48 hours |
+| 📧 **Business Inquiries** | amruthjakku@gmail.com | 48 hours |
 
 </div>
 
@@ -689,7 +689,7 @@ git checkout -b feature/amazing-feature
 ║  BharatVerse - Where every story matters, every voice is heard, ║
 ║  and every tradition lives on for generations to come.          ║
 ║                                                                  ║
-║  🌟 Star us on GitHub | 🤝 Join our community | 📚 Contribute   ║
+║  🌟 Star us on GitLab | 🤝 Join our community | 📚 Contribute   ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
@@ -709,7 +709,7 @@ git checkout -b feature/amazing-feature
 
 <p>
   <strong>BharatVerse Team</strong><br>
-  📧 team@bharatverse.org | 🌐 bharatverse.org | 📍 Hyderabad,Telangana India
+  📧 amruthjakku@gmail.com | 🌐 https://amruthjakku-bharatverse.streamlit.app | 📍 Hyderabad,Telangana India
 </p>
 
 <p>
