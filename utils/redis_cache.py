@@ -12,6 +12,7 @@ Purpose: Performance optimization through intelligent caching
 import streamlit as st
 import json
 import pickle
+import requests
 from typing import Any, Optional, Dict, List
 import logging
 from datetime import datetime, timedelta
@@ -30,6 +31,10 @@ class RedisCacheManager:
     
     def __init__(self):
         """Initialize Redis client using Streamlit secrets"""
+        self.use_rest_api = False
+        self.rest_url = None
+        self.rest_token = None
+        
         try:
             redis_config = st.secrets.get("redis", {})
             
@@ -46,17 +51,19 @@ class RedisCacheManager:
                 else:
                     host = url
                 
-                # Use HTTPS connection method (works better with Upstash)
+                # Use HTTPS connection method (optimized for Streamlit Cloud)
                 self.client = redis.Redis(
                     host=host,
                     port=6379,
                     password=token,
                     decode_responses=False,
                     ssl=True,
-                    socket_connect_timeout=10,
-                    socket_timeout=10,
+                    ssl_cert_reqs=None,  # Disable SSL certificate verification for cloud
+                    socket_connect_timeout=15,  # Longer timeout for cloud
+                    socket_timeout=15,
                     retry_on_timeout=True,
-                    health_check_interval=30
+                    retry_on_error=[redis.ConnectionError, redis.TimeoutError],
+                    health_check_interval=60
                 )
             elif "url" in redis_config:
                 # Fallback to URL-based connection
@@ -88,17 +95,149 @@ class RedisCacheManager:
             
         except Exception as e:
             logger.error(f"Failed to initialize Redis client: {e}")
-            self.client = None
+            # Fallback to REST API for cloud environments
+            redis_config = st.secrets.get("redis", {})
+            if "url" in redis_config and "token" in redis_config:
+                logger.info("Falling back to Upstash REST API")
+                self.use_rest_api = True
+                self.rest_url = redis_config["url"]
+                self.rest_token = redis_config["token"]
+                self.client = None
+                
+                # Test REST API connection
+                if self._test_rest_api():
+                    logger.info("REST API fallback successful")
+                else:
+                    logger.error("REST API fallback also failed")
+            else:
+                self.client = None
+    
+    def _test_rest_api(self) -> bool:
+        """Test Upstash REST API connection"""
+        try:
+            headers = {"Authorization": f"Bearer {self.rest_token}"}
+            response = requests.post(f"{self.rest_url}/ping", headers=headers, timeout=10)
+            return response.status_code == 200
+        except Exception as e:
+            logger.error(f"REST API test failed: {e}")
+            return False
+    
+    def _set_rest_api(self, key: str, value: Any, expiry_seconds: int = None) -> bool:
+        """Set value using REST API"""
+        try:
+            headers = {"Authorization": f"Bearer {self.rest_token}"}
+            
+            # Serialize value
+            if isinstance(value, (dict, list)):
+                serialized_value = json.dumps(value)
+            elif isinstance(value, str):
+                serialized_value = value
+            else:
+                serialized_value = json.dumps(str(value))
+            
+            # Prepare command
+            if expiry_seconds:
+                data = ["SETEX", key, expiry_seconds, serialized_value]
+            else:
+                data = ["SET", key, serialized_value]
+            
+            response = requests.post(f"{self.rest_url}", headers=headers, json=data, timeout=10)
+            return response.status_code == 200
+        except Exception as e:
+            logger.error(f"REST API set failed: {e}")
+            return False
+    
+    def _get_rest_api(self, key: str) -> Optional[Any]:
+        """Get value using REST API"""
+        try:
+            headers = {"Authorization": f"Bearer {self.rest_token}"}
+            data = ["GET", key]
+            
+            response = requests.post(f"{self.rest_url}", headers=headers, json=data, timeout=10)
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("result"):
+                    try:
+                        return json.loads(result["result"])
+                    except:
+                        return result["result"]
+            return None
+        except Exception as e:
+            logger.error(f"REST API get failed: {e}")
+            return None
     
     def is_connected(self) -> bool:
-        """Check if Redis is connected"""
+        """Check if Redis is connected with enhanced cloud compatibility"""
+        if self.use_rest_api:
+            return self._test_rest_api()
+            
         if not self.client:
+            logger.warning("Redis client not initialized")
             return False
+        
         try:
-            self.client.ping()
-            return True
-        except Exception:
+            # Try ping with timeout
+            result = self.client.ping()
+            if result:
+                logger.info("Redis ping successful")
+                return True
+            else:
+                logger.warning("Redis ping returned False")
+                return False
+        except redis.ConnectionError as e:
+            logger.error(f"Redis connection error: {e}")
+            # Try to reconnect once
+            try:
+                self._reconnect()
+                result = self.client.ping()
+                return bool(result)
+            except Exception as reconnect_error:
+                logger.error(f"Redis reconnection failed: {reconnect_error}")
+                return False
+        except redis.TimeoutError as e:
+            logger.error(f"Redis timeout error: {e}")
             return False
+        except Exception as e:
+            logger.error(f"Redis unexpected error: {e}")
+            return False
+    
+    def _reconnect(self):
+        """Attempt to reconnect to Redis"""
+        try:
+            redis_config = st.secrets.get("redis", {})
+            
+            if "url" in redis_config and "token" in redis_config:
+                url = redis_config["url"]
+                token = redis_config["token"]
+                
+                # Extract host from URL
+                if url.startswith("https://"):
+                    host = url.replace("https://", "")
+                elif url.startswith("redis://"):
+                    host = url.replace("redis://", "")
+                else:
+                    host = url
+                
+                # Create new connection with cloud-optimized settings
+                self.client = redis.Redis(
+                    host=host,
+                    port=6379,
+                    password=token,
+                    decode_responses=False,
+                    ssl=True,
+                    ssl_cert_reqs=None,  # Disable SSL certificate verification for cloud
+                    socket_connect_timeout=15,  # Longer timeout for cloud
+                    socket_timeout=15,
+                    retry_on_timeout=True,
+                    retry_on_error=[redis.ConnectionError, redis.TimeoutError],
+                    health_check_interval=60
+                )
+                logger.info("Redis reconnection attempt completed")
+            else:
+                logger.error("Redis configuration missing for reconnection")
+        except Exception as e:
+            logger.error(f"Failed to reconnect to Redis: {e}")
+            raise
     
     def set(self, key: str, value: Any, expiry_seconds: int = None) -> bool:
         """
@@ -112,6 +251,9 @@ class RedisCacheManager:
         Returns:
             True if successful, False otherwise
         """
+        if self.use_rest_api:
+            return self._set_rest_api(key, value, expiry_seconds)
+            
         if not self.client:
             return False
         
@@ -144,6 +286,9 @@ class RedisCacheManager:
         Returns:
             Cached value or None if not found
         """
+        if self.use_rest_api:
+            return self._get_rest_api(key)
+            
         if not self.client:
             return None
         
