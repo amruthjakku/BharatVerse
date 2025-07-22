@@ -377,10 +377,9 @@ class RedisCacheManager:
             logger.error(f"Failed to get Redis stats: {e}")
             return {"connected": False, "error": str(e)}
 
-# Global cache manager instance
 @st.cache_resource
 def get_cache_manager() -> RedisCacheManager:
-    """Get cached Redis manager instance"""
+    """Get cached Redis manager instance (singleton using Streamlit cache)"""
     return RedisCacheManager()
 
 # Convenience functions
