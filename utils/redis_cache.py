@@ -33,13 +33,38 @@ class RedisCacheManager:
         try:
             redis_config = st.secrets.get("redis", {})
             
-            if "url" in redis_config:
-                # URL-based connection (Upstash format)
+            if "url" in redis_config and "token" in redis_config:
+                # Upstash Redis connection (preferred method)
+                url = redis_config["url"]
+                token = redis_config["token"]
+                
+                # Extract host from URL
+                if url.startswith("https://"):
+                    host = url.replace("https://", "")
+                elif url.startswith("redis://"):
+                    host = url.replace("redis://", "")
+                else:
+                    host = url
+                
+                # Use HTTPS connection method (works better with Upstash)
+                self.client = redis.Redis(
+                    host=host,
+                    port=6379,
+                    password=token,
+                    decode_responses=False,
+                    ssl=True,
+                    socket_connect_timeout=10,
+                    socket_timeout=10,
+                    retry_on_timeout=True,
+                    health_check_interval=30
+                )
+            elif "url" in redis_config:
+                # Fallback to URL-based connection
                 self.client = redis.from_url(
                     redis_config["url"],
                     decode_responses=False,
-                    socket_connect_timeout=5,
-                    socket_timeout=5,
+                    socket_connect_timeout=10,
+                    socket_timeout=10,
                     retry_on_timeout=True,
                     health_check_interval=30
                 )
@@ -51,8 +76,8 @@ class RedisCacheManager:
                     password=redis_config.get("password", None),
                     db=redis_config.get("db", 0),
                     decode_responses=False,
-                    socket_connect_timeout=5,
-                    socket_timeout=5,
+                    socket_connect_timeout=10,
+                    socket_timeout=10,
                     retry_on_timeout=True,
                     health_check_interval=30
                 )
