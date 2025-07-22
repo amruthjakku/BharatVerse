@@ -709,7 +709,7 @@ git checkout -b feature/amazing-feature
 
 <p>
   <strong>BharatVerse Team</strong><br>
-  📧 team@bharatverse.org | 🌐 bharatverse.org | 📍 New Delhi, India
+  📧 team@bharatverse.org | 🌐 bharatverse.org | 📍 Hyderabad,Telangana India
 </p>
 
 <p>
