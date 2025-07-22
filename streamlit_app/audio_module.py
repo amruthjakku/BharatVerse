@@ -67,6 +67,22 @@ except (ImportError, OSError) as e:
     AUDIO_AVAILABLE = False
     # Don't show warning here as it will show on every import
 
+# Detect cloud environment
+def is_cloud_environment():
+    """Detect if running in a cloud environment"""
+    import os
+    cloud_indicators = [
+        '/mount/src/',  # Streamlit Cloud
+        '/app/',        # Heroku
+        '/workspace/',  # GitHub Codespaces
+        'STREAMLIT_CLOUD' in os.environ,
+        'HEROKU' in os.environ,
+        'CODESPACE_NAME' in os.environ
+    ]
+    
+    current_path = os.getcwd()
+    return any(indicator in current_path if isinstance(indicator, str) else indicator for indicator in cloud_indicators)
+
 # Try to import enhanced AI models
 try:
     from core.ai_models import ai_manager
@@ -408,7 +424,11 @@ def audio_page():
     # Recording section
     st.markdown("---")
     
-    if AUDIO_AVAILABLE:
+    # Check if we're in a cloud environment
+    cloud_env = is_cloud_environment()
+    recording_available = AUDIO_AVAILABLE and not cloud_env
+    
+    if recording_available:
         # Import and use the real audio recorder
         try:
             from streamlit_app.audio_recorder import audio_recorder_component
@@ -417,16 +437,36 @@ def audio_page():
             st.error(f"Audio recorder component not available: {e}")
             # Fallback to file upload
             st.markdown("### 📁 Upload Audio File")
-            uploaded_file = st.file_uploader("Upload Audio File", type=['wav', 'mp3', 'ogg', 'm4a'])
+            uploaded_file = st.file_uploader("Upload Audio File", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
             if uploaded_file:
                 st.session_state.uploaded_audio = uploaded_file
+                st.audio(uploaded_file)
+        except Exception as e:
+            st.error(f"Audio recording failed: {str(e)}")
+            st.info("💡 Please use the file upload option below.")
+            # Fallback to file upload
+            st.markdown("### 📁 Upload Audio File")
+            uploaded_file = st.file_uploader("Upload Audio File", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
+            if uploaded_file:
+                st.session_state.uploaded_audio = uploaded_file
+                st.audio(uploaded_file)
     else:
-        st.warning("🚫 Live recording not available. Please upload an audio file instead.")
+        # Show appropriate message based on the reason
+        if cloud_env:
+            st.info("🌐 You're using BharatVerse in a cloud environment. Live audio recording is not supported, but you can upload audio files!")
+        else:
+            st.warning("🚫 Live recording not available. Please upload an audio file instead.")
+        
         st.markdown("### 📁 Upload Audio File")
-        uploaded_file = st.file_uploader("Upload Audio File", type=['wav', 'mp3', 'ogg', 'm4a'])
+        uploaded_file = st.file_uploader(
+            "Upload Audio File", 
+            type=['wav', 'mp3', 'ogg', 'm4a', 'flac'],
+            help="Upload your audio recording (folk songs, stories, oral traditions)"
+        )
         if uploaded_file:
             st.session_state.uploaded_audio = uploaded_file
             st.audio(uploaded_file)
+            st.success("✅ Audio file uploaded successfully!")
     
     # Transcription section
     if st.session_state.get('recorded_audio') is not None or st.session_state.get('uploaded_audio') is not None:
