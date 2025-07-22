@@ -43,7 +43,7 @@ def test_huggingface_api():
     
     # Test API endpoints
     endpoints = {
-        "Text Analysis": "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest",
+        "Text Analysis": "https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment",
         "Translation": "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-hi-en",
         "Whisper": "https://api-inference.huggingface.co/models/openai/whisper-small"
     }
