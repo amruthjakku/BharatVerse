@@ -1,4 +1,4 @@
-# 🇮🇳 BharatVerse - AI-Powered Cultural Heritage Platform
+# BharatVerse - AI-Powered Cultural Heritage Platform
 
 <div align="center">
 
