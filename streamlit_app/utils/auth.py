@@ -184,12 +184,50 @@ APP_ENV=render
             'redirect_uri': self.redirect_uri
         }
         
+        # Debug information
+        if st.secrets.get("app", {}).get("debug"):
+            st.write("🔍 OAuth Token Exchange Debug:")
+            st.write(f"- Token URL: {token_url}")
+            st.write(f"- Client ID: {self.client_id[:10]}...")
+            st.write(f"- Redirect URI: {self.redirect_uri}")
+            st.write(f"- Code: {code[:10]}...")
+        
         try:
             response = requests.post(token_url, data=data)
+            
+            # Debug response
+            if st.secrets.get("app", {}).get("debug"):
+                st.write(f"- Response Status: {response.status_code}")
+                if response.status_code != 200:
+                    st.write(f"- Response Text: {response.text}")
+            
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
             st.error(f"Failed to exchange code for token: {e}")
+            
+            # Additional error details for debugging
+            if hasattr(e, 'response') and e.response is not None:
+                st.error(f"Response status: {e.response.status_code}")
+                st.error(f"Response text: {e.response.text}")
+                
+                # Check for common OAuth errors
+                if e.response.status_code == 401:
+                    st.error("🚨 **OAuth Configuration Issue Detected**")
+                    st.markdown("""
+                    **Possible causes:**
+                    1. **Client credentials mismatch** - Check if Client ID and Secret are correct
+                    2. **Redirect URI mismatch** - The redirect URI must exactly match what's configured in GitLab
+                    3. **Authorization code expired** - Try the login process again
+                    4. **GitLab application not properly configured**
+                    
+                    **To fix:**
+                    1. Go to https://code.swecha.org/-/profile/applications
+                    2. Check your application settings
+                    3. Ensure redirect URI is exactly: `http://localhost:8501/callback`
+                    4. Verify Client ID and Secret match your configuration
+                    """)
+            
             return None
     
     def get_user_info(self, access_token: str) -> Optional[Dict[str, Any]]:
@@ -647,10 +685,20 @@ def make_gitlab_api_request(endpoint: str, method: str = 'GET', data: Optional[D
         return None
 
 
+# Global auth manager instance
+_auth_manager = None
+
+def get_auth_manager():
+    """Get the global authentication manager instance"""
+    global _auth_manager
+    if _auth_manager is None:
+        _auth_manager = GitLabAuth()
+    return _auth_manager
+
 # Initialize authentication on module import
 def init_auth():
     """Initialize authentication system"""
-    auth = GitLabAuth()
+    auth = get_auth_manager()
     
     # Try to restore persistent login first (if not already authenticated)
     if not auth.is_authenticated():

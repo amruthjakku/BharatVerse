@@ -1,7 +1,9 @@
 import streamlit as st
 import sys
 from pathlib import Path
+import requests
 import os
+from urllib.parse import urlencode
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
@@ -14,40 +16,34 @@ def main():
         layout="wide"
     )
     
-    st.title("🔧 OAuth Debug Page")
-    st.markdown("---")
+    st.markdown("# 🔧 OAuth Debug Tool")
+    st.markdown("Debug GitLab OAuth configuration and test authentication flow")
     
-    # Import auth with fallback
+    # Load configuration
     try:
-        from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, init_auth
-        AUTH_AVAILABLE = True
-    except ImportError as e:
-        AUTH_AVAILABLE = False
-        st.error(f"Auth module not available: {e}")
-        return
-    
-    # Initialize auth
-    try:
-        init_auth()
-    except Exception as e:
-        st.warning(f"Auth initialization warning: {e}")
-    
-    # Create auth instance
-    auth = GitLabAuth()
-    
-    st.markdown("## 🔍 OAuth Configuration Status")
-    
-    # Configuration status
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### ⚙️ Configuration")
-        st.code(f"""
-Auth Disabled: {auth.disabled}
+        from streamlit_app.utils.auth import GitLabAuth, init_auth
+        
+        # Initialize auth
+        try:
+            init_auth()
+        except Exception as e:
+            st.warning(f"Auth initialization warning: {e}")
+        
+        auth = GitLabAuth()
+        
+        st.markdown("## 📋 Current Configuration")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("### 🔑 OAuth Settings")
+            st.code(f"""
 Client ID: {'✅ Set' if auth.client_id else '❌ Missing'}
 Client Secret: {'✅ Set' if auth.client_secret else '❌ Missing'}
-Redirect URI: {auth.redirect_uri or '❌ Missing'}
-Base URL: {auth.base_url or '❌ Missing'}
+Base URL: {auth.base_url}
+Redirect URI: {auth.redirect_uri}
+Scopes: {auth.scopes}
+Disabled: {auth.disabled}
 Scopes: {auth.scopes or '❌ Missing'}
 """)
     
