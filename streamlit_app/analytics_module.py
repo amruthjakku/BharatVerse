@@ -79,11 +79,15 @@ def get_supabase_analytics_data():
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def generate_analytics_charts(stats_data, contributions_data):
-    """Generate analytics charts with caching"""
-    charts = {}
+    """Generate analytics charts with caching and multithreading"""
+    from utils.threading_manager import parallel_map
     
-    # Content type pie chart
-    if stats_data:
+    def create_content_pie_chart(data):
+        """Create content type pie chart"""
+        stats_data, _ = data
+        if not stats_data:
+            return None
+            
         content_data = {
             'Type': ['Audio', 'Text', 'Image'],
             'Count': [
@@ -96,17 +100,23 @@ def generate_analytics_charts(stats_data, contributions_data):
         df_content = df_content[df_content['Count'] > 0]  # Filter out zero counts
         
         if not df_content.empty:
-            charts['content_pie'] = px.pie(
+            chart = px.pie(
                 df_content, 
                 values='Count', 
                 names='Type',
                 title='Content Type Distribution',
                 color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1']
             )
-            charts['content_pie'].update_traces(textposition='inside', textinfo='percent+label')
+            chart.update_traces(textposition='inside', textinfo='percent+label')
+            return ('content_pie', chart)
+        return None
     
-    # Language distribution
-    if contributions_data:
+    def create_language_bar_chart(data):
+        """Create language distribution bar chart"""
+        _, contributions_data = data
+        if not contributions_data:
+            return None
+            
         lang_counts = {}
         for contrib in contributions_data:
             lang = contrib.get('language', 'Unknown')
@@ -116,14 +126,65 @@ def generate_analytics_charts(stats_data, contributions_data):
         if lang_counts:
             df_lang = pd.DataFrame(list(lang_counts.items()), columns=['Language', 'Count'])
             df_lang = df_lang.sort_values('Count', ascending=False).head(10)  # Top 10 languages
-            charts['language_bar'] = px.bar(
+            chart = px.bar(
                 df_lang, 
                 x='Language', 
-                y='Count', 
-                title='Top Languages Used',
+                y='Count',
+                title='Top Languages by Contribution Count',
                 color='Count',
                 color_continuous_scale='viridis'
             )
+            return ('language_bar', chart)
+        return None
+    
+    def create_region_chart(data):
+        """Create region distribution chart"""
+        _, contributions_data = data
+        if not contributions_data:
+            return None
+            
+        region_counts = {}
+        for contrib in contributions_data:
+            region = contrib.get('region', 'Unknown')
+            if region and region != 'Unknown':
+                region_counts[region] = region_counts.get(region, 0) + 1
+        
+        if region_counts:
+            df_region = pd.DataFrame(list(region_counts.items()), columns=['Region', 'Count'])
+            df_region = df_region.sort_values('Count', ascending=False).head(15)
+            chart = px.bar(
+                df_region, 
+                x='Count', 
+                y='Region',
+                orientation='h',
+                title='Contributions by Region',
+                color='Count',
+                color_continuous_scale='plasma'
+            )
+            return ('region_bar', chart)
+        return None
+    
+    # Create chart generation tasks
+    chart_tasks = [
+        create_content_pie_chart,
+        create_language_bar_chart,
+        create_region_chart
+    ]
+    
+    # Execute chart generation in parallel
+    data_tuple = (stats_data, contributions_data)
+    chart_results = parallel_map(
+        lambda func: func(data_tuple), 
+        chart_tasks, 
+        max_workers=3
+    )
+    
+    # Collect results
+    charts = {}
+    for result in chart_results:
+        if result and len(result) == 2:
+            chart_name, chart = result
+            charts[chart_name] = chart
     
     return charts
 

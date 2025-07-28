@@ -595,12 +595,12 @@ def story_section():
             if not content.strip():
                 st.warning("Please enter some content to analyze.")
             else:
-                with st.spinner("Analyzing text..."):
+                from utils.threading_manager import streamlit_threaded_operation
+                
+                def _analyze_text_task():
+                    """Internal text analysis task for threading"""
                     if AI_MODELS_AVAILABLE:
                         try:
-                            # Use enhanced AI models for text analysis
-                            st.info("🤖 Using real AI models for text analysis...")
-                            
                             # Determine language code
                             lang_code = language.lower()[:2] if language != "English" else "en"
                             
@@ -612,51 +612,62 @@ def story_section():
                                 translation_result = ai_manager.translate_text(content, "english")
                                 result["translation"] = translation_result
                             
-                            if result.get('success'):
-                                st.success("✅ Analysis complete!")
-                                
-                                # Show comprehensive analysis
-                                col1, col2, col3, col4 = st.columns(4)
-                                with col1:
-                                    st.metric("Word Count", result.get('word_count', 0))
-                                with col2:
-                                    sentiment = result.get('sentiment', {})
-                                    st.metric("Sentiment", sentiment.get('label', 'Unknown'))
-                                with col3:
-                                    emotions = result.get('emotions', {})
-                                    st.metric("Primary Emotion", emotions.get('primary_emotion', 'Unknown'))
-                                with col4:
-                                    quality = result.get('quality_metrics', {})
-                                    st.metric("Readability", quality.get('complexity', 'Unknown'))
-                                
-                                # Language detection
-                                detected_lang = result.get('language', 'unknown')
-                                st.info(f"🌐 Detected language: {detected_lang}")
-                                
-                                # Show translation if available
-                                translation_result = result.get('translation', {})
-                                if translation_result and translation_result.get('success'):
-                                    translation = translation_result.get('translation', '')
-                                    st.text_area("🔄 English Translation", translation, height=200)
-                                    st.caption(f"Translation confidence: {translation_result.get('confidence', 0.0):.2%}")
-                                
-                                # Cultural elements
-                                cultural_elements = result.get('cultural_elements', [])
-                                if cultural_elements:
-                                    st.markdown("### 🏛️ Cultural Elements Detected")
-                                    st.write(", ".join(cultural_elements))
-                                
-                                # Themes
-                                themes = result.get('themes', [])
-                                if themes:
-                                    st.markdown("### 🎭 Key Themes")
-                                    st.write(", ".join(themes))
-                                
-                                # Summary if available
-                                summary = result.get('summary')
-                                if summary and summary != result.get('text', '')[:200]:
-                                    st.markdown("### 📋 Summary")
-                                    st.write(summary)
+                            return result
+                        except Exception as e:
+                            return {"success": False, "error": str(e)}
+                    else:
+                        return {"success": False, "error": "AI models not available"}
+                
+                # Execute text analysis in a separate thread
+                result = streamlit_threaded_operation(
+                    _analyze_text_task,
+                    progress_text="🤖 Analyzing text with AI...",
+                    success_text="✅ Text analysis complete!"
+                )
+                
+                if result and result.get('success'):
+                    # Show comprehensive analysis
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Word Count", result.get('word_count', 0))
+                    with col2:
+                        sentiment = result.get('sentiment', {})
+                        st.metric("Sentiment", sentiment.get('label', 'Unknown'))
+                    with col3:
+                        emotions = result.get('emotions', {})
+                        st.metric("Primary Emotion", emotions.get('primary_emotion', 'Unknown'))
+                    with col4:
+                        quality = result.get('quality_metrics', {})
+                        st.metric("Readability", quality.get('complexity', 'Unknown'))
+                    
+                    # Language detection
+                    detected_lang = result.get('language', 'unknown')
+                    st.info(f"🌐 Detected language: {detected_lang}")
+                    
+                    # Show translation if available
+                    translation_result = result.get('translation', {})
+                    if translation_result and translation_result.get('success'):
+                        translation = translation_result.get('translation', '')
+                        st.text_area("🔄 English Translation", translation, height=200)
+                        st.caption(f"Translation confidence: {translation_result.get('confidence', 0.0):.2%}")
+                    
+                    # Cultural elements
+                    cultural_elements = result.get('cultural_elements', [])
+                    if cultural_elements:
+                        st.markdown("### 🏛️ Cultural Elements Detected")
+                        st.write(", ".join(cultural_elements))
+                    
+                    # Themes
+                    themes = result.get('themes', [])
+                    if themes:
+                        st.markdown("### 🎭 Key Themes")
+                        st.write(", ".join(themes))
+                    
+                    # Summary if available
+                    summary = result.get('summary')
+                    if summary and summary != result.get('text', '')[:200]:
+                        st.markdown("### 📋 Summary")
+                        st.write(summary)
                                 
                                 # Detailed sentiment analysis
                                 sentiment = result.get('sentiment', {})

@@ -127,12 +127,13 @@ def image_page():
         st.markdown("### 🤖 AI Image Analysis")
         
         if st.button("Analyze Image", use_container_width=True):
-            with st.spinner("Analyzing image with AI..."):
+            from utils.threading_manager import streamlit_threaded_operation
+            
+            def _analyze_image_task():
+                """Internal image analysis task for threading"""
                 if AI_MODELS_AVAILABLE:
                     try:
                         # Use enhanced AI models for image analysis
-                        st.info("🤖 Using real AI models for image analysis...")
-                        
                         # Convert image to bytes
                         image_buffer = io.BytesIO()
                         image.save(image_buffer, format=image.format or 'PNG')
@@ -140,53 +141,61 @@ def image_page():
                         
                         # Use enhanced AI for comprehensive image analysis
                         result = ai_manager.caption_image(image)
-                        
-                        if result.get('success'):
-                            st.success("✅ Image analysis complete!")
-                            
-                            # Show generated caption
-                            caption = result.get('caption', '')
-                            st.text_area("🖼️ AI-Generated Caption", caption, height=100)
-                            
-                            # Show image analysis details
-                            col1, col2, col3 = st.columns(3)
-                            
-                            with col1:
-                                image_size = result.get('image_size', [0, 0])
-                                st.metric("Width", f"{image_size[0]}px")
-                                st.metric("Height", f"{image_size[1]}px")
-                            
-                            with col2:
-                                quality_metrics = result.get('quality_metrics', {})
-                                st.metric("Quality Score", f"{quality_metrics.get('quality_score', 0):.1f}")
-                                st.metric("Brightness", f"{quality_metrics.get('brightness', 0):.1f}")
-                            
-                            with col3:
-                                st.metric("Contrast", f"{quality_metrics.get('contrast', 0):.1f}")
-                                st.metric("Aspect Ratio", quality_metrics.get('aspect_ratio', '1:1'))
-                            
-                            # Show detected objects
-                            objects = result.get('objects', [])
-                            if objects:
-                                st.markdown("### 🎯 Detected Objects")
-                                for obj in objects[:5]:  # Show top 5 objects
-                                    st.write(f"• {obj.get('label', 'Unknown')} (confidence: {obj.get('confidence', 0):.2%})")
-                            
-                            # Show cultural elements
-                            cultural_elements = result.get('cultural_elements', [])
-                            if cultural_elements:
-                                st.markdown("### 🏛️ Cultural Elements Detected")
-                                st.write(", ".join(cultural_elements))
-                            
-                            # Store results for submission
-                            st.session_state.image_analysis_result = result
-                            
-                        else:
-                            st.error(f"Image analysis failed: {result.get('error', 'Unknown error')}")
-                            
+                        return result
                     except Exception as e:
-                        st.error(f"Error during image analysis: {str(e)}")
-                        # Fallback to API call
+                        return {"success": False, "error": str(e)}
+                else:
+                    return {"success": False, "error": "AI models not available"}
+            
+            # Execute image analysis in a separate thread
+            result = streamlit_threaded_operation(
+                _analyze_image_task,
+                progress_text="🤖 Analyzing image with AI...",
+                success_text="✅ Image analysis complete!"
+            )
+            
+            if result and result.get('success'):
+                # Show generated caption
+                caption = result.get('caption', '')
+                st.text_area("🖼️ AI-Generated Caption", caption, height=100)
+                
+                # Show image analysis details
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    image_size = result.get('image_size', [0, 0])
+                    st.metric("Width", f"{image_size[0]}px")
+                    st.metric("Height", f"{image_size[1]}px")
+                
+                with col2:
+                    quality_metrics = result.get('quality_metrics', {})
+                    st.metric("Quality Score", f"{quality_metrics.get('quality_score', 0):.1f}")
+                    st.metric("Brightness", f"{quality_metrics.get('brightness', 0):.1f}")
+                
+                with col3:
+                    st.metric("Contrast", f"{quality_metrics.get('contrast', 0):.1f}")
+                    st.metric("Aspect Ratio", quality_metrics.get('aspect_ratio', '1:1'))
+                
+                # Show detected objects
+                objects = result.get('objects', [])
+                if objects:
+                    st.markdown("### 🎯 Detected Objects")
+                    for obj in objects[:5]:  # Show top 5 objects
+                        st.write(f"• {obj.get('label', 'Unknown')} (confidence: {obj.get('confidence', 0):.2%})")
+                
+                # Show cultural elements
+                cultural_elements = result.get('cultural_elements', [])
+                if cultural_elements:
+                    st.markdown("### 🏛️ Cultural Elements Detected")
+                    st.write(", ".join(cultural_elements))
+                
+                # Store results for submission
+                st.session_state.image_analysis_result = result
+                
+            elif result:
+                st.error(f"Image analysis failed: {result.get('error', 'Unknown error')}")
+            else:
+                st.error("Image analysis failed: No result returned")
                         st.info("Falling back to API analysis...")
                         try:
                             import requests

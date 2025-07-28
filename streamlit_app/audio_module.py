@@ -178,7 +178,9 @@ def warm_up_ai_services():
                 st.warning("⚠️ Some AI services may have cold start delays")
 
 def process_audio_with_caching(audio_data: bytes, language: str, user_id: int = None):
-    """Process audio with intelligent caching"""
+    """Process audio with intelligent caching and multithreading"""
+    from utils.threading_manager import get_threading_manager, streamlit_threaded_operation
+    
     optimizer = get_performance_optimizer()
     
     # Generate cache key
@@ -200,25 +202,43 @@ def process_audio_with_caching(audio_data: bytes, language: str, user_id: int = 
     # Mark as processing
     st.session_state[processing_key] = True
     
-    try:
-        # Use cloud AI manager for processing
-        if CLOUD_AI_AVAILABLE:
-            ai_manager = get_cloud_ai_manager()
-            result = ai_manager.process_audio(audio_data, language, user_id)
-            
-            # Cache the result if successful
-            if result.get("status") == "success":
-                # Store in session state for immediate access
-                st.session_state[f"transcription_{audio_hash}"] = result
-            
-            return result
-        else:
+    def _process_audio_task():
+        """Internal audio processing task for threading"""
+        try:
+            # Use cloud AI manager for processing
+            if CLOUD_AI_AVAILABLE:
+                ai_manager = get_cloud_ai_manager()
+                result = ai_manager.process_audio(audio_data, language, user_id)
+                
+                # Cache the result if successful
+                if result.get("status") == "success":
+                    # Store in session state for immediate access
+                    st.session_state[f"transcription_{audio_hash}"] = result
+                
+                return result
+            else:
+                return {
+                    "status": "error",
+                    "error": "AI services not available",
+                    "text": "",
+                    "language": "unknown"
+                }
+        except Exception as e:
             return {
                 "status": "error",
-                "error": "AI services not available",
+                "error": str(e),
                 "text": "",
                 "language": "unknown"
             }
+    
+    try:
+        # Execute audio processing in a separate thread with progress indication
+        result = streamlit_threaded_operation(
+            _process_audio_task,
+            progress_text="🎵 Processing audio...",
+            success_text="✅ Audio processed successfully!"
+        )
+        return result
     
     finally:
         # Remove processing flag

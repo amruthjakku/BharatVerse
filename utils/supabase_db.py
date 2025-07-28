@@ -218,6 +218,55 @@ class DatabaseManager:
             logger.error(f"Query execution error: {e}")
             return []
     
+    def execute_query_async(self, query: str, params: Dict = None):
+        """Execute a query asynchronously"""
+        from utils.threading_manager import get_threading_manager
+        manager = get_threading_manager()
+        return manager.submit_task(self.execute_query, query, params, task_name="db_query")
+    
+    def batch_insert(self, table: str, records: List[Dict], batch_size: int = 100):
+        """Insert multiple records in batches with multithreading"""
+        from utils.threading_manager import batch_process_files
+        
+        def insert_batch(batch_records):
+            """Insert a batch of records"""
+            if not batch_records:
+                return 0
+                
+            # Build insert query
+            if not batch_records:
+                return 0
+                
+            columns = list(batch_records[0].keys())
+            placeholders = ', '.join([f'%({col})s' for col in columns])
+            query = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
+            
+            try:
+                with self.get_connection() as conn:
+                    with conn.cursor() as cursor:
+                        cursor.executemany(query, batch_records)
+                        conn.commit()
+                        return len(batch_records)
+            except Exception as e:
+                logger.error(f"Batch insert error: {e}")
+                return 0
+        
+        # Split records into batches and process in parallel
+        batches = [records[i:i + batch_size] for i in range(0, len(records), batch_size)]
+        results = batch_process_files(insert_batch, batches, batch_size=5)
+        
+        return sum(results)
+    
+    def parallel_query_execution(self, queries: List[tuple], max_workers: int = 5):
+        """Execute multiple queries in parallel"""
+        from utils.threading_manager import parallel_map
+        
+        def execute_single_query(query_data):
+            query, params = query_data
+            return self.execute_query(query, params)
+        
+        return parallel_map(execute_single_query, queries, max_workers=max_workers)
+    
     def insert_user(self, username: str, email: str, hashed_password: str, 
                    full_name: str = None, is_admin: bool = False) -> Optional[int]:
         """Insert a new user"""

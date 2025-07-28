@@ -130,10 +130,11 @@ def main():
         st.metric("System Health", health_status, "Auto-monitored")
     
     # Detailed monitoring sections
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📈 Performance Metrics", 
         "💾 Memory Management", 
         "🗄️ Cache Management", 
+        "🧵 Threading Monitor",
         "🔧 System Tools",
         "📊 Analytics"
     ])
@@ -249,6 +250,127 @@ def main():
             st.info("Configure Redis in secrets.toml to enable caching features")
     
     with tab4:
+        st.markdown("### 🧵 Threading Monitor")
+        
+        try:
+            from utils.threading_manager import get_threading_manager, get_threading_metrics
+            
+            # Threading manager status
+            manager = get_threading_manager()
+            metrics = get_threading_metrics()
+            
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("Max Workers", manager.max_workers)
+            
+            with col2:
+                active_tasks = manager.get_active_tasks()
+                st.metric("Active Tasks", len(active_tasks))
+            
+            with col3:
+                thread_metrics = metrics.get_metrics()
+                st.metric("Completed Tasks", thread_metrics['completed_tasks'])
+            
+            with col4:
+                st.metric("Failed Tasks", thread_metrics['failed_tasks'])
+            
+            # Active tasks details
+            if active_tasks:
+                st.markdown("#### 🔄 Active Tasks")
+                for task_id, task_info in active_tasks.items():
+                    with st.expander(f"Task: {task_info['name']}"):
+                        st.write(f"**ID:** {task_id}")
+                        st.write(f"**Running Time:** {task_info['running_time']:.2f}s")
+                        st.write(f"**Status:** {'✅ Done' if task_info['done'] else '🔄 Running'}")
+            
+            # Threading performance metrics
+            st.markdown("#### 📊 Threading Performance")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                avg_time = thread_metrics['average_task_time']
+                st.metric("Average Task Time", f"{avg_time:.3f}s")
+                
+                total_tasks = thread_metrics['total_tasks']
+                st.metric("Total Tasks Processed", total_tasks)
+            
+            with col2:
+                active_threads = thread_metrics['active_threads']
+                st.metric("Active Threads", active_threads)
+                
+                if total_tasks > 0:
+                    success_rate = (thread_metrics['completed_tasks'] / total_tasks) * 100
+                    st.metric("Success Rate", f"{success_rate:.1f}%")
+            
+            # Threading controls
+            st.markdown("#### 🔧 Threading Controls")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                if st.button("🧪 Test Threading"):
+                    import time
+                    import random
+                    
+                    def test_task(task_id):
+                        time.sleep(random.uniform(0.1, 0.5))
+                        return f"Task {task_id} completed"
+                    
+                    # Submit test tasks
+                    futures = []
+                    for i in range(5):
+                        future = manager.submit_task(test_task, i, task_name=f"test_task_{i}")
+                        futures.append(future)
+                    
+                    # Wait for completion
+                    results = manager.wait_for_completion(futures, timeout=10)
+                    
+                    st.success(f"✅ Threading test completed! {len([r for r in results if r])} tasks succeeded")
+            
+            with col2:
+                if st.button("📊 Performance Benchmark"):
+                    from utils.threading_manager import parallel_map
+                    import time
+                    
+                    def benchmark_task(x):
+                        # Simulate CPU-bound work
+                        result = sum(i * i for i in range(x * 1000))
+                        return result
+                    
+                    # Test data
+                    test_data = list(range(1, 21))  # 20 tasks
+                    
+                    # Sequential execution
+                    start_time = time.time()
+                    sequential_results = [benchmark_task(x) for x in test_data]
+                    sequential_time = time.time() - start_time
+                    
+                    # Parallel execution
+                    start_time = time.time()
+                    parallel_results = parallel_map(benchmark_task, test_data, max_workers=4)
+                    parallel_time = time.time() - start_time
+                    
+                    speedup = sequential_time / parallel_time if parallel_time > 0 else 0
+                    
+                    st.success(f"🚀 Benchmark completed!")
+                    st.info(f"Sequential: {sequential_time:.2f}s")
+                    st.info(f"Parallel: {parallel_time:.2f}s")
+                    st.info(f"Speedup: {speedup:.2f}x")
+            
+            with col3:
+                if st.button("🗑️ Clear Metrics"):
+                    # Reset metrics
+                    metrics.__init__()
+                    st.success("Threading metrics cleared!")
+                    st.rerun()
+        
+        except ImportError:
+            st.warning("🔌 Threading manager not available")
+            st.info("Threading utilities are not properly configured")
+    
+    with tab5:
         st.markdown("### 🔧 System Tools")
         
         # API testing

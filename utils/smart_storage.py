@@ -73,6 +73,22 @@ class SmartStorageManager:
             logger.error(f"Upload failed: {e}")
             return None
     
+    def upload_file_async(self, file_obj, file_key: str, content_type: str = None):
+        """Upload file asynchronously"""
+        from utils.threading_manager import get_threading_manager
+        manager = get_threading_manager()
+        return manager.submit_task(self.upload_file, file_obj, file_key, content_type, task_name=f"upload_{file_key}")
+    
+    def upload_multiple_files(self, files_data: list, max_workers: int = 5):
+        """Upload multiple files in parallel"""
+        from utils.threading_manager import parallel_process_with_progress
+        
+        def upload_single_file(file_data):
+            file_obj, file_key, content_type = file_data
+            return self.upload_file(file_obj, file_key, content_type)
+        
+        return parallel_process_with_progress(upload_single_file, files_data, max_workers=max_workers)
+    
     def upload_bytes(self, data: bytes, file_key: str, content_type: str = None) -> Optional[str]:
         """Upload bytes using available storage"""
         try:
