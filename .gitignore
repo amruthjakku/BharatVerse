@@ -48,7 +48,7 @@ ENV/
 .pytest_cache/
 
 # IDE
-.vscode/
+#.vscode/
 .idea/
 *.swp
 *.swo
