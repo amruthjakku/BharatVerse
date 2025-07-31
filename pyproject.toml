@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Preserving India's Cultural Heritage - An open-source platform for capturing, preserving, and sharing India's diverse cultural traditions"
 authors = ["BharatVerse Team <team@bharatverse.org>"]
 license = "AGPL-3.0"
-readme = { file = "README.md", content-type = "text/markdown" }
+readme = "README.md"
 homepage = "https://bharatverse.org"
 repository = "https://code.swecha.org/amruth_jakku/bharatverse"
 documentation = "https://bharatverse.readthedocs.io"
