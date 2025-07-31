@@ -48,7 +48,6 @@ ENV/
 .pytest_cache/
 
 # IDE
-#.vscode/
 .idea/
 *.swp
 *.swo
@@ -66,11 +65,7 @@ ENV/
 *.ai-chat
 .ai-context/
 
-# VS Code specific files
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
-.vscode/extensions.json
+# VS Code workspace files (but keep configuration)
 .vscode/*.code-workspace
 
 # OS
