@@ -102,10 +102,7 @@ def install_python_dependencies():
     """Install Python dependencies"""
     print("\n🐍 Installing Python Dependencies...")
     
-    # Upgrade pip first
-    run_command(f"{sys.executable} -m pip install --upgrade pip", "Upgrading pip")
-    
-    # Install core dependencies
+    # Install core dependencies with uv
     core_deps = [
         "torch>=2.1.0",
         "torchvision>=0.16.0",
@@ -121,12 +118,12 @@ def install_python_dependencies():
     ]
     
     for dep in core_deps:
-        run_command(f"{sys.executable} -m pip install {dep}", f"Installing {dep}")
+        run_command(f"uv pip install {dep}", f"Installing {dep}")
     
     # Install remaining requirements
     requirements_file = Path(__file__).parent / "requirements.txt"
     if requirements_file.exists():
-        run_command(f"{sys.executable} -m pip install -r {requirements_file}", "Installing from requirements.txt")
+        run_command(f"uv pip install -r {requirements_file}", "Installing from requirements.txt")
 
 def download_ai_models():
     """Download and cache AI models"""

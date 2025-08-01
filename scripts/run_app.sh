@@ -10,7 +10,7 @@ echo ""
 # Check if streamlit is installed
 if ! command -v streamlit &> /dev/null; then
     echo "❌ Streamlit is not installed. Installing now..."
-    pip install streamlit
+    uv pip install streamlit
     echo "✅ Streamlit installed successfully!"
     echo ""
 fi

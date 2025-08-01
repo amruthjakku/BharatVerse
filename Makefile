@@ -1,25 +1,31 @@
-.PHONY: help install install-dev run test lint format clean docker-up docker-down
+.PHONY: help install install-dev run test lint format clean docker-up docker-down sync check fix
 
 # Default target
 help:
-	@echo "BharatVerse - Development Commands"
-	@echo "================================="
-	@echo "make install       - Install core dependencies"
-	@echo "make install-dev   - Install development dependencies"
+	@echo "BharatVerse - Development Commands (uv + ruff)"
+	@echo "=============================================="
+	@echo "make install       - Install core dependencies with uv"
+	@echo "make install-dev   - Install development dependencies with uv"
+	@echo "make sync          - Sync dependencies with uv"
 	@echo "make run          - Run the application"
 	@echo "make test         - Run tests"
-	@echo "make lint         - Run linting"
-	@echo "make format       - Format code"
+	@echo "make lint         - Run linting with ruff"
+	@echo "make format       - Format code with ruff"
+	@echo "make check        - Run all checks (lint + test)"
+	@echo "make fix          - Auto-fix code issues with ruff"
 	@echo "make clean        - Clean temporary files"
 	@echo "make docker-up    - Start Docker services"
 	@echo "make docker-down  - Stop Docker services"
 
-# Installation
+# Installation with uv
 install:
-	pip install -r requirements.txt
+	uv pip install -e .
 
 install-dev:
-	pip install -r requirements/dev.txt
+	uv pip install -e ".[dev]"
+
+sync:
+	uv pip sync
 
 # Running
 run:
@@ -30,19 +36,28 @@ run-api:
 
 # Testing
 test:
-	pytest tests/
+	uv run pytest tests/
 
 test-coverage:
-	pytest tests/ --cov=. --cov-report=html
+	uv run pytest tests/ --cov=. --cov-report=html
 
-# Code quality
+# Code quality with ruff (replaces black, isort, flake8, pylint)
 lint:
-	flake8 . --max-line-length=88 --exclude=venv,__pycache__,.git
-	pylint bharatverse
+	uv run ruff check .
 
 format:
-	black .
-	isort .
+	uv run ruff format .
+
+fix:
+	uv run ruff check --fix .
+	uv run ruff format .
+
+check: lint test
+	@echo "All checks passed!"
+
+# Type checking
+typecheck:
+	uv run mypy .
 
 # Cleaning
 clean:
@@ -75,9 +90,14 @@ db-backup:
 # Development
 dev-setup:
 	cp .env.local .env
-	make install-dev
+	uv pip install -e ".[dev]"
 	make docker-up
-	@echo "Development environment ready!"
+	@echo "Development environment ready with uv!"
+
+# Initialize uv project
+uv-init:
+	uv init --no-readme --no-pin-python
+	@echo "uv project initialized!"
 
 # Production
 prod-build:
