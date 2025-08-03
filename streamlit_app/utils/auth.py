@@ -214,19 +214,66 @@ APP_ENV=render
                 # Check for common OAuth errors
                 if e.response.status_code == 401:
                     st.error("🚨 **OAuth Configuration Issue Detected**")
-                    st.markdown("""
-                    **Possible causes:**
-                    1. **Client credentials mismatch** - Check if Client ID and Secret are correct
-                    2. **Redirect URI mismatch** - The redirect URI must exactly match what's configured in GitLab
-                    3. **Authorization code expired** - Try the login process again
-                    4. **GitLab application not properly configured**
                     
-                    **To fix:**
-                    1. Go to https://code.swecha.org/-/profile/applications
-                    2. Check your application settings
-                    3. Ensure redirect URI is exactly: `http://localhost:8501/callback`
-                    4. Verify Client ID and Secret match your configuration
-                    """)
+                    # Try to parse the error response
+                    try:
+                        error_data = e.response.json()
+                        error_type = error_data.get('error', 'unknown')
+                        error_desc = error_data.get('error_description', 'No description')
+                        
+                        if error_type == 'invalid_client':
+                            st.markdown(f"""
+                            **Error:** `{error_type}`  
+                            **Description:** {error_desc}
+                            
+                            **Most likely cause:** Redirect URI mismatch
+                            
+                            **Current redirect URI:** `{self.redirect_uri}`
+                            
+                            **To fix:**
+                            1. Go to https://code.swecha.org/-/profile/applications
+                            2. Find your application with Client ID: `{self.client_id[:10]}...`
+                            3. Update the Redirect URI to exactly match: `{self.redirect_uri}`
+                            4. Make sure there are no extra spaces or characters
+                            
+                            **Alternative:** Add multiple redirect URIs:
+                            - `http://localhost:8501/callback` (for local development)
+                            - `https://amruth-bharatverse.streamlit.app/callback` (for production)
+                            """)
+                        else:
+                            st.markdown(f"""
+                            **Error:** `{error_type}`  
+                            **Description:** {error_desc}
+                            
+                            **Possible causes:**
+                            1. **Client credentials mismatch** - Check if Client ID and Secret are correct
+                            2. **Redirect URI mismatch** - The redirect URI must exactly match what's configured in GitLab
+                            3. **Authorization code expired** - Try the login process again
+                            4. **GitLab application not properly configured**
+                            
+                            **To fix:**
+                            1. Go to https://code.swecha.org/-/profile/applications
+                            2. Check your application settings
+                            3. Ensure redirect URI is exactly: `{self.redirect_uri}`
+                            4. Verify Client ID and Secret match your configuration
+                            """)
+                    except:
+                        # Fallback if we can't parse the error response
+                        st.markdown(f"""
+                        **Possible causes:**
+                        1. **Client credentials mismatch** - Check if Client ID and Secret are correct
+                        2. **Redirect URI mismatch** - The redirect URI must exactly match what's configured in GitLab
+                        3. **Authorization code expired** - Try the login process again
+                        4. **GitLab application not properly configured**
+                        
+                        **Current redirect URI:** `{self.redirect_uri}`
+                        
+                        **To fix:**
+                        1. Go to https://code.swecha.org/-/profile/applications
+                        2. Check your application settings
+                        3. Ensure redirect URI is exactly: `{self.redirect_uri}`
+                        4. Verify Client ID and Secret match your configuration
+                        """)
             
             return None
     
