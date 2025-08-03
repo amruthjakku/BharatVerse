@@ -14,37 +14,40 @@ project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
 # Import utilities with error handling
+AUTH_AVAILABLE = False
+DATABASE_AVAILABLE = False
+STYLING_AVAILABLE = False
+SUPABASE_AVAILABLE = False
+
 try:
-    from streamlit_app.utils.auth import get_auth_manager
+    from streamlit_app.utils.auth import get_auth_manager, GitLabAuth
     AUTH_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     AUTH_AVAILABLE = False
+    # Store error for later display
+    AUTH_ERROR = str(e)
 
 try:
     from streamlit_app.utils.database import get_db_connection
     DATABASE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     DATABASE_AVAILABLE = False
+    DATABASE_ERROR = str(e)
 
 try:
     from streamlit_app.utils.main_styling import load_custom_css
     STYLING_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     STYLING_AVAILABLE = False
+    STYLING_ERROR = str(e)
 
 # Database imports
 try:
     from utils.supabase_db import get_database_manager
     SUPABASE_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     SUPABASE_AVAILABLE = False
-
-# Authentication imports
-try:
-    from streamlit_app.utils.auth import get_auth_manager
-    AUTH_AVAILABLE = True
-except ImportError:
-    AUTH_AVAILABLE = False
+    SUPABASE_ERROR = str(e)
 
 def check_user_access():
     """Check if user is authenticated"""
@@ -341,6 +344,15 @@ def main():
         st.error("🔒 Authentication system not available")
         st.warning("User dashboard requires authentication to be configured.")
         st.info("Please configure authentication to access your personal dashboard.")
+        
+        # Show debug information
+        if st.checkbox("Show debug information"):
+            st.code(f"Auth Error: {globals().get('AUTH_ERROR', 'Unknown error')}")
+            if not DATABASE_AVAILABLE:
+                st.code(f"Database Error: {globals().get('DATABASE_ERROR', 'Unknown error')}")
+            if not SUPABASE_AVAILABLE:
+                st.code(f"Supabase Error: {globals().get('SUPABASE_ERROR', 'Unknown error')}")
+        
         st.stop()
     
     user_info, auth = check_user_access()

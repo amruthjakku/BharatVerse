@@ -15,15 +15,33 @@ import logging
 from datetime import datetime, timedelta
 
 # Import existing utilities with fallbacks
-from utils.redis_cache import get_cache_manager
-from utils.supabase_db import get_database_manager
+def _get_cache_manager():
+    """Lazy import to avoid circular dependencies"""
+    try:
+        from .redis_cache import get_cache_manager
+        return get_cache_manager()
+    except ImportError:
+        return None
 
-try:
-    from utils.minio_storage import get_storage_manager
-    MINIO_AVAILABLE = True
-except ImportError:
-    MINIO_AVAILABLE = False
-    from utils.fallback_storage import get_fallback_storage_manager as get_storage_manager
+def _get_database_manager():
+    """Lazy import to avoid circular dependencies"""
+    try:
+        from .supabase_db import get_database_manager
+        return get_database_manager()
+    except ImportError:
+        return None
+
+def _get_storage_manager():
+    """Lazy import to avoid circular dependencies"""
+    try:
+        from .minio_storage import get_storage_manager
+        return get_storage_manager()
+    except ImportError:
+        try:
+            from .fallback_storage import get_fallback_storage_manager
+            return get_fallback_storage_manager()
+        except ImportError:
+            return None
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +52,9 @@ class PerformanceOptimizer:
     """
     
     def __init__(self):
-        self.cache_manager = get_cache_manager()
-        self.db_manager = get_database_manager()
-        self.storage_manager = get_storage_manager()
+        self.cache_manager = _get_cache_manager()
+        self.db_manager = _get_database_manager()
+        self.storage_manager = _get_storage_manager()
         
         # Performance metrics
         self.metrics = {
