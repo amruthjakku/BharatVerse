@@ -78,289 +78,186 @@ def image_page():
     
     # Performance monitoring for admins
     if st.session_state.get("user_role") == "admin":
-        with st.expander("⚡ Performance Monitoring", expanded=False):
+        with st.expander("🔧 Performance Monitoring"):
             show_memory_dashboard()
     
-    # Memory tracking for image operations
-    with MemoryTracker("image_page_operations"):
-        # Image upload with optimized settings
-        uploaded_file = st.file_uploader(
-            "Choose an image",
-            type=image_config['supported_formats'],
-            help=f"Upload images of cultural significance (Max: {image_config['max_image_size_mb']}MB)"
-        )
+    # File upload
+    uploaded_file = st.file_uploader(
+        "Choose an image file",
+        type=['jpg', 'jpeg', 'png', 'webp', 'bmp'],
+        help="Upload images of cultural significance, festivals, art, architecture, etc."
+    )
     
     if uploaded_file is not None:
-        # Display image
+        # Display the uploaded image
         image = Image.open(uploaded_file)
-        col1, col2 = st.columns([2, 1])
+        st.image(image, caption="Uploaded Image", use_column_width=True)
         
+        # Image metadata
+        st.markdown("### 📋 Image Information")
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.image(image, caption="Uploaded Image", use_container_width=True)
-        
+            st.metric("Format", image.format)
+            st.metric("Width", f"{image.size[0]}px")
         with col2:
-            st.markdown("### 📊 Image Info")
-            st.write(f"**Format:** {image.format}")
-            st.write(f"**Size:** {image.size}")
-            st.write(f"**Mode:** {image.mode}")
+            st.metric("Height", f"{image.size[1]}px")
+            st.metric("Mode", image.mode)
+        with col3:
+            file_size = len(uploaded_file.getvalue()) / 1024 / 1024
+            st.metric("File Size", f"{file_size:.2f} MB")
         
-        # Image details
-        st.markdown("---")
-        st.markdown("### 📝 Image Details")
-        
+        # Basic image details
+        st.markdown("### 🏷️ Image Details")
         col1, col2 = st.columns(2)
         with col1:
-            title = st.text_input("Title", "Durga Puja Pandal")
+            title = st.text_input("Title", "Cultural Heritage Image")
             category = st.selectbox(
                 "Category",
                 ["Festival", "Architecture", "Art", "Ritual", "Food", "Clothing", "Craft", "Nature", "Daily Life"]
             )
-            location = st.text_input("Location", "Kolkata, West Bengal")
+            location = st.text_input("Location", "India")
         
         with col2:
-            event = st.text_input("Event/Occasion", "Durga Puja 2023")
+            event = st.text_input("Event/Occasion", "")
             photographer = st.text_input("Photographer (Optional)", "")
-            year_taken = st.number_input("Year Taken", 1900, 2024, 2023)
+            year_taken = st.number_input("Year Taken", 1900, 2024, 2024)
         
-        # AI-generated caption and analysis
+        # AI Analysis section
         st.markdown("---")
         st.markdown("### 🤖 AI Image Analysis")
         
         if st.button("Analyze Image", use_container_width=True):
-            from utils.threading_manager import streamlit_threaded_operation
-            
-            def _analyze_image_task():
-                """Internal image analysis task for threading"""
+            with st.spinner("Analyzing image..."):
                 if AI_MODELS_AVAILABLE:
                     try:
-                        # Use enhanced AI models for image analysis
-                        # Convert image to bytes
-                        image_buffer = io.BytesIO()
-                        image.save(image_buffer, format=image.format or 'PNG')
-                        image_bytes = image_buffer.getvalue()
-                        
-                        # Use enhanced AI for comprehensive image analysis
+                        # Try AI analysis
                         result = ai_manager.caption_image(image)
-                        return result
+                        if result and result.get('success'):
+                            st.success("✅ AI analysis completed!")
+                            
+                            # Show generated caption
+                            caption = result.get('caption', '')
+                            if caption:
+                                st.text_area("🖼️ AI-Generated Caption", caption, height=100)
+                            
+                            # Show cultural elements if available
+                            cultural_elements = result.get('cultural_elements', [])
+                            if cultural_elements:
+                                st.info(f"Cultural elements detected: {', '.join(cultural_elements)}")
+                            
+                            # Show detected objects if available
+                            objects = result.get('objects', [])
+                            if objects:
+                                st.markdown("### 🎯 Detected Objects")
+                                for obj in objects[:5]:  # Show top 5 objects
+                                    st.write(f"• {obj.get('label', 'Unknown')} (confidence: {obj.get('confidence', 0):.2%})")
+                        else:
+                            st.warning("AI analysis completed with basic information only.")
                     except Exception as e:
-                        return {"success": False, "error": str(e)}
+                        st.warning(f"AI analysis failed: {str(e)}")
+                        st.info("Please provide manual description below.")
                 else:
-                    return {"success": False, "error": "AI models not available"}
-            
-            # Execute image analysis in a separate thread
-            result = streamlit_threaded_operation(
-                _analyze_image_task,
-                progress_text="🤖 Analyzing image with AI...",
-                success_text="✅ Image analysis complete!"
-            )
-            
-            if result and result.get('success'):
-                # Show generated caption
-                caption = result.get('caption', '')
-                st.text_area("🖼️ AI-Generated Caption", caption, height=100)
-                
-                # Show image analysis details
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    image_size = result.get('image_size', [0, 0])
-                    st.metric("Width", f"{image_size[0]}px")
-                    st.metric("Height", f"{image_size[1]}px")
-                
-                with col2:
-                    quality_metrics = result.get('quality_metrics', {})
-                    st.metric("Quality Score", f"{quality_metrics.get('quality_score', 0):.1f}")
-                    st.metric("Brightness", f"{quality_metrics.get('brightness', 0):.1f}")
-                
-                with col3:
-                    st.metric("Contrast", f"{quality_metrics.get('contrast', 0):.1f}")
-                    st.metric("Aspect Ratio", quality_metrics.get('aspect_ratio', '1:1'))
-                
-                # Show detected objects
-                objects = result.get('objects', [])
-                if objects:
-                    st.markdown("### 🎯 Detected Objects")
-                    for obj in objects[:5]:  # Show top 5 objects
-                        st.write(f"• {obj.get('label', 'Unknown')} (confidence: {obj.get('confidence', 0):.2%})")
-                
-                # Show cultural elements
-                cultural_elements = result.get('cultural_elements', [])
-                if cultural_elements:
-                    st.markdown("### 🏛️ Cultural Elements Detected")
-                    st.write(", ".join(cultural_elements))
-                
-                # Store results for submission
-                st.session_state.image_analysis_result = result
-                
-            elif result:
-                st.error(f"Image analysis failed: {result.get('error', 'Unknown error')}")
-            else:
-                st.error("Image analysis failed: No result returned")
-                        st.info("Falling back to API analysis...")
-                        try:
-                            import requests
-                            import os
-                            
-                            # Prepare image for API
-                            image_buffer = io.BytesIO()
-                            image.save(image_buffer, format=image.format or 'PNG')
-                            image_buffer.seek(0)
-                            
-                            API_URL = os.getenv("API_URL", "http://localhost:8000")
-                            files = {'file': (uploaded_file.name, image_buffer, uploaded_file.type)}
-                            
-                            response = requests.post(
-                                f"{API_URL}/api/v1/image/analyze",
-                                files=files
-                            )
-                            
-                            if response.status_code == 200:
-                                result = response.json()
-                                if result.get('success'):
-                                    caption = result.get('caption', '')
-                                    cultural_elements = result.get('cultural_elements', [])
-                                    
-                                    st.success("API Caption generated!")
-                                    st.text_area("Generated Caption", caption, height=100)
-                                    
-                                    if cultural_elements:
-                                        st.info(f"Detected cultural elements: {', '.join(cultural_elements)}")
-                                else:
-                                    st.error(f"Caption generation failed: {result.get('error', 'Unknown error')}")
-                            else:
-                                st.error(f"API error: {response.status_code}")
-                        except Exception as api_e:
-                            st.error(f"API fallback also failed: {str(api_e)}")
-                
-                else:
-                    st.warning("🚧 AI models not available. Install dependencies with: pip install -r requirements.txt")
-                    st.info("Please provide manual description below or install AI models for automatic analysis.")
+                    st.info("AI models not available. Please provide manual description below.")
         
-        # Manual description
-        st.markdown("### ✏️ Your Description")
+        # Manual description section
+        st.markdown("---")
+        st.markdown("### ✏️ Description & Context")
+        
         description = st.text_area(
             "Describe the cultural significance",
             "",
             height=150,
-            placeholder="Enter your description of the cultural significance..."
+            placeholder="Describe what this image represents, its cultural significance, historical context, etc."
         )
         
         # Tags
         tags = st.text_input(
             "Tags (comma-separated)",
             "",
-            placeholder="Enter tags separated by commas..."
+            placeholder="festival, tradition, art, architecture, etc."
         )
         
         # Cultural context
         st.markdown("### 🎭 Cultural Context")
-        
         col1, col2 = st.columns(2)
         with col1:
-            region = st.text_input("Region/State", "", placeholder="Enter region/state...")
-            community = st.text_input("Community", "", placeholder="Enter community...")
+            cultural_significance = st.selectbox(
+                "Cultural Significance",
+                ["High", "Medium", "Low", "Historical", "Religious", "Artistic", "Social"]
+            )
+            region = st.text_input("Region/State", "")
         
         with col2:
-            significance = st.selectbox(
-                "Significance Level",
-                ["Local", "Regional", "National", "International"]
-            )
-            frequency = st.selectbox(
-                "How often does this occur?",
-                ["Annual", "Seasonal", "Once in lifetime", "Daily", "Special occasions"]
-            )
-        
-        # Additional notes
-        notes = st.text_area(
-            "Additional Notes",
-            "Any stories, memories, or historical context related to this image...",
-            height=100
-        )
-        
-        # Consent
+            community = st.text_input("Community/Group", "")
+            language_context = st.text_input("Language Context", "")
+
+        # Consent checkbox
         consent = st.checkbox(
             "I confirm that I have the right to share this image and agree to the "
             "terms of use and CC-BY 4.0 license for the contributed data."
         )
-        
-        # Submit
-        if consent:
-            if st.button("📤 Submit Image", type="primary", use_container_width=True):
-                st.success("🎉 Thank you! Your image has been added to BharatVerse.")
-                st.balloons()
+
+        # Submit button
+        if st.button("Submit Image", type="primary", use_container_width=True):
+            if not title.strip():
+                st.error("Please provide a title for your image.")
+            elif not description.strip():
+                st.error("Please provide a description for your image.")
+            elif not consent:
+                st.error("Please confirm that you have the right to share this image.")
+            else:
+                # Convert image to base64 for storage
+                image_buffer = io.BytesIO()
+                image.save(image_buffer, format=image.format or 'PNG')
+                image_base64 = base64.b64encode(image_buffer.getvalue()).decode()
                 
-                # Show summary
-                st.markdown("### 📋 Contribution Summary")
-                st.json({
-                    "type": "image",
+                # Prepare contribution data
+                contribution_data = {
                     "title": title,
+                    "description": description,
+                    "content_type": "image",
                     "category": category,
                     "location": location,
                     "event": event,
-                    "year": year_taken,
-                    "tags": tags.split(", "),
+                    "photographer": photographer,
+                    "year_taken": year_taken,
+                    "tags": tags,
+                    "cultural_significance": cultural_significance,
                     "region": region,
                     "community": community,
-                    "timestamp": datetime.now().isoformat()
-                })
-    
-    # Gallery examples
-    st.markdown("---")
-    st.markdown("### 🖼️ Example Contributions")
-    
-    example_cols = st.columns(3)
-    examples = [
-        {
-            "title": "Kathakali Performer",
-            "category": "Art",
-            "location": "Kerala",
-            "description": "Traditional Kathakali makeup and costume"
-        },
-        {
-            "title": "Rajasthani Handicraft",
-            "category": "Craft",
-            "location": "Jaipur",
-            "description": "Intricate blue pottery work"
-        },
-        {
-            "title": "Pongal Celebration",
-            "category": "Festival",
-            "location": "Tamil Nadu",
-            "description": "Traditional harvest festival cooking"
-        }
-    ]
-    
-    for col, example in zip(example_cols, examples):
-        with col:
-            st.markdown(f"**{example['title']}**")
-            # Placeholder for example images
-            st.markdown(f"""
-            <div style='background: #f0f2f6; height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 8px;'>
-                <h1>📷</h1>
-            </div>
-            """, unsafe_allow_html=True)
-            st.caption(f"{example['category']} • {example['location']}")
-            st.write(example['description'])
-    
-    # Photography tips
-    with st.expander("📸 Photography Tips"):
-        st.markdown("""
-        ### Tips for Cultural Photography:
-        
-        - **Respect**: Always ask permission before photographing people or religious ceremonies
-        - **Context**: Include surroundings to show the cultural setting
-        - **Details**: Capture close-ups of intricate artwork, patterns, or craftsmanship
-        - **Natural Light**: Use natural lighting when possible for authentic colors
-        - **Story**: Try to capture moments that tell a story about the culture
-        - **Diversity**: Show different aspects - people, places, objects, activities
-        
-        ### What to Photograph:
-        
-        - Traditional clothing and jewelry
-        - Festival decorations and celebrations
-        - Religious or cultural ceremonies
-        - Traditional crafts being made
-        - Architectural details of temples, homes, monuments
-        - Food preparation and presentation
-        - Daily life activities with cultural significance
-        """)
+                    "language_context": language_context,
+                    "image_data": image_base64,
+                    "image_format": image.format or 'PNG',
+                    "image_size": image.size,
+                    "file_size": len(uploaded_file.getvalue()),
+                    "created_at": datetime.now().isoformat()
+                }
+                
+                # Try to save to database
+                success = False
+                if DATABASE_AVAILABLE:
+                    try:
+                        add_contribution("image", contribution_data)
+                        success = True
+                        st.success("✅ Image submitted successfully to database!")
+                    except Exception as e:
+                        st.warning(f"Database save failed: {str(e)}")
+                
+                if not success:
+                    # Fallback to session state
+                    if 'local_image_contributions' not in st.session_state:
+                        st.session_state.local_image_contributions = []
+                    st.session_state.local_image_contributions.append(contribution_data)
+                    st.success("✅ Image saved locally! It will be synced when database is available.")
+                
+                # Show success message
+                st.balloons()
+                st.markdown("### 🎉 Thank you for your contribution!")
+                st.markdown("Your image has been added to the BharatVerse collection.")
+                
+                # Clear form
+                if st.button("Submit Another Image"):
+                    st.rerun()
+
+if __name__ == "__main__":
+    image_page()

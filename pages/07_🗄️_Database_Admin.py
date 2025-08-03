@@ -14,11 +14,30 @@ from datetime import datetime, timedelta
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-# Import utilities
-from streamlit_app.utils.auth import get_auth_manager, require_auth
-from streamlit_app.utils.user_manager import UserManager
-from streamlit_app.utils.database import get_db_connection, get_database_stats
-from streamlit_app.utils.main_styling import load_custom_css
+# Import utilities with error handling
+try:
+    from streamlit_app.utils.auth import get_auth_manager
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
+
+try:
+    from streamlit_app.utils.user_manager import UserManager
+    USER_MANAGER_AVAILABLE = True
+except ImportError:
+    USER_MANAGER_AVAILABLE = False
+
+try:
+    from streamlit_app.utils.database import get_db_connection, get_statistics
+    DATABASE_UTILS_AVAILABLE = True
+except ImportError:
+    DATABASE_UTILS_AVAILABLE = False
+
+try:
+    from streamlit_app.utils.main_styling import load_custom_css
+    STYLING_AVAILABLE = True
+except ImportError:
+    STYLING_AVAILABLE = False
 
 # Safe database imports
 try:
@@ -30,12 +49,20 @@ except ImportError:
 
 def check_admin_access():
     """Check if current user has admin access"""
+    if not AUTH_AVAILABLE:
+        st.error("🔒 Authentication system not available")
+        st.warning("Database Admin panel requires authentication to be configured.")
+        st.stop()
+    
     auth = get_auth_manager()
     if not auth.is_authenticated():
         st.error("🔒 Please login to access the Database Admin panel")
         st.markdown("### 🔗 Login Required")
-        from streamlit_app.utils.auth import render_login_button
-        render_login_button()
+        try:
+            from streamlit_app.utils.auth import render_login_button
+            render_login_button()
+        except ImportError:
+            st.info("Please configure authentication to access the admin panel.")
         st.stop()
     
     # Check if user is admin
