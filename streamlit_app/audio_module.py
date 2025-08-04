@@ -58,15 +58,6 @@ def get_audio_processing_config():
         'processing_timeout': 300
     }
 
-# Try to import audio libraries with fallback
-try:
-    import sounddevice as sd
-    import soundfile as sf
-    AUDIO_AVAILABLE = True
-except (ImportError, OSError) as e:
-    AUDIO_AVAILABLE = False
-    # Don't show warning here as it will show on every import
-
 # Detect cloud environment
 def is_cloud_environment():
     """Detect if running in a cloud environment"""
@@ -82,6 +73,35 @@ def is_cloud_environment():
     
     current_path = os.getcwd()
     return any(indicator in current_path if isinstance(indicator, str) else indicator for indicator in cloud_indicators)
+
+# Try to import audio libraries with multiple fallbacks
+AUDIO_AVAILABLE = False
+AUDIO_IMPORT_ERROR = None
+AUDIO_BACKEND = None
+
+# Try sounddevice first (preferred)
+try:
+    import sounddevice as sd
+    import soundfile as sf
+    AUDIO_AVAILABLE = True
+    AUDIO_BACKEND = "sounddevice"
+except (ImportError, OSError) as e:
+    AUDIO_IMPORT_ERROR = str(e)
+    
+    # Try PyAudio as fallback
+    try:
+        import pyaudio
+        import wave
+        AUDIO_AVAILABLE = True
+        AUDIO_BACKEND = "pyaudio"
+    except (ImportError, OSError) as e2:
+        AUDIO_IMPORT_ERROR = f"sounddevice: {e}, pyaudio: {e2}"
+        
+        # Final fallback - check if we're in cloud environment
+        if is_cloud_environment():
+            # In cloud, we might still be able to process uploaded files
+            AUDIO_AVAILABLE = "upload_only"
+            AUDIO_BACKEND = "cloud_upload"
 
 # Try to import enhanced AI models
 try:
@@ -278,8 +298,20 @@ def audio_page():
             st.metric("Memory", f"{memory_usage['rss_mb']:.0f}MB")
     
     # Check if audio libraries are available
-    if not AUDIO_AVAILABLE:
-        st.error("🚫 Audio recording is not available on this system.")
+    if not AUDIO_AVAILABLE or AUDIO_AVAILABLE == "upload_only":
+        if AUDIO_AVAILABLE == "upload_only":
+            st.warning("⚠️ Live audio recording is not available in cloud environment, but file upload is supported.")
+        else:
+            st.error("🚫 Audio recording is not available on this system.")
+        
+        # Show diagnostic information
+        if AUDIO_IMPORT_ERROR:
+            with st.expander("🔍 Diagnostic Information", expanded=False):
+                st.code(f"Import Error: {AUDIO_IMPORT_ERROR}")
+                st.code(f"Environment: {'Cloud' if is_cloud_environment() else 'Local'}")
+                st.code(f"Current Path: {os.getcwd()}")
+                if AUDIO_BACKEND:
+                    st.code(f"Audio Backend: {AUDIO_BACKEND}")
         
         # Detailed installation instructions
         with st.expander("🔧 How to Enable Audio Recording", expanded=True):
@@ -311,11 +343,17 @@ def audio_page():
             ```
             
             ### For Streamlit Cloud Deployment:
-            Add to `packages.txt` file:
+            Add to `packages.txt` file in the **root directory** of your repository:
             ```
+            ffmpeg
+            libsndfile1
             portaudio19-dev
             python3-pyaudio
+            libportaudio2
+            libasound2-dev
             ```
+            
+            **⚠️ Important:** The `packages.txt` file must be in the root directory, not in a subdirectory!
             """)
         
         st.info("""
