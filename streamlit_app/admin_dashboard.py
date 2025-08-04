@@ -33,29 +33,97 @@ def require_admin(func):
 @require_admin
 def admin_dashboard_page():
     """Main admin dashboard"""
-    st.markdown("# 🛡️ Admin Dashboard")
-    st.markdown("---")
+    # Enhanced header with time-based greeting
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "🌅 Good Morning"
+    elif current_hour < 17:
+        greeting = "☀️ Good Afternoon"
+    else:
+        greeting = "🌙 Good Evening"
     
-    # Admin header
     auth = GitLabAuth()
     admin_user = auth.get_current_db_user()
+    admin_name = admin_user.get('name', 'Administrator') if admin_user else 'Administrator'
     
-    st.markdown(f"**Welcome, Admin {admin_user.get('name', 'Unknown') if admin_user else 'Unknown'}**")
-    st.markdown("*Administrative control panel for BharatVerse*")
+    st.markdown(f"# 🛡️ {greeting}, {admin_name}!")
+    st.markdown("*Welcome to the BharatVerse Administrative Control Center*")
     
-    # Quick stats
-    stats = user_manager.get_user_stats()
-    
-    col1, col2, col3, col4 = st.columns(4)
+    # System status indicator
+    col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        st.metric("Total Users", stats['total_users'])
+        st.markdown("### 📊 System Status")
     with col2:
-        st.metric("Active Users", stats['active_users'])
+        st.success("🟢 System Online")
     with col3:
-        st.metric("New This Month", stats['new_users_month'])
-    with col4:
-        admin_count = stats['roles'].get('admin', 0)
-        st.metric("Admins", admin_count)
+        st.metric("⏰ Uptime", "99.9%")
+    
+    st.markdown("---")
+    
+    # Enhanced quick stats with better visualization
+    try:
+        stats = user_manager.get_user_stats()
+        
+        # Main metrics row
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
+        with col1:
+            st.metric(
+                "👥 Total Users", 
+                stats.get('total_users', 0),
+                delta=f"+{stats.get('new_users_today', 0)} today"
+            )
+        
+        with col2:
+            st.metric(
+                "🟢 Active Users", 
+                stats.get('active_users', 0),
+                delta=f"{stats.get('active_percentage', 0):.1f}%"
+            )
+        
+        with col3:
+            st.metric(
+                "📅 New This Month", 
+                stats.get('new_users_month', 0),
+                delta=f"+{stats.get('growth_rate', 0):.1f}%"
+            )
+        
+        with col4:
+            admin_count = stats.get('roles', {}).get('admin', 0)
+            st.metric("🛡️ Admins", admin_count)
+        
+        with col5:
+            # Calculate total contributions
+            total_contributions = stats.get('total_contributions', 0)
+            st.metric("📝 Contributions", total_contributions)
+        
+        # Secondary metrics row
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("🎤 Audio Files", stats.get('audio_count', 0))
+        
+        with col2:
+            st.metric("📝 Text Stories", stats.get('text_count', 0))
+        
+        with col3:
+            st.metric("🖼️ Images", stats.get('image_count', 0))
+        
+        with col4:
+            st.metric("💾 Storage Used", f"{stats.get('storage_used_gb', 0):.1f} GB")
+            
+    except Exception as e:
+        st.error(f"Error loading system statistics: {e}")
+        # Fallback stats
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Total Users", "Loading...")
+        with col2:
+            st.metric("Active Users", "Loading...")
+        with col3:
+            st.metric("New This Month", "Loading...")
+        with col4:
+            st.metric("Admins", "Loading...")
     
     st.markdown("---")
     

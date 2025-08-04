@@ -328,6 +328,211 @@ def show_community_info():
         if st.button("📊 View Analytics", use_container_width=True):
             st.switch_page("pages/04_📊_Analytics.py")
 
+def show_dashboard_header(user_info, auth):
+    """Show enhanced dashboard header with user greeting"""
+    current_hour = datetime.now().hour
+    if current_hour < 12:
+        greeting = "🌅 Good Morning"
+    elif current_hour < 17:
+        greeting = "☀️ Good Afternoon"
+    else:
+        greeting = "🌙 Good Evening"
+    
+    # Header with greeting
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
+    with col1:
+        st.title(f"{greeting}, {user_info.get('name', 'Friend')}!")
+        st.markdown("*Welcome to your BharatVerse dashboard*")
+    
+    with col2:
+        # Quick stats badge
+        username = user_info.get('username', 'unknown')
+        contrib_stats, _ = get_user_contributions(username)
+        total_contributions = sum([stat[1] for stat in contrib_stats]) if contrib_stats else 0
+        
+        st.metric("🏆 Total Contributions", total_contributions)
+    
+    with col3:
+        # User level/badge
+        if total_contributions >= 50:
+            level = "🌟 Cultural Master"
+        elif total_contributions >= 20:
+            level = "🎭 Heritage Keeper"
+        elif total_contributions >= 5:
+            level = "📚 Story Teller"
+        else:
+            level = "🌱 New Explorer"
+        
+        st.markdown(f"**Your Level:**")
+        st.markdown(f"### {level}")
+
+def show_achievement_system(username: str):
+    """Show user achievements and progress"""
+    st.subheader("🏆 Your Achievements")
+    
+    contrib_stats, recent_contribs = get_user_contributions(username)
+    total_contributions = sum([stat[1] for stat in contrib_stats]) if contrib_stats else 0
+    
+    # Achievement definitions
+    achievements = [
+        {"name": "First Steps", "desc": "Make your first contribution", "icon": "🌱", "threshold": 1},
+        {"name": "Story Teller", "desc": "Share 5 cultural stories", "icon": "📚", "threshold": 5},
+        {"name": "Heritage Keeper", "desc": "Contribute 20 items", "icon": "🎭", "threshold": 20},
+        {"name": "Cultural Master", "desc": "Reach 50 contributions", "icon": "🌟", "threshold": 50},
+        {"name": "Community Leader", "desc": "Make 100 contributions", "icon": "👑", "threshold": 100},
+    ]
+    
+    # Show achievements in a grid
+    cols = st.columns(5)
+    for i, achievement in enumerate(achievements):
+        with cols[i]:
+            earned = total_contributions >= achievement["threshold"]
+            if earned:
+                st.markdown(f"### {achievement['icon']}")
+                st.markdown(f"**{achievement['name']}**")
+                st.success("✅ Earned!")
+            else:
+                st.markdown(f"### 🔒")
+                st.markdown(f"**{achievement['name']}**")
+                progress = min(total_contributions / achievement["threshold"], 1.0)
+                st.progress(progress)
+                st.caption(f"{total_contributions}/{achievement['threshold']}")
+    
+    # Progress to next achievement
+    next_achievement = None
+    for achievement in achievements:
+        if total_contributions < achievement["threshold"]:
+            next_achievement = achievement
+            break
+    
+    if next_achievement:
+        st.markdown("### 🎯 Next Goal")
+        progress = total_contributions / next_achievement["threshold"]
+        st.progress(progress)
+        remaining = next_achievement["threshold"] - total_contributions
+        st.markdown(f"**{remaining} more contributions** to unlock **{next_achievement['name']}** {next_achievement['icon']}")
+
+def show_contribution_calendar(username: str):
+    """Show contribution activity calendar"""
+    st.subheader("📅 Your Contribution Activity")
+    
+    contrib_stats, recent_contribs = get_user_contributions(username)
+    
+    if recent_contribs:
+        # Create a simple activity visualization
+        dates = []
+        for contrib in recent_contribs:
+            try:
+                # Parse date from contribution
+                date_str = contrib[2]  # created_at
+                if isinstance(date_str, str):
+                    # Try to parse different date formats
+                    try:
+                        date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                    except:
+                        date = datetime.strptime(date_str[:10], '%Y-%m-%d')
+                    dates.append(date.date())
+            except:
+                continue
+        
+        if dates:
+            # Count contributions by date
+            date_counts = {}
+            for date in dates:
+                date_counts[date] = date_counts.get(date, 0) + 1
+            
+            # Create DataFrame for visualization
+            df = pd.DataFrame(list(date_counts.items()), columns=['Date', 'Contributions'])
+            df['Date'] = pd.to_datetime(df['Date'])
+            
+            # Show chart
+            st.line_chart(df.set_index('Date'))
+            
+            # Show streak info
+            if dates:
+                latest_date = max(dates)
+                days_since_last = (datetime.now().date() - latest_date).days
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("📈 Most Active Day", f"{max(date_counts.values())} contributions")
+                with col2:
+                    if days_since_last == 0:
+                        st.metric("🔥 Last Contribution", "Today!")
+                    elif days_since_last == 1:
+                        st.metric("🔥 Last Contribution", "Yesterday")
+                    else:
+                        st.metric("🔥 Last Contribution", f"{days_since_last} days ago")
+    else:
+        st.info("Start contributing to see your activity calendar!")
+
+def show_personalized_recommendations(username: str):
+    """Show personalized recommendations based on user activity"""
+    st.subheader("💡 Personalized Recommendations")
+    
+    contrib_stats, recent_contribs = get_user_contributions(username)
+    
+    # Analyze user's contribution patterns
+    audio_count = next((stat[1] for stat in contrib_stats if stat[0] == 'audio'), 0)
+    text_count = next((stat[1] for stat in contrib_stats if stat[0] == 'text'), 0)
+    image_count = next((stat[1] for stat in contrib_stats if stat[0] == 'image'), 0)
+    
+    recommendations = []
+    
+    # Generate recommendations based on activity
+    if audio_count == 0:
+        recommendations.append({
+            "title": "🎤 Try Audio Recording",
+            "desc": "Share your voice! Record traditional songs, stories, or cultural practices.",
+            "action": "Record Audio",
+            "page": "pages/01_🎤_Audio_Capture.py"
+        })
+    
+    if text_count == 0:
+        recommendations.append({
+            "title": "📝 Write Your Story",
+            "desc": "Document family traditions, local legends, or cultural memories.",
+            "action": "Write Story",
+            "page": "pages/02_📝_Text_Stories.py"
+        })
+    
+    if image_count == 0:
+        recommendations.append({
+            "title": "📸 Share Visual Heritage",
+            "desc": "Upload photos of cultural artifacts, festivals, or traditional art.",
+            "action": "Upload Images",
+            "page": "pages/03_📸_Visual_Heritage.py"
+        })
+    
+    # Add general recommendations
+    if len(contrib_stats) > 0:
+        recommendations.append({
+            "title": "🔍 Explore Community",
+            "desc": "Discover what others are sharing and connect with fellow contributors.",
+            "action": "Browse Community",
+            "page": "pages/06_🤝_Community.py"
+        })
+    
+    if not recommendations:
+        recommendations.append({
+            "title": "🌟 You're doing great!",
+            "desc": "Keep sharing your cultural heritage. Every contribution matters!",
+            "action": "View Analytics",
+            "page": "pages/05_📊_Analytics.py"
+        })
+    
+    # Display recommendations
+    for i, rec in enumerate(recommendations[:3]):  # Show top 3
+        with st.container():
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f"**{rec['title']}**")
+                st.markdown(rec['desc'])
+            with col2:
+                if st.button(rec['action'], key=f"rec_{i}"):
+                    st.switch_page(rec['page'])
+
 def main():
     st.set_page_config(
         page_title="My Dashboard - BharatVerse",
@@ -338,6 +543,38 @@ def main():
     # Load custom CSS
     if STYLING_AVAILABLE:
         load_custom_css()
+    
+    # Custom CSS for dashboard enhancements
+    st.markdown("""
+    <style>
+    .metric-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        color: white;
+        margin: 0.5rem 0;
+    }
+    .achievement-card {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        margin: 0.5rem;
+    }
+    .achievement-earned {
+        border-color: #4CAF50;
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+    }
+    .recommendation-card {
+        border-left: 4px solid #667eea;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # Check user access
     if not AUTH_AVAILABLE:
@@ -356,31 +593,71 @@ def main():
         st.stop()
     
     user_info, auth = check_user_access()
+    username = user_info.get('username', 'unknown')
     
-    st.title("👤 My Dashboard")
-    st.markdown("*Your personal BharatVerse activity center*")
+    # Enhanced dashboard header
+    show_dashboard_header(user_info, auth)
     
-    # Sidebar navigation
+    st.markdown("---")
+    
+    # Sidebar navigation with enhanced options
     st.sidebar.title("📋 Dashboard Menu")
     
     menu_option = st.sidebar.selectbox(
         "Choose section:",
         [
+            "🏠 Overview",
             "👤 Profile",
             "📊 My Contributions", 
+            "🏆 Achievements",
+            "📅 Activity Calendar",
+            "💡 Recommendations",
             "📈 Recent Activity",
             "🚀 Quick Actions",
             "🏘️ Community"
         ]
     )
     
-    username = user_info.get('username', 'unknown')
+    # Show user info in sidebar
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 👤 Your Info")
+    st.sidebar.markdown(f"**Name:** {user_info.get('name', 'Unknown')}")
+    st.sidebar.markdown(f"**Username:** @{username}")
     
-    if menu_option == "👤 Profile":
+    # Quick stats in sidebar
+    contrib_stats, _ = get_user_contributions(username)
+    total_contributions = sum([stat[1] for stat in contrib_stats]) if contrib_stats else 0
+    st.sidebar.metric("🏆 Contributions", total_contributions)
+    
+    # Main content based on menu selection
+    if menu_option == "🏠 Overview":
+        # Overview dashboard with key highlights
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            show_contribution_summary(username)
+            st.markdown("---")
+            show_recent_activity(username)
+        
+        with col2:
+            show_personalized_recommendations(username)
+            st.markdown("---")
+            show_quick_actions()
+    
+    elif menu_option == "👤 Profile":
         show_user_stats(user_info, auth)
         
     elif menu_option == "📊 My Contributions":
         show_contribution_summary(username)
+        
+    elif menu_option == "🏆 Achievements":
+        show_achievement_system(username)
+        
+    elif menu_option == "📅 Activity Calendar":
+        show_contribution_calendar(username)
+        
+    elif menu_option == "💡 Recommendations":
+        show_personalized_recommendations(username)
         
     elif menu_option == "📈 Recent Activity":
         show_recent_activity(username)
