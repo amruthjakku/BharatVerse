@@ -5,7 +5,7 @@ description = "Preserving India's Cultural Heritage - An open-source platform fo
 authors = [
     {name = "BharatVerse Team", email = "team@bharatverse.org"}
 ]
-license = {text = "AGPL-3.0"}
+license = {text = "AGPL-3.0-only"}
 readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["cultural-heritage", "india", "preservation", "ai", "streamlit"]
