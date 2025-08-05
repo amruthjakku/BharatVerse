@@ -9,34 +9,23 @@ from datetime import datetime, timedelta
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-# Import performance utilities
-from utils.performance_optimizer import get_performance_optimizer, show_performance_dashboard
-# Safe memory manager import
-try:
-    from utils.memory_manager import get_memory_manager, show_memory_dashboard
-except ImportError:
-    from utils.fallback_memory import get_fallback_memory_manager as get_memory_manager, show_fallback_memory_dashboard as show_memory_dashboard
-try:
-    from utils.redis_cache import get_cache_manager
-    REDIS_AVAILABLE = True
-except ImportError:
-    REDIS_AVAILABLE = False
+# Import the new clean architecture
+from core.page_template import create_page, get_page_config
+from core.service_manager import get_service_manager
+from core.error_handler import error_boundary, handle_errors, show_service_status
+from core.module_loader import get_function
 
-try:
-    from utils.async_client import run_parallel_api_calls
-    ASYNC_CLIENT_AVAILABLE = True
-except ImportError:
-    ASYNC_CLIENT_AVAILABLE = False
-
-def main():
-    st.set_page_config(
-        page_title="Performance Dashboard - BharatVerse",
-        page_icon="⚡",
-        layout="wide"
-    )
+@create_page(
+    title="Performance Dashboard",
+    icon="⚡",
+    description="Monitor and optimize BharatVerse performance in real-time",
+    required_services=[],
+    optional_services=["memory", "cache", "redis"]
+)
+def performance_page():
+    """Clean performance dashboard implementation"""
     
-    st.markdown("# ⚡ Performance Dashboard")
-    st.markdown("Monitor and optimize BharatVerse performance in real-time")
+    service_manager = get_service_manager()
     
     # Check admin access
     from streamlit_app.utils.auth import get_auth_manager

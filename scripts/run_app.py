@@ -256,7 +256,7 @@ class BharatVerseRunner:
         print("If you encounter issues:")
         print("1. Check that you're in the correct directory")
         print("2. Ensure virtual environment is activated")
-        print("3. Run: pip install -r requirements.txt")
+        print("3. Run: uv pip install -e .")
         print("4. Check .streamlit/secrets.toml exists")
         print("5. Verify .env file has DISABLE_GITLAB_AUTH=true")
         print()

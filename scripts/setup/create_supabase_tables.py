@@ -31,7 +31,7 @@ def get_supabase_config():
                 postgres_config = secrets.get('postgres', {})
                 config.update(postgres_config)
             except ImportError:
-                print("⚠️ toml package not found. Install with: pip install toml")
+                print("⚠️ toml package not found. Install with: uv pip install toml")
                 return None
         else:
             print("❌ No Supabase configuration found!")

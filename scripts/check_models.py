@@ -223,7 +223,7 @@ def generate_status_report():
         recommendations.append("⚠️ Very few models downloaded. Run: python scripts/fix_dependencies.py")
     
     if not whisper_working:
-        recommendations.append("❌ Whisper not working. Install with: pip install openai-whisper")
+        recommendations.append("❌ Whisper not working. Install with: uv pip install openai-whisper")
     
     if len(failed_models) > len(working_models):
         recommendations.append("❌ Most Transformers models failed. Check internet connection and disk space")

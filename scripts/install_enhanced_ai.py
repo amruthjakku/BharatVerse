@@ -50,7 +50,7 @@ def install_pytorch():
     
     # Install PyTorch (CPU version for compatibility)
     commands = [
-        "pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu",
+        "uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu",
     ]
     
     for cmd in commands:
@@ -64,11 +64,11 @@ def install_transformers():
     logger.info("🔄 Installing Transformers and NLP packages...")
     
     commands = [
-        "pip install transformers>=4.36.0",
-        "pip install accelerate>=0.25.0",
-        "pip install datasets>=2.15.0",
-        "pip install sentence-transformers>=2.2.2",
-        "pip install optimum>=1.16.0"
+        "uv pip install transformers>=4.36.0",
+        "uv pip install accelerate>=0.25.0",
+        "uv pip install datasets>=2.15.0",
+        "uv pip install sentence-transformers>=2.2.2",
+        "uv pip install optimum>=1.16.0"
     ]
     
     for cmd in commands:
@@ -82,9 +82,9 @@ def install_audio_packages():
     logger.info("🔄 Installing audio processing packages...")
     
     commands = [
-        "pip install openai-whisper>=20231117",
-        "pip install librosa>=0.10.1",
-        "pip install soundfile>=0.12.1"
+        "uv pip install openai-whisper>=20231117",
+        "uv pip install librosa>=0.10.1",
+        "uv pip install soundfile>=0.12.1"
     ]
     
     for cmd in commands:
@@ -98,9 +98,9 @@ def install_vision_packages():
     logger.info("🔄 Installing vision processing packages...")
     
     commands = [
-        "pip install Pillow>=10.1.0",
-        "pip install opencv-python>=4.8.1",
-        "pip install timm>=0.9.12"
+        "uv pip install Pillow>=10.1.0",
+        "uv pip install opencv-python>=4.8.1",
+        "uv pip install timm>=0.9.12"
     ]
     
     for cmd in commands:
@@ -114,8 +114,8 @@ def install_language_packages():
     logger.info("🔄 Installing language processing packages...")
     
     commands = [
-        "pip install langdetect>=1.0.9",
-        "pip install nltk>=3.8.1"
+        "uv pip install langdetect>=1.0.9",
+        "uv pip install nltk>=3.8.1"
     ]
     
     for cmd in commands:

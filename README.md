@@ -278,6 +278,91 @@ git push
 
 ---
 
+## 🛠️ **Development & Contributing**
+
+### **Modern Python Toolchain**
+
+BharatVerse uses **uv** and **ruff** for fast, modern Python development:
+
+<table>
+<tr>
+<td width="50%">
+
+#### ⚡ **uv - Ultra-fast Package Manager**
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies (10-100x faster than pip)
+uv pip install -e .
+
+# Development dependencies
+uv pip install -e ".[dev]"
+
+# Run tools
+uv run pytest tests/
+uv run ruff check .
+```
+
+</td>
+<td width="50%">
+
+#### 🔧 **ruff - All-in-One Code Quality**
+```bash
+# Format code (replaces black)
+uv run ruff format .
+
+# Check code (replaces flake8, pylint, isort)
+uv run ruff check .
+
+# Auto-fix issues
+uv run ruff check --fix .
+
+# Use convenient make commands
+make check  # lint + test
+make fix    # auto-fix everything
+```
+
+</td>
+</tr>
+</table>
+
+### **Quick Development Setup**
+
+```bash
+# 1. Clone and setup
+git clone <your-repo>
+cd bharatverse
+
+# 2. Run migration script (for existing users)
+python scripts/migrate_to_uv_ruff.py
+
+# 3. Install dependencies
+uv pip install -e ".[dev]"
+
+# 4. Setup pre-commit hooks
+pre-commit install
+
+# 5. Run all checks
+make check
+```
+
+### **Available Commands**
+
+| Command | Description |
+|---------|-------------|
+| `make install` | Install core dependencies |
+| `make install-dev` | Install development dependencies |
+| `make lint` | Run code quality checks |
+| `make format` | Format code |
+| `make fix` | Auto-fix all issues |
+| `make test` | Run tests |
+| `make check` | Run all checks |
+
+📖 **Read [UV_RUFF_GUIDE.md](UV_RUFF_GUIDE.md) for detailed development guide**
+
+---
+
 ## ✨ **Feature Showcase**
 
 ### 🎙️ **Audio Intelligence**

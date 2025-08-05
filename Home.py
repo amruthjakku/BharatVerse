@@ -7,29 +7,16 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
-# Simple deployment-safe imports
+# Load environment variables
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
 
-# Detect deployment mode
-DEPLOYMENT_MODE = os.getenv("AI_MODE", "cloud")
-IS_CLOUD_DEPLOYMENT = True  # Force cloud mode for deployment
-
-# Safe imports with fallbacks
-try:
-    from streamlit_app.utils.main_styling import load_custom_css
-    STYLING_AVAILABLE = True
-except ImportError:
-    STYLING_AVAILABLE = False
-
-try:
-    from streamlit_app.utils.auth import GitLabAuth, handle_oauth_callback, render_login_button, init_auth
-    AUTH_AVAILABLE = True
-except ImportError:
-    AUTH_AVAILABLE = False
+# Import the new service management system
+from core.service_manager import get_service_manager
+from core.error_handler import error_boundary, safe_import
 
 def main():
     """Main application function"""
@@ -40,19 +27,20 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # Apply styling if available
-    if STYLING_AVAILABLE:
-        try:
-            load_custom_css()
-        except Exception:
-            pass
+    # Initialize service manager
+    service_manager = get_service_manager()
     
-    # Initialize authentication (handle OAuth callbacks)
-    if AUTH_AVAILABLE:
-        try:
-            init_auth()
-        except Exception:
-            pass
+    # Apply styling if available
+    with error_boundary("Failed to load styling", show_error=False):
+        styling_module = safe_import("streamlit_app.utils.main_styling")
+        if styling_module:
+            styling_module.load_custom_css()
+    
+    # Initialize authentication
+    with error_boundary("Failed to initialize authentication", show_error=False):
+        auth_module = safe_import("streamlit_app.utils.auth")
+        if auth_module:
+            auth_module.init_auth()
     
     # Header
     st.markdown("""

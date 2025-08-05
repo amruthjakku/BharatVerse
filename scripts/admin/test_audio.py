@@ -72,7 +72,7 @@ def show_installation_help():
     print("  Windows:   conda install portaudio")
     
     print("\n🐍 Install Python packages:")
-    print("  pip install sounddevice soundfile")
+    print("  uv pip install sounddevice soundfile")
     
     print("\n☁️  For Streamlit Cloud, add to packages.txt:")
     print("  portaudio19-dev")

@@ -20,7 +20,7 @@ def test_redis_connection():
         print("✅ Redis library available")
     except ImportError:
         print("❌ Redis library not installed")
-        print("Run: pip install redis")
+        print("Run: uv pip install redis")
         return
     
     # Test with environment variables

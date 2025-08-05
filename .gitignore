@@ -27,6 +27,10 @@ MANIFEST
 venv/
 env/
 ENV/
+.venv/
+
+# uv
+uv.lock
 
 # Streamlit
 .streamlit/secrets.toml

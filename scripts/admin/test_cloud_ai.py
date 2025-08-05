@@ -35,7 +35,7 @@ def test_huggingface_api():
         print(f"✅ Found HuggingFace token: {token[:10]}...")
         
     except ImportError:
-        print("❌ toml package not installed. Run: pip install toml")
+        print("❌ toml package not installed. Run: uv pip install toml")
         return False
     except Exception as e:
         print(f"❌ Error reading secrets: {e}")
@@ -125,7 +125,7 @@ def test_redis_cache():
             return True
             
         except ImportError:
-            print("⚠️  Redis package not installed. Run: pip install redis")
+            print("⚠️  Redis package not installed. Run: uv pip install redis")
             return False
         except Exception as e:
             print(f"❌ Redis connection failed: {e}")
