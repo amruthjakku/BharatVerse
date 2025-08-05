@@ -15,21 +15,10 @@ import psycopg2
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.pool import SimpleConnectionPool
 
-try:
-    import redis
-    REDIS_AVAILABLE = True
-except ImportError:
-    REDIS_AVAILABLE = False
-    redis = None
-
-try:
-    from minio import Minio
-    from minio.error import S3Error
-    MINIO_AVAILABLE = True
-except ImportError:
-    MINIO_AVAILABLE = False
-    Minio = None
-    S3Error = None
+# Import the new clean architecture
+from .service_manager import get_service_manager
+from .error_handler import handle_errors, error_boundary
+from .module_loader import load_module, get_class
 
 # Configuration
 from dotenv import load_dotenv

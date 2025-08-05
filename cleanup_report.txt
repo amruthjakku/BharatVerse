@@ -1,0 +1,364 @@
+BharatVerse Cleanup Report
+==============================
+
+Redundant Files:
+  - utils/fallback_auth.py
+  - utils/fallback_memory.py
+  - utils/fallback_storage.py
+  - utils/config_validator.py
+
+Files with Useless Patterns:
+  - Home.py: Empty except blocks
+  - core/api_service.py: Excessive try/except imports
+  - core/cloud_ai_manager.py: Empty except blocks
+  - core/database.py: Empty except blocks, Excessive try/except imports
+  - core/enhanced_ai_models.py: Empty except blocks, Unused variable: AUDIO_PROCESSING_AVAILABLE, Unused variable: AUDIO_PROCESSING_AVAILABLE, Excessive try/except imports
+  - core/community_service.py: Excessive try/except imports
+  - core/ai_models.py: Excessive try/except imports
+  - config/threading_config.py: Empty except blocks
+  - utils/memory_manager.py: Empty except blocks, Excessive try/except imports
+  - utils/database_viewer.py: Unused variable: POSTGRES_AVAILABLE, Unused variable: POSTGRES_AVAILABLE
+  - utils/minio_storage.py: Empty except blocks, Unused variable: MINIO_AVAILABLE, Unused variable: MINIO_AVAILABLE, Excessive try/except imports
+  - utils/fallback_memory.py: Empty except blocks
+  - utils/supabase_db.py: Excessive try/except imports
+  - utils/performance_optimizer.py: Excessive try/except imports
+  - utils/redis_cache.py: Empty except blocks, Unused variable: REDIS_AVAILABLE, Unused variable: REDIS_AVAILABLE, Excessive try/except imports
+  - utils/smart_storage.py: Excessive try/except imports
+  - scripts/deploy_free.py: Empty except blocks
+  - scripts/fix_dependencies.py: Empty except blocks
+  - scripts/setup_performance.py: Empty except blocks
+  - scripts/test_uv_ruff_setup.py: Empty except blocks
+  - scripts/cleanup_redundant_files.py: Empty except blocks
+  - scripts/start_enhanced_system.py: Empty except blocks, Excessive try/except imports
+  - scripts/install_enhanced_ai.py: Empty except blocks
+  - scripts/start_docker_system.py: Excessive try/except imports
+  - api/main.py: Excessive try/except imports
+  - streamlit_app/image_module_broken.py: Unused variable: DATABASE_AVAILABLE, Unused variable: DATABASE_AVAILABLE, Excessive try/except imports
+  - streamlit_app/search_module.py: Empty except blocks, Unused variable: AI_MODELS_AVAILABLE, Unused variable: AI_MODELS_AVAILABLE, Unused variable: DATABASE_AVAILABLE, Unused variable: DATABASE_AVAILABLE, Unused variable: LANGDETECT_AVAILABLE, Unused variable: LANGDETECT_AVAILABLE, Unused variable: PLOTLY_AVAILABLE, Unused variable: PLOTLY_AVAILABLE
+  - streamlit_app/text_module_broken.py: Excessive try/except imports
+  - streamlit_app/ai_module.py: Unused variable: TEXTBLOB_AVAILABLE, Unused variable: TEXTBLOB_AVAILABLE, Unused variable: WORDCLOUD_AVAILABLE, Unused variable: WORDCLOUD_AVAILABLE, Unused variable: MATPLOTLIB_AVAILABLE, Unused variable: MATPLOTLIB_AVAILABLE
+  - streamlit_app/community_admin.py: Excessive try/except imports
+  - streamlit_app/community_module.py: Excessive try/except imports
+  - streamlit_app/text_module.py: Unused variable: SUPABASE_AVAILABLE, Unused variable: SUPABASE_AVAILABLE, Unused variable: AUTH_AVAILABLE, Unused variable: AUTH_AVAILABLE, Excessive try/except imports
+  - streamlit_app/analytics_module.py: Unused variable: AUTH_AVAILABLE, Unused variable: AUTH_AVAILABLE, Unused variable: LEGACY_MODULES_AVAILABLE, Unused variable: LEGACY_MODULES_AVAILABLE
+  - streamlit_app/audio_recorder.py: Empty except blocks
+  - streamlit_app/user_dashboard.py: Empty except blocks
+  - streamlit_app/audio_module.py: Excessive try/except imports
+  - pages/06_⚡_Performance.py: Empty except blocks
+  - pages/08_🛡️_Admin_Dashboard.py: Unused variable: USER_MANAGER_AVAILABLE, Unused variable: USER_MANAGER_AVAILABLE, Unused variable: STYLING_AVAILABLE, Unused variable: STYLING_AVAILABLE, Excessive try/except imports
+  - pages/09_👤_My_Dashboard.py: Excessive try/except imports
+  - pages/09_🔗_GitLab.py: Empty except blocks
+  - pages/11_📚_Browse_Contributions.py: Empty except blocks, Unused variable: AUTH_AVAILABLE, Unused variable: AUTH_AVAILABLE
+  - pages/07_🗄️_Database_Admin.py: Unused variable: USER_MANAGER_AVAILABLE, Unused variable: USER_MANAGER_AVAILABLE, Unused variable: DATABASE_UTILS_AVAILABLE, Unused variable: DATABASE_UTILS_AVAILABLE, Unused variable: STYLING_AVAILABLE, Unused variable: STYLING_AVAILABLE, Excessive try/except imports
+  - streamlit_app/utils/auth.py: Empty except blocks, Excessive try/except imports
+  - streamlit_app/utils/cache_manager.py: Empty except blocks
+  - streamlit_app/utils/user_manager.py: Empty except blocks, Unused variable: POSTGRES_AVAILABLE, Unused variable: POSTGRES_AVAILABLE
+  - streamlit_app/utils/database.py: Empty except blocks
+  - scripts/setup/create_supabase_tables.py: Empty except blocks
+  - scripts/admin/test_setup.py: Empty except blocks
+  - scripts/admin/test_redis_connection.py: Empty except blocks
+  - scripts/admin/test_cloud_ai.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sounddevice.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/six.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/typing_extensions.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/packaging/metadata.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/aiohttp/worker.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/web.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/web_protocol.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/aiohttp/compression_utils.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/client.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/aiohttp/web_runner.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/client_reqrep.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/aiohttp/resolver.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/connector.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/aiohttp/http_writer.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/http_parser.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohttp/pytest_plugin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/toml/decoder.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/streamlit/type_util.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/dotenv/cli.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/annotated_types/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/s3transfer/tasks.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/s3transfer/futures.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/s3transfer/utils.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/redis/client.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/redis/connection.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/redis/utils.py: Unused variable: SSL_AVAILABLE, Unused variable: SSL_AVAILABLE, Unused variable: CRYPTOGRAPHY_AVAILABLE, Unused variable: CRYPTOGRAPHY_AVAILABLE
+  - .venv/lib/python3.13/site-packages/redis/cluster.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/jinja2/compiler.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/jinja2/environment.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/jinja2/filters.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/frozenlist/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/referencing/retrieval.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/cffi/backend_ctypes.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/cffi/ffiplatform.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/cffi/api.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/cffi/vengine_cpy.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/cffi/commontypes.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/cffi/recompiler.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/cffi/cparser.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/cffi/verifier.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/click/_winconsole.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/click/types.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/click/_compat.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/click/_termui_impl.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tenacity/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pytz/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pytz/lazy.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/cachetools/__init__.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/cachetools/_cached.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/minio/api.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/minio/crypto.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/basedatatypes.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/_distributor_init.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/botocore/compat.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/botocore/useragent.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/botocore/credentials.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/botocore/utils.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/botocore/httpsession.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/PIL/PngImagePlugin.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/AvifImagePlugin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/PIL/ImageFile.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/_typing.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/PIL/GifImagePlugin.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/ImageCms.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/ImageFilter.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/PIL/ImageShow.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/PIL/WebPImagePlugin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/PIL/TiffImagePlugin.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/Image.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/JpegImagePlugin.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/PIL/ImageFont.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/requests/cookies.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/requests/compat.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/requests/models.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/requests/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/requests/utils.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/requests/adapters.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/_plotly_utils/data_utils.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/_plotly_utils/basevalidators.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/multidict/_multidict_py.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tornado/web.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tornado/gen.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tornado/iostream.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tornado/log.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/util.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/process.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/autoreload.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/websocket.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/jsonschema/validators.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/narwhals/dependencies.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/urllib3/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/urllib3/response.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/urllib3/connectionpool.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psycopg2/errorcodes.py: Unused variable: LOCK_NOT_AVAILABLE
+  - .venv/lib/python3.13/site-packages/psycopg2/extensions.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic/config.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/mypy.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic/types.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/json_schema.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/networks.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/_pswindows.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/_common.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/__init__.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/_psbsd.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/_pslinux.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/_pssunos.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/gitdb/pack.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/gitdb/fun.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/gitdb/util.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/gitdb/stream.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic_core/core_schema.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/git/cmd.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/git/remote.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/git/util.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/conftest.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/dateutil/rrule.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/aiohappyeyeballs/impl.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/conftest.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/util.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/__init__.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/dataset.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/pandas_compat.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/fs.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/acero.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/boto3/s3/inject.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_ipc.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_convert_builtin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_acero.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/strategies.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_adhoc_memory_leak.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_orc.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_table.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_array.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_io.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_cffi.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_schema.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_fs.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_udf.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_dataset.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_extension_type.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_feather.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_pandas.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_exec_plan.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_flight.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_json.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_compute.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/test_scalars.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/parquet/core.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/interchange/test_conversion.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_basic.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_parquet_writer.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_metadata.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_datetime.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_dataset.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_data_types.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_pandas.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pyarrow/tests/parquet/test_parquet_file.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/dateutil/parser/_parser.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/dateutil/tz/tz.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/frame.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/io/pytables.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/io/common.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/io/sql.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/plotting/_core.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/tests/io/test_parquet.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/tests/io/test_common.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/tests/plotting/test_converter.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/tests/arrays/test_datetimes.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/tests/indexes/datetimes/methods/test_tz_localize.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/tests/scalar/timestamp/methods/test_tz_localize.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/io/parsers/python_parser.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/io/formats/style.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/io/clipboard/__init__.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/interchange/from_dataframe.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/core/dtypes/cast.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/dtypes/dtypes.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/dtypes/common.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/dtypes/inference.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pandas/core/arrays/datetimelike.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/indexes/multi.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/indexes/base.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pandas/core/arrays/arrow/array.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/git/refs/symbolic.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/git/index/base.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/git/repo/base.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/git/objects/submodule/base.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/tests/test_misc.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/psutil/tests/__init__.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/tests/test_process_all.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/psutil/tests/test_process.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/v1/_hypothesis_plugin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic/v1/validators.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/v1/mypy.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic/v1/dataclasses.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic/v1/typing.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/_internal/_typing_extra.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/pydantic/_internal/_validators.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pydantic/_internal/_generate_schema.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/urllib3/util/request.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/urllib3/util/ssl_.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/urllib3/util/url.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/urllib3/contrib/socks.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/urllib3/contrib/pyopenssl.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/urllib3/contrib/emscripten/fetch.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/jsonschema/tests/test_validators.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/test/gen_test.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tornado/test/curl_httpclient_test.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/test/websocket_test.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/tornado/test/iostream_test.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/tornado/platform/asyncio.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/botocore/vendored/six.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/ctypeslib/_ctypeslib.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/ma/core.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/ma/mrecords.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/_core/_internal.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/tests/test_ctypeslib.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/tests/test_public_api.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/f2py/crackfortran.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/f2py/diagnose.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/lib/_iotools.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/lib/_npyio_impl.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/lib/_datasource.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/lib/_utils_impl.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/random/tests/test_direct.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/lib/tests/test_io.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/lib/tests/test__datasource.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/testing/_private/utils.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/typing/tests/test_typing.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/_core/tests/test_array_interface.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/_core/tests/test_deprecations.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/_core/tests/test_mem_policy.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/_core/tests/test_cython.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/numpy/_core/tests/test_multiarray.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/ma/tests/test_core.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/numpy/linalg/tests/test_linalg.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/express/_core.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/plotly/express/_imshow.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/io/_renderers.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/io/_kaleido.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/io/_base_renderers.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/io/_templates.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/plotly/express/trendline_functions/__init__.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/minio/credentials/providers.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/testing/util.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/testing/assertions.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/testing/requirements.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/loading.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/path_registry.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/mapper.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/clsregistry.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/decl_api.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/orm/state.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/engine/interfaces.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/engine/result.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/engine/cursor.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/pool/impl.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/event/attr.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/sql/compiler.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/sql/selectable.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/sql/base.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/sql/schema.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/sqlalchemy/dialects/oracle/base.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/dialects/sqlite/pysqlcipher.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/mariadbconnector.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/dialects/mysql/base.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/testing/plugin/pytestplugin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/testing/fixtures/base.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/sqlalchemy/ext/mypy/plugin.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/altair/utils/mimebundle.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/google/protobuf/json_format.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/google/protobuf/text_format.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/google/protobuf/descriptor_pool.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/google/protobuf/internal/api_implementation.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/google/protobuf/internal/python_message.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/redis/commands/core.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/redis/asyncio/client.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/redis/asyncio/connection.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/redis/asyncio/cluster.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pycparser/ply/yacc.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/pycparser/ply/lex.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/streamlit/watcher/path_watcher.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/streamlit/web/bootstrap.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/streamlit/runtime/app_session.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/streamlit/elements/pyplot.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/streamlit/vendor/pympler/asizeof.py: Empty except blocks, Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/streamlit/components/v1/custom_component.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/streamlit/testing/v1/element_tree.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/PublicKey/ECC.py: Excessive try/except imports
+  - .venv/lib/python3.13/site-packages/Crypto/Util/_raw_api.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/IO/PKCS8.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/SelfTest/loader.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/SelfTest/PublicKey/test_import_Curve25519.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/SelfTest/PublicKey/test_import_ECC.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/SelfTest/PublicKey/test_import_RSA.py: Empty except blocks
+  - .venv/lib/python3.13/site-packages/Crypto/SelfTest/PublicKey/test_import_Curve448.py: Empty except blocks
+  - .streamlit/others/setup_accounts.py: Empty except blocks, Excessive try/except imports
+  - .streamlit/others/setup_supabase_config.py: Empty except blocks
