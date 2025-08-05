@@ -14,59 +14,58 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ---
 
 ## Additional Terms for Cultural Content
 
-While the **software code** is licensed under the AGPLv3 above, the **cultural
-content** contributed to BharatVerse (including but not limited to audio recordings,
-text stories, images, and other cultural materials) is licensed under:
+While the **software code** is licensed under the GNU AGPL v3 license above, the **cultural content** contributed to BharatVerse — including but not limited to audio, text, images, and community-submitted materials — is licensed under:
 
 **Creative Commons Attribution 4.0 International License (CC BY 4.0)**
 
-This means that cultural content can be:
-- Shared — copy and redistribute the material in any medium or format
-- Adapted — remix, transform, and build upon the material for any purpose
+This means that cultural content may be:
 
-Under the following terms:
-- Attribution — You must give appropriate credit, provide a link to the license,
-  and indicate if changes were made.
+- **Shared** — copied and redistributed in any medium or format
+- **Adapted** — remixed, transformed, or built upon for any purpose
 
-Full CC BY 4.0 license: https://creativecommons.org/licenses/by/4.0/
+Under the following condition:
+- **Attribution** — You must give appropriate credit, link to the license, and indicate if changes were made.
+
+See the full license: https://creativecommons.org/licenses/by/4.0/
 
 ---
 
 ## Third-Party Components
 
-This software includes the following third-party components with their respective licenses:
+This project uses the following open-source components, each under its respective license:
 
-1. **OpenAI Whisper** - MIT License  
-2. **Transformers (Hugging Face)** - Apache License 2.0  
-3. **Streamlit** - Apache License 2.0  
-4. **FastAPI** - MIT License  
-5. **PostgreSQL** - PostgreSQL License  
-6. **Redis** - BSD 3-Clause License  
-7. **MinIO** - GNU Affero General Public License v3.0  
+1. **OpenAI Whisper** – MIT License  
+2. **Transformers (Hugging Face)** – Apache License 2.0  
+3. **Streamlit** – Apache License 2.0  
+4. **FastAPI** – MIT License  
+5. **PostgreSQL** – PostgreSQL License  
+6. **Redis** – BSD 3-Clause License  
+7. **MinIO** – GNU Affero General Public License v3.0  
 
-(See `THIRD_PARTY_LICENSES.md` for full text of each license.)
+Full details and license texts for these components are available in `THIRD_PARTY_LICENSES.md`.
 
 ---
 
-## Cultural Sensitivity Statement
+## Cultural Sensitivity Guidelines
 
-Users of BharatVerse are expected to:
-- Respect the cultural significance of contributed content
-- Attribute content creators and communities appropriately
-- Not misrepresent or misappropriate cultural materials
-- Use content in ways that honor its cultural context
+BharatVerse users and contributors are expected to:
+
+- Respect the cultural significance and origins of contributed content.
+- Attribute content creators and source communities accurately.
+- Avoid misrepresentation or misuse of cultural heritage.
+- Use the content in a way that honors its traditional and cultural context.
 
 ---
 
 ## Contact
 
-For licensing questions or concerns, please contact:  
-📧 Email: legal@bharatverse.org  
-🌐 Website: https://bharatverse.org/license
+For licensing questions or concerns:
 
+- 📧 Email: legal@bharatverse.org  
+- 🌐 Website: https://bharatverse.org/license
