@@ -2,6 +2,8 @@ import streamlit as st
 import sys
 import os
 from pathlib import Path
+from utils.corpus_api import fetch_categories
+
 
 # Add the project root to Python path
 project_root = Path(__file__).parent
@@ -123,20 +125,32 @@ def main():
     # Community stats (mock data for demo)
     st.markdown("---")
     st.markdown("### 📊 Community Impact")
-    
-    stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
-    
-    with stat_col1:
-        st.metric("Cultural Stories", "2,547", "+127")
-    
-    with stat_col2:
-        st.metric("Active Users", "1,234", "+89")
-    
-    with stat_col3:
-        st.metric("Heritage Sites", "456", "+23")
-    
-    with stat_col4:
-        st.metric("Languages", "28", "+2")
+
+    categories_data = fetch_categories()
+
+    if categories_data:
+        categories = categories_data.get("categories", categories_data)
+
+        cultural_stories = len([cat for cat in categories if cat.get("type") == "story"])
+        heritage_sites = len([cat for cat in categories if cat.get("type") == "site"])
+        languages = len(set(cat.get("language") for cat in categories if "language" in cat))
+        active_users = 1234  # Replace with actual API data if available
+
+        stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
+
+        with stat_col1:
+            st.metric("Cultural Stories", str(cultural_stories))
+
+        with stat_col2:
+            st.metric("Active Users", str(active_users))
+
+        with stat_col3:
+            st.metric("Heritage Sites", str(heritage_sites))
+
+        with stat_col4:
+            st.metric("Languages", str(languages))
+    else:
+        st.error("Could not load community data. Please try again later.")
     
     # Footer
     st.markdown("---")
