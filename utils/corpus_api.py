@@ -1,7 +1,7 @@
 import requests
 
 API_URL = "https://api.corpus.swecha.org/api/v1/categories/"
-BEARER_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTQ2NzAwNTEsInN1YiI6ImZkZjgzMzExLTJlYzctNDc2Mi04OWQxLTMzNzI0NGM4YWYwZiJ9.6N9_R1d4mAWDZmiZ4Lv2rCtAAIcdq0u8ZYIcnhujvqQ"
+BEARER_TOKEN = "YOUR_BEARER_TOKEN"
 
 def fetch_categories():
     headers = {
