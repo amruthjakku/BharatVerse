@@ -56,19 +56,6 @@ uv.lock
 *.swp
 *.swo
 
-# AI Coding Assistants & IDE Extensions
-.zencoder/
-.cursor/
-.continue/
-.aider/
-.copilot/
-.codeium/
-.tabnine/
-.windsurf/
-*.ai-session
-*.ai-chat
-.ai-context/
-
 # VS Code workspace files (but keep configuration)
 .vscode/*.code-workspace
 
