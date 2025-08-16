@@ -73,6 +73,11 @@ def gitlab_integration_page():
     with tab1:
         st.markdown("### 📊 Profile Statistics")
         
+        # Role-based profile (display only; no RBAC enforcement)
+        db_user = auth.get_current_db_user()
+        role_label = (db_user.get('role').title() if db_user and db_user.get('role') else 'Member')
+        st.markdown(f"**Role:** {role_label}")
+        
         # Display user stats
         col1, col2, col3, col4 = st.columns(4)
         

@@ -12,16 +12,12 @@ load_dotenv('.env.local')  # Load local env first
 load_dotenv('.env')        # Then load default env
 
 # Import modules
-from streamlit_app.audio_module import audio_page
 from streamlit_app.text_module import text_page
-from streamlit_app.image_module import image_page
 from streamlit_app.analytics_module import analytics_page
 from streamlit_app.search_module import search_page
 from streamlit_app.community_module import community_page
-from streamlit_app.ai_module import ai_insights_page
-from streamlit_app.collaboration_module import collaboration_page
 from streamlit_app.gitlab_module import gitlab_page
-from streamlit_app.user_profile import user_profile_main
+from streamlit_app.user_profile import user_profile_page
 from streamlit_app.admin_dashboard import admin_dashboard_main
 from streamlit_app.utils.database import init_db, get_statistics
 from streamlit_app.utils.theme_styling import load_theme_css
@@ -60,7 +56,7 @@ with st.sidebar:
 
     # Navigation
     auth = GitLabAuth()
-    nav_options = ["Home", "Audio Capture", "Text Stories", "Visual Heritage", "🔍 Discover", "📊 Analytics", "🤝 Community", "🤖 AI Insights", "👥 Collaboration", "🔗 GitLab", "Browse Contributions", "About"]
+    nav_options = ["Home", "Text Stories", "🔍 Discover", "📊 Analytics", "🤝 Community", "🔗 GitLab", "Browse Contributions", "About"]
     
     # Add authenticated user options
     if auth.is_authenticated():
@@ -84,11 +80,8 @@ with st.sidebar:
     with col2:
         st.metric("Languages", stats['unique_languages'])
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Audio", stats['audio_count'])
-    with col2:
-        st.metric("Text", stats['text_count'])
+    # Simplified type metrics
+    st.metric("Text Contributions", stats['text_count'])
     
     st.markdown("---")
     
@@ -165,17 +158,6 @@ if page == "Home":
     
     with col1:
         st.markdown("""
-        <div class='feature-card-1'>
-            <h3 style='color: white !important;'>🎙️ Audio Magic</h3>
-            <p style='color: white !important;'>Record and transcribe folk songs, stories, and oral traditions in 22+ Indian languages.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Start Recording", key="audio_btn", use_container_width=True):
-            st.session_state.page = "Audio Capture"
-            st.rerun()
-    
-    with col2:
-        st.markdown("""
         <div class='feature-card-2'>
             <h3 style='color: white !important;'>📝 Story Keeper</h3>
             <p style='color: white !important;'>Document local customs, proverbs, recipes, and wisdom passed down through generations.</p>
@@ -185,15 +167,26 @@ if page == "Home":
             st.session_state.page = "Text Stories"
             st.rerun()
     
-    with col3:
+    with col2:
         st.markdown("""
         <div class='feature-card-3'>
-            <h3 style='color: white !important;'>📷 Visual Heritage</h3>
-            <p style='color: white !important;'>Upload and caption images of festivals, art, architecture, and cultural symbols.</p>
+            <h3 style='color: white !important;'>🤝 Community</h3>
+            <p style='color: white !important;'>Join groups, collaborate, and participate in challenges with the community.</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Upload Image", key="image_btn", use_container_width=True):
-            st.session_state.page = "Visual Heritage"
+        if st.button("Open Community", key="community_btn", use_container_width=True):
+            st.session_state.page = "🤝 Community"
+            st.rerun()
+    
+    with col3:
+        st.markdown("""
+        <div class='feature-card-1'>
+            <h3 style='color: white !important;'>🔍 Discover</h3>
+            <p style='color: white !important;'>Search stories and contributions from across BharatVerse.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Start Discovering", key="discover_btn", use_container_width=True):
+            st.session_state.page = "🔍 Discover"
             st.rerun()
     
     # Recent contributions
@@ -231,14 +224,8 @@ if page == "Home":
         with col:
             st.metric(metric["label"], metric["value"], metric["delta"])
 
-elif page == "Audio Capture":
-    audio_page()
-
 elif page == "Text Stories":
     text_page()
-
-elif page == "Visual Heritage":
-    image_page()
 
 elif page == "🔍 Discover":
     search_page()
@@ -249,17 +236,11 @@ elif page == "📊 Analytics":
 elif page == "🤝 Community":
     community_page()
 
-elif page == "🤖 AI Insights":
-    ai_insights_page()
-
-elif page == "👥 Collaboration":
-    collaboration_page()
-
 elif page == "🔗 GitLab":
     gitlab_page()
 
 elif page == "👤 My Profile":
-    user_profile_main()
+    user_profile_page()
 
 elif page == "🛡️ Admin Dashboard":
     admin_dashboard_main()

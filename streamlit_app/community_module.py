@@ -127,14 +127,23 @@ def community_page():
         st.error(f"Failed to load community stats: {e}")
         return
     
-    # Main content tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    # Main content tabs (with Collaboration)
+    from streamlit_app.collaboration_module import (
+        active_projects_section,
+        task_board_section,
+        review_queue_section,
+        team_analytics_section,
+        workflows_section,
+    )
+    
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "🏠 Groups", 
         "💬 Chat", 
         "🗣️ Discussions", 
         "🎯 Challenges", 
         "🏆 Leaderboard", 
-        "👤 Profile"
+        "👤 Profile",
+        "🤝 Collaboration",
     ])
     
     with tab1:
@@ -154,6 +163,12 @@ def community_page():
     
     with tab6:
         profile_section(community_service, current_user)
+    
+    with tab7:
+        st.markdown("### 🤝 Collaboration")
+        active_projects_section()
+        st.markdown("---")
+        task_board_section()
 
 def groups_section(community_service, current_user):
     """Community Groups Section"""

@@ -68,19 +68,10 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Features overview
-    col1, col2, col3 = st.columns(3)
+    # Features overview (simplified)
+    col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 10px; 
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid #FF6B35;">
-            <h4 style="color: #FF6B35; margin-bottom: 1rem;">🎤 Audio Stories</h4>
-            <p>Record and preserve oral traditions, family stories, and cultural narratives.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
         st.markdown("""
         <div style="background: white; padding: 1.5rem; border-radius: 10px; 
                     box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid #2E86AB;">
@@ -89,12 +80,12 @@ def main():
         </div>
         """, unsafe_allow_html=True)
     
-    with col3:
+    with col2:
         st.markdown("""
         <div style="background: white; padding: 1.5rem; border-radius: 10px; 
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid #A23B72;">
-            <h4 style="color: #A23B72; margin-bottom: 1rem;">🖼️ Visual Heritage</h4>
-            <p>Upload and analyze cultural artifacts, photographs, and artwork.</p>
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid #6C63FF;">
+            <h4 style="color: #6C63FF; margin-bottom: 1rem;">🤝 Community</h4>
+            <p>Join groups, collaborate, and participate in challenges.</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -102,21 +93,13 @@ def main():
     st.markdown("---")
     st.markdown("### 🧭 Explore BharatVerse")
     
-    nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
+    nav_col1, nav_col2 = st.columns(2)
     
     with nav_col1:
-        if st.button("🎤 Audio Capture", use_container_width=True):
-            st.switch_page("pages/01_🎤_Audio_Capture.py")
-    
-    with nav_col2:
         if st.button("📝 Text Stories", use_container_width=True):
             st.switch_page("pages/02_📝_Text_Stories.py")
     
-    with nav_col3:
-        if st.button("🖼️ Visual Heritage", use_container_width=True):
-            st.switch_page("pages/03_🖼️_Visual_Heritage.py")
-    
-    with nav_col4:
+    with nav_col2:
         if st.button("🔍 Discover", use_container_width=True):
             st.switch_page("pages/04_🔍_Discover.py")
     

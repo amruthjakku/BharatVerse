@@ -35,6 +35,20 @@
 
 ## 🚀 **Quick Access**
 
+> Simplified Edition (Finalised Version of BharatVerse)
+> 
+> The app is now optimized to be easy, simple, and fast. The following features are disabled/removed for this release:
+> - Audio features
+> - Visual heritage
+> - Performance tab
+> - Complex AI features (Enhanced AI, Real-time AI Analytics)
+> - Role-based access control (RBAC) checks are temporarily disabled
+>
+> Available core features:
+> - Text Stories, Discover, Analytics
+> - Community (with built-in Collaboration tab)
+> - GitLab integration and a simple profile page
+
 <div align="center">
 
 | 🌐 **Live Demo** | ☁️ **Deploy Your Own** | 📖 **Documentation** | 💬 **Community** |
@@ -578,30 +592,31 @@ graph TD
 bharatverse/
 ├── 🏠 Home.py                          # Main application entry point
 ├── 📱 pages/                           # Streamlit application pages
-│   ├── 01_🎤_Audio_Capture.py         # Audio recording & processing
 │   ├── 02_📝_Text_Stories.py          # Story documentation
-│   ├── 03_📸_Visual_Heritage.py       # Image upload & analysis  
 │   ├── 04_🔍_Discover.py              # Content discovery
 │   ├── 05_📊_Analytics.py             # Analytics dashboard
-│   ├── 06_🤝_Community.py             # Community features
-│   └── 14_🧠_Enhanced_AI_Features.py   # Advanced AI capabilities
+│   ├── 06_🤝_Community.py             # Community features (with Collaboration)
+│   ├── 09_🔗_GitLab.py                # GitLab integration
+│   ├── 09_👤_My_Dashboard.py          # Simple user dashboard
+│   ├── 11_📂_Browse_Contributions.py  # Browse contributions
+│   └── 12_ℹ️_About.py                 # About the project
 ├── 🤖 core/                           # Core functionality
-│   └── cloud_ai_manager.py           # AI orchestration (ORCHESTRATOR)
-├── 🛠️ utils/                          # Utility modules
-│   ├── inference_manager.py          # HuggingFace API calls (EXECUTOR)
-│   ├── supabase_db.py               # Database operations
-│   ├── redis_cache.py               # Caching & performance
-│   ├── r2_storage.py                # File storage
-│   └── config_validator.py          # Configuration management
+│   └── service_manager.py            # Service orchestration
+├── 🛠️ streamlit_app/                  # Modularized app components
+│   ├── community_module.py           # Community UI and logic
+│   ├── collaboration_module.py       # Collaboration sections (used inside Community)
+│   ├── gitlab_module.py              # GitLab page and profile
+│   ├── user_profile.py               # Profile page (simplified)
+│   └── utils/                        # Auth, database, styling, etc.
 ├── 🚀 scripts/                        # Deployment & testing
-│   ├── setup_free_cloud.py          # Automated deployment setup
-│   └── test_cloud_setup.py          # Configuration validation
+│   ├── setup_free_cloud.py           # Automated deployment setup
+│   └── test_cloud_setup.py           # Configuration validation
 ├── ⚙️ .streamlit/                     # Streamlit configuration
 │   └── config.toml                   # App settings
-├── 📋 requirements_cloud.txt          # Cloud dependencies
+├── 📋 requirements/                   # Dependencies by environment
 ├── 🐳 runtime.txt                     # Python version for cloud
 ├── 🔧 packages.txt                    # System packages
-└── 📖 README.md                      # This amazing file!
+└── 📖 README.md                       # This file
 ```
 
 ---

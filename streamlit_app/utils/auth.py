@@ -325,14 +325,12 @@ APP_ENV=render
         return st.session_state.get('db_user')
     
     def is_admin(self) -> bool:
-        """Check if current user is admin"""
-        db_user = self.get_current_db_user()
-        return db_user and db_user.get('role') == 'admin'
+        """Temporarily disable admin role checks"""
+        return False
     
     def is_moderator(self) -> bool:
-        """Check if current user is moderator or admin"""
-        db_user = self.get_current_db_user()
-        return db_user and db_user.get('role') in ['admin', 'moderator']
+        """Temporarily disable moderator role checks"""
+        return False
     
     def save_persistent_login(self):
         """Save login state for persistence across sessions"""
@@ -661,8 +659,7 @@ def render_user_info():
                 if st.button("🗄️ Database", use_container_width=True):
                     st.switch_page("pages/07_🗄️_Database_Admin.py")
             with col2:
-                if st.button("⚡ Performance", use_container_width=True):
-                    st.switch_page("pages/06_⚡_Performance.py")
+                st.caption("Performance page disabled")
 
 
 def require_auth(func):
