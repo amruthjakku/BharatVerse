@@ -43,64 +43,26 @@ handle_oauth_callback()
 # Load theme-based CSS after getting theme selection
 # This will be loaded after the sidebar is created
 
-# Sidebar theme toggle and navigation
+# Sidebar navigation (clean)
 with st.sidebar:
-    st.markdown("# 🇮🇳 BharatVerse")
-    st.markdown("---")
-
-    # Demo mode completely removed - always use real data from database
-
-    # Theme toggle
-    theme = st.selectbox("Select Theme:", ["Light", "Dark"])
-    st.markdown("---")
-
+    st.markdown("## 🇮🇳 BharatVerse")
+    
     # Navigation
     auth = GitLabAuth()
     nav_options = ["Home", "Text Stories", "🔍 Discover", "📊 Analytics", "🤝 Community", "🔗 GitLab", "Browse Contributions", "About"]
-    
-    # Add authenticated user options
     if auth.is_authenticated():
-        nav_options.insert(-2, "👤 My Profile")  # Insert before "About"
-        
-        # Add admin option for admins
+        nav_options.insert(-2, "👤 My Profile")
         if auth.is_admin():
             nav_options.insert(-2, "🛡️ Admin Dashboard")
-    
-    page = st.radio("Navigate to:", nav_options)
-    
-    st.markdown("---")
-    st.markdown("### 📊 Live Statistics")
-    
-    # Get real statistics from database
-    stats = get_statistics()
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Total Contributions", stats['total_contributions'])
-    with col2:
-        st.metric("Languages", stats['unique_languages'])
-    
-    # Simplified type metrics
-    st.metric("Text Contributions", stats['text_count'])
+    page = st.radio("Navigate:", nav_options)
     
     st.markdown("---")
-    
-    # Authentication section
-    if auth.is_authenticated():
-        render_user_info()
-    else:
-        st.markdown("### 🔐 Authentication")
-        st.info("Login with GitLab to contribute and access personalized features.")
+    if not auth.is_authenticated():
+        st.markdown("### 🔐 Login")
         render_login_button()
-    
-    st.markdown("---")
-    st.markdown("### 🌐 Resources")
-    st.markdown("[📚 Documentation](https://github.com/bharatverse/bharatverse)")
-    st.markdown("[🤗 API Access](https://api.bharatverse.org)")
-    st.markdown("[📧 Contact Us](mailto:team@bharatverse.org)")
 
-# Load theme CSS based on selection
-load_theme_css(theme)
+# Load default theme CSS
+load_theme_css("Light")
 
 # Main content
 if page == "Home":
