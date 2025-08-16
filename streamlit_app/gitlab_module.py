@@ -244,39 +244,73 @@ def gitlab_page():
     """Main GitLab page function"""
     auth = GitLabAuth()
     
-    # If GitLab auth is disabled, show disabled message
-    if auth.disabled:
-        # GitLab header with official logo
+    # Check if GitLab is properly configured
+    if not auth.client_id or not auth.client_secret:
+        # Beautiful error state
         st.markdown("""
-        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <div style="
+            background: linear-gradient(135deg, #FC6D26 0%, #FCA326 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+        ">
             <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyMzA1IiB2aWV3Qm94PSIwIDAgMjU2IDIzNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc1bDQ3LjEwNC0xNDQuOTdIODAuOTdsNDcuMTA0IDE0NC45N3oiIGZpbGw9IiNFMjQzMjkiLz48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc0TDgwLjk3IDkxLjEwNEgxNC45NTZsMTEzLjExOSAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDRMLjY0MiAxMzUuMTZhOS43NTIgOS43NTIgMCAwIDAgMy41NDIgMTAuOTAzbDEyMy44OTEgOTAuMDEyLTExMy4xMi0xNDQuOTd6IiBmaWxsPSIjRkNBMzI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDVIODAuOTdMNTIuNjAxIDMuNzljLTEuNDYtNC40OTMtNy44MTYtNC40OTItOS4yNzUgMGwtMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjxwYXRoIGQ9Ik0xMjguMDc1IDIzNi4wNzRsNDcuMTA0LTE0NC45N2g2Ni4wMTVsLTExMy4xMiAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTI0MS4xOTQgOTEuMTA0bDE0LjMxNCA0NC4wNTZhOS43NTIgOS43NTIgMCAwIDEtMy41NDMgMTAuOTAzbC0xMjMuODkgOTAuMDEyIDExMy4xMTktMTQ0Ljk3eiIgZmlsbD0iI0ZDQTMyNiIvPjxwYXRoIGQ9Ik0yNDEuMTk0IDkxLjEwNWgtNjYuMDE1bDI4LjM3LTg3LjMxNWMxLjQ2LTQuNDkzIDcuODE2LTQuNDkyIDkuMjc1IDBsMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjwvc3ZnPg==" 
-                 style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
-            <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
+                 style="width: 60px; height: 60px; margin-bottom: 1rem;" alt="GitLab Logo">
+            <h2 style="color: white; margin: 0;">GitLab Integration</h2>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("---")
-        st.info("🚫 GitLab integration is currently disabled for local development.")
-        st.markdown("""
-        **To enable GitLab integration:**
-        1. Run `python scripts/fix_gitlab_oauth.py`
-        2. Choose option 2 to configure GitLab OAuth
-        3. Provide your GitLab application credentials
-        """)
+        
+        st.warning("🔧 GitLab OAuth is not configured yet")
+        
+        # Setup instructions
+        with st.expander("📚 Setup Instructions", expanded=True):
+            st.markdown("""
+            ### Quick Setup Guide
+            
+            1. **Create a GitLab Application:**
+               - Go to [GitLab Settings](https://code.swecha.org/-/profile/applications)
+               - Click "New Application"
+               - Name: `BharatVerse`
+               - Redirect URI: `http://localhost:8501/callback`
+               - Scopes: Select `api`, `read_user`, `profile`, `email`
+               - Click "Save application"
+            
+            2. **Configure Environment:**
+               ```bash
+               # Add to your .env file:
+               GITLAB_CLIENT_ID=your_application_id
+               GITLAB_CLIENT_SECRET=your_secret
+               GITLAB_BASE_URL=https://code.swecha.org
+               GITLAB_REDIRECT_URI=http://localhost:8501/callback
+               ```
+            
+            3. **Restart the Application**
+            """)
         return
     
     if not auth.is_authenticated():
-        # GitLab header with official logo
+        # Beautiful login prompt
         st.markdown("""
-        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <div style="
+            background: linear-gradient(135deg, #FC6D26 0%, #FCA326 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(252, 109, 38, 0.3);
+        ">
             <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwMCIgaGVpZ2h0PSIyMzA1IiB2aWV3Qm94PSIwIDAgMjU2IDIzNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc1bDQ3LjEwNC0xNDQuOTdIODAuOTdsNDcuMTA0IDE0NC45N3oiIGZpbGw9IiNFMjQzMjkiLz48cGF0aCBkPSJNMTI4LjA3NSAyMzYuMDc0TDgwLjk3IDkxLjEwNEgxNC45NTZsMTEzLjExOSAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDRMLjY0MiAxMzUuMTZhOS43NTIgOS43NTIgMCAwIDAgMy41NDIgMTAuOTAzbDEyMy44OTEgOTAuMDEyLTExMy4xMi0xNDQuOTd6IiBmaWxsPSIjRkNBMzI2Ii8+PHBhdGggZD0iTTE0Ljk1NiA5MS4xMDVIODAuOTdMNTIuNjAxIDMuNzljLTEuNDYtNC40OTMtNy44MTYtNC40OTItOS4yNzUgMGwtMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjxwYXRoIGQ9Ik0xMjguMDc1IDIzNi4wNzRsNDcuMTA0LTE0NC45N2g2Ni4wMTVsLTExMy4xMiAxNDQuOTd6IiBmaWxsPSIjRkM2RDI2Ii8+PHBhdGggZD0iTTI0MS4xOTQgOTEuMTA0bDE0LjMxNCA0NC4wNTZhOS43NTIgOS43NTIgMCAwIDEtMy41NDMgMTAuOTAzbC0xMjMuODkgOTAuMDEyIDExMy4xMTktMTQ0Ljk3eiIgZmlsbD0iI0ZDQTMyNiIvPjxwYXRoIGQ9Ik0yNDEuMTk0IDkxLjEwNWgtNjYuMDE1bDI4LjM3LTg3LjMxNWMxLjQ2LTQuNDkzIDcuODE2LTQuNDkyIDkuMjc1IDBsMjguMzcgODcuMzE1eiIgZmlsbD0iI0UyNDMyOSIvPjwvc3ZnPg==" 
-                 style="width: 32px; height: 32px; margin-right: 12px;" alt="GitLab Logo">
-            <h2 style="margin: 0; color: #FC6D26;">GitLab Integration</h2>
+                 style="width: 80px; height: 80px; margin-bottom: 1.5rem;" alt="GitLab Logo">
+            <h1 style="color: white; margin: 0 0 1rem 0; font-size: 2.5rem;">GitLab Integration</h1>
+            <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">Connect your GitLab account to unlock powerful features</p>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("---")
-        st.info("Please login with GitLab to access integration features.")
         
-        from streamlit_app.utils.auth import render_login_button
-        render_login_button()
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            st.info("🔐 Please login with GitLab to access integration features")
+            from streamlit_app.utils.auth import render_login_button
+            render_login_button()
     else:
         gitlab_integration_page()

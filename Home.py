@@ -42,84 +42,217 @@ def main():
         if auth_module:
             auth_module.init_auth()
     
-    # Header
+    # Modern gradient header
     st.markdown("""
-    <div style="text-align: center; padding: 2rem 0;">
-        <h1 style="color: #FF6B35; font-size: 3rem; margin-bottom: 0.5rem;">
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    ">
+        <h1 style="
+            color: white;
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        ">
             🏛️ BharatVerse
         </h1>
-        <h2 style="color: #2E86AB; font-size: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="
+            color: rgba(255,255,255,0.95);
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 0;
+        ">
             Preserving India's Cultural Heritage
         </h2>
     </div>
     """, unsafe_allow_html=True)
     
-    # Welcome message
+    # Welcome card with glassmorphism effect
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); 
-                color: white; padding: 2rem; border-radius: 15px; margin: 2rem 0;">
-        <h3 style="color: white; margin-bottom: 1rem;">Welcome to BharatVerse! 🎉</h3>
-        <p style="font-size: 1.1rem; margin-bottom: 1rem;">
-            Join thousands of cultural enthusiasts in preserving and sharing India's rich heritage.
+    <div style="
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin: 2rem 0;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    ">
+        <h3 style="
+            color: #1a1a2e;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            font-weight: 600;
+        ">Welcome to Your Cultural Journey! 🎉</h3>
+        <p style="
+            font-size: 1.15rem;
+            color: #16213e;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        ">
+            Join a growing community dedicated to preserving India's rich cultural tapestry.
         </p>
-        <p style="font-size: 1rem; opacity: 0.9;">
-            Document family stories, discover hidden cultural gems, and connect with like-minded heritage preservationists.
+        <p style="
+            font-size: 1rem;
+            color: #0f3460;
+            line-height: 1.6;
+        ">
+            📚 Document stories • 🔍 Discover heritage • 🤝 Connect with enthusiasts
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Features overview (simplified)
-    col1, col2 = st.columns(2)
+    # Modern feature cards
+    st.markdown("<h3 style='text-align: center; color: #1a1a2e; margin: 2rem 0;'>✨ Core Features</h3>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 10px; 
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid #2E86AB;">
-            <h4 style="color: #2E86AB; margin-bottom: 1rem;">📝 Text Documentation</h4>
-            <p>Write and share cultural stories, traditions, and historical accounts.</p>
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s;
+        ">
+            <h4 style="color: white; margin-bottom: 1rem; font-size: 1.3rem;">📝 Text Stories</h4>
+            <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.5;">
+                Document traditions, folklore, recipes, and wisdom passed through generations
+            </p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style="background: white; padding: 1.5rem; border-radius: 10px; 
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid #6C63FF;">
-            <h4 style="color: #6C63FF; margin-bottom: 1rem;">🤝 Community</h4>
-            <p>Join groups, collaborate, and participate in challenges.</p>
+        <div style="
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(245, 87, 108, 0.3);
+        ">
+            <h4 style="color: white; margin-bottom: 1rem; font-size: 1.3rem;">🤝 Community Hub</h4>
+            <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.5;">
+                Connect, collaborate, and participate in cultural preservation initiatives
+            </p>
         </div>
         """, unsafe_allow_html=True)
     
-    # Navigation
-    st.markdown("---")
-    st.markdown("### 🧭 Explore BharatVerse")
+    with col3:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(250, 112, 154, 0.3);
+        ">
+            <h4 style="color: white; margin-bottom: 1rem; font-size: 1.3rem;">🔍 Discover</h4>
+            <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; line-height: 1.5;">
+                Explore rich cultural content from diverse regions and communities
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
-    nav_col1, nav_col2 = st.columns(2)
+    # Clean navigation buttons
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #1a1a2e;'>🚀 Get Started</h3>", unsafe_allow_html=True)
     
-    with nav_col1:
-        if st.button("📝 Text Stories", use_container_width=True):
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("📝 Write Story", use_container_width=True, type="primary"):
             st.switch_page("pages/02_📝_Text_Stories.py")
     
-    with nav_col2:
-        if st.button("🔍 Discover", use_container_width=True):
+    with col2:
+        if st.button("🤝 Join Community", use_container_width=True, type="primary"):
+            st.switch_page("pages/06_🤝_Community.py")
+    
+    with col3:
+        if st.button("🔍 Explore", use_container_width=True, type="primary"):
             st.switch_page("pages/04_🔍_Discover.py")
     
-    # Community stats (mock data for demo)
-    st.markdown("---")
-    st.markdown("### 📊 Community Impact")
+    # Beautiful stats section
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #1a1a2e; margin-bottom: 2rem;'>📊 Our Growing Impact</h3>", unsafe_allow_html=True)
     
-    stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4)
     
-    with stat_col1:
-        st.metric("Cultural Stories", "2,547", "+127")
+    with col1:
+        st.markdown("""
+        <div style="
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        ">
+            <h2 style="color: #667eea; margin: 0;">2,547</h2>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Cultural Stories</p>
+            <small style="color: #4caf50;">↑ 127 this week</small>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with stat_col2:
-        st.metric("Active Users", "1,234", "+89")
+    with col2:
+        st.markdown("""
+        <div style="
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        ">
+            <h2 style="color: #f093fb; margin: 0;">1,234</h2>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Active Users</p>
+            <small style="color: #4caf50;">↑ 89 today</small>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with stat_col3:
-        st.metric("Heritage Sites", "456", "+23")
+    with col3:
+        st.markdown("""
+        <div style="
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        ">
+            <h2 style="color: #fa709a; margin: 0;">456</h2>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Heritage Sites</p>
+            <small style="color: #4caf50;">↑ 23 this month</small>
+        </div>
+        """, unsafe_allow_html=True)
     
-    with stat_col4:
-        st.metric("Languages", "28", "+2")
+    with col4:
+        st.markdown("""
+        <div style="
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        ">
+            <h2 style="color: #fee140; margin: 0;">28</h2>
+            <p style="color: #666; margin: 0.5rem 0 0 0;">Languages</p>
+            <small style="color: #4caf50;">↑ 2 added</small>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Footer
     st.markdown("---")
