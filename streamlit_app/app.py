@@ -13,12 +13,10 @@ load_dotenv('.env')        # Then load default env
 
 # Import modules
 from streamlit_app.text_module import text_page
-from streamlit_app.analytics_module import analytics_page
 from streamlit_app.search_module import search_page
 from streamlit_app.community_module import community_page
 from streamlit_app.gitlab_module import gitlab_page
 from streamlit_app.user_profile import user_profile_page
-from streamlit_app.admin_dashboard import admin_dashboard_main
 from streamlit_app.utils.database import init_db, get_statistics
 from streamlit_app.utils.theme_styling import load_theme_css
 from streamlit_app.utils.cache_manager import cache_manager
@@ -49,11 +47,7 @@ with st.sidebar:
     
     # Navigation
     auth = GitLabAuth()
-    nav_options = ["Home", "Text Stories", "🔍 Discover", "📊 Analytics", "🤝 Community", "🔗 GitLab", "Browse Contributions", "About"]
-    if auth.is_authenticated():
-        nav_options.insert(-2, "👤 My Profile")
-        if auth.is_admin():
-            nav_options.insert(-2, "🛡️ Admin Dashboard")
+    nav_options = ["Home", "Text Stories", "🔍 Discover", "🤝 Community", "🔗 GitLab", "👤 My Profile", "About"]
     page = st.radio("Navigate:", nav_options)
     
     st.markdown("---")
@@ -192,9 +186,6 @@ elif page == "Text Stories":
 elif page == "🔍 Discover":
     search_page()
 
-elif page == "📊 Analytics":
-    analytics_page()
-
 elif page == "🤝 Community":
     community_page()
 
@@ -203,9 +194,6 @@ elif page == "🔗 GitLab":
 
 elif page == "👤 My Profile":
     user_profile_page()
-
-elif page == "🛡️ Admin Dashboard":
-    admin_dashboard_main()
 
 elif page == "Browse Contributions":
     st.markdown("## 🔍 Browse Cultural Contributions")

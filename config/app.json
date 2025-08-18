@@ -1,20 +1,21 @@
 {
   "name": "BharatVerse",
-  "description": "Digital Cultural Heritage Platform with AI",
+  "description": "Digital Cultural Heritage Platform - Simple, Fast, Perfect",
   "repository": "https://github.com/YOUR_USERNAME/bharatverse",
   "keywords": [
     "streamlit",
-    "ai",
     "cultural-heritage",
-    "india"
+    "india",
+    "community",
+    "collaboration"
   ],
   "env": {
-    "AI_MODE": {
-      "description": "AI deployment mode",
-      "value": "free_tier"
+    "GITLAB_AUTH_ENABLED": {
+      "description": "Enable GitLab authentication",
+      "value": "true"
     },
-    "USE_LIGHTWEIGHT_MODELS": {
-      "description": "Use lightweight AI models",
+    "COMMUNITY_FEATURES": {
+      "description": "Enable community collaboration features",
       "value": "true"
     }
   },
