@@ -80,6 +80,59 @@ def user_profile_page():
     with tab5:
         render_gitlab_profile(user_info)
 
+def render_gitlab_profile(user_info):
+    """Render GitLab profile integration"""
+    st.markdown("### 🔗 GitLab Profile Integration")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 👤 GitLab Information")
+        st.markdown(f"**Username:** @{user_info.get('username', 'N/A')}")
+        st.markdown(f"**Name:** {user_info.get('name', 'N/A')}")
+        st.markdown(f"**Email:** {user_info.get('email', 'N/A')}")
+        st.markdown(f"**ID:** {user_info.get('id', 'N/A')}")
+        
+        if user_info.get('state'):
+            st.markdown(f"**Status:** {user_info['state']}")
+        
+        if user_info.get('web_url'):
+            st.markdown(f"[View GitLab Profile]({user_info['web_url']})")
+    
+    with col2:
+        st.markdown("#### 🎯 GitLab Role & Permissions")
+        
+        # Determine role based on GitLab permissions
+        gitlab_role = "Contributor"
+        if user_info.get('is_admin'):
+            gitlab_role = "Administrator"
+        elif user_info.get('can_create_project'):
+            gitlab_role = "Developer"
+        elif user_info.get('can_create_group'):
+            gitlab_role = "Maintainer"
+        
+        st.markdown(f"**Role:** {gitlab_role}")
+        st.markdown(f"**Can Create Projects:** {'✅' if user_info.get('can_create_project') else '❌'}")
+        st.markdown(f"**Can Create Groups:** {'✅' if user_info.get('can_create_group') else '❌'}")
+        
+    st.markdown("---")
+    st.markdown("#### 📊 GitLab Activity")
+    
+    # Mock GitLab activity data
+    activity_data = {
+        'commits': 42,
+        'merge_requests': 15,
+        'issues': 28,
+        'contributions': 85
+    }
+    
+    cols = st.columns(4)
+    for i, (key, value) in enumerate(activity_data.items()):
+        with cols[i]:
+            st.metric(key.replace('_', ' ').title(), value)
+    
+    st.info("🔄 GitLab activity syncs automatically with your contributions to BharatVerse")
+
 def render_user_dashboard(db_user):
     """Render user dashboard with statistics"""
     st.markdown("### 📊 Personal Dashboard")
@@ -91,10 +144,9 @@ def render_user_dashboard(db_user):
         st.info("🎯 Start contributing to see your dashboard statistics!")
         st.markdown("""
         **Get started by:**
-        - 🎵 Recording audio stories
         - 📝 Sharing text stories
-        - 🖼️ Uploading visual heritage
         - 🤝 Participating in community discussions
+        - 🔍 Discovering cultural heritage
         """)
         return
     

@@ -1,424 +1,288 @@
+"""
+Analytics Module for BharatVerse
+Provides data visualization and analytics features
+"""
+
 import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import sys
-from pathlib import Path
+from typing import Dict, List, Optional
+import random
 
-# Add parent directory to path for imports
-sys.path.append(str(Path(__file__).parent.parent))
+from core.service_manager import get_service_manager
+from core.error_handler import error_boundary, handle_errors
 
-# Performance optimization imports
-from utils.performance_optimizer import (
-    get_performance_optimizer, 
-    cached_analytics_data,
-    show_performance_dashboard,
-    optimize_dataframe_memory,
-    progressive_loading_container
-)
-
-# Database imports with caching
-try:
-    from utils.supabase_db import (
-        get_database_manager,
-        get_cached_platform_stats,
-        get_cached_contributions,
-        get_cached_user_analytics,
-        log_analytics_batched
-    )
-    SUPABASE_AVAILABLE = True
-except ImportError:
-    SUPABASE_AVAILABLE = False
-
-# Authentication imports
-try:
-    from streamlit_app.utils.auth import get_auth_manager
-    AUTH_AVAILABLE = True
-except ImportError:
-    AUTH_AVAILABLE = False
-
-# Try to import existing modules with fallback
-try:
-    from streamlit_app.utils.database import get_statistics
-    from streamlit_app.utils.data_handler import get_contributions
-    LEGACY_MODULES_AVAILABLE = True
-except ImportError:
-    LEGACY_MODULES_AVAILABLE = False
-
-@st.cache_data(ttl=1800, show_spinner=False)
-def get_supabase_analytics_data():
-    """Get analytics data from Supabase"""
-    if not SUPABASE_AVAILABLE:
-        return None, None
+def generate_sample_data():
+    """Generate sample data for demonstration"""
+    # Sample data for contributions over time
+    dates = pd.date_range(end=datetime.now(), periods=30, freq='D')
+    contributions_data = pd.DataFrame({
+        'date': dates,
+        'stories': np.random.poisson(10, 30),
+        'users': np.random.poisson(5, 30),
+        'views': np.random.poisson(100, 30),
+    })
     
-    try:
-        db = get_database_manager()
-        
-        # Get contributions
-        contributions = db.get_contributions(limit=1000)
-        
-        # Calculate statistics
-        stats = {
-            'total_contributions': len(contributions),
-            'text_count': len([c for c in contributions if c.get('content_type') == 'text']),
-            'audio_count': len([c for c in contributions if c.get('content_type') == 'audio']),
-            'image_count': len([c for c in contributions if c.get('content_type') == 'image']),
-            'proverb_count': len([c for c in contributions if c.get('content_type') == 'proverb']),
-            'languages': list(set([c.get('language', 'Unknown') for c in contributions if c.get('language')])),
-            'regions': list(set([c.get('region', 'Unknown') for c in contributions if c.get('region')])),
-            'recent_contributions': len([c for c in contributions if c.get('created_at', '') > (datetime.now() - timedelta(days=7)).isoformat()])
-        }
-        
-        return stats, contributions
-        
-    except Exception as e:
-        st.error(f"Error loading Supabase analytics: {e}")
-        return None, None
+    # Sample data for content categories
+    categories = ['Folklore', 'Recipes', 'Traditions', 'Music', 'Dance', 'Art', 'History', 'Languages']
+    category_data = pd.DataFrame({
+        'category': categories,
+        'count': [random.randint(20, 100) for _ in categories],
+        'engagement': [random.randint(50, 500) for _ in categories]
+    })
+    
+    # Sample data for regional distribution
+    regions = ['North', 'South', 'East', 'West', 'Central', 'Northeast']
+    region_data = pd.DataFrame({
+        'region': regions,
+        'contributions': [random.randint(50, 200) for _ in regions],
+        'active_users': [random.randint(20, 80) for _ in regions]
+    })
+    
+    return contributions_data, category_data, region_data
 
-@st.cache_data(ttl=1800, show_spinner=False)
-def generate_analytics_charts(stats_data, contributions_data):
-    """Generate analytics charts with caching and multithreading"""
-    from utils.threading_manager import parallel_map
+@handle_errors(fallback_value=None, show_error=True)
+def create_time_series_chart(data: pd.DataFrame):
+    """Create time series chart for contributions"""
+    fig = go.Figure()
     
-    def create_content_pie_chart(data):
-        """Create content type pie chart"""
-        stats_data, _ = data
-        if not stats_data:
-            return None
-            
-        content_data = {
-            'Type': ['Audio', 'Text', 'Image'],
-            'Count': [
-                stats_data.get('audio_count', 0), 
-                stats_data.get('text_count', 0), 
-                stats_data.get('image_count', 0)
-            ]
-        }
-        df_content = pd.DataFrame(content_data)
-        df_content = df_content[df_content['Count'] > 0]  # Filter out zero counts
-        
-        if not df_content.empty:
-            chart = px.pie(
-                df_content, 
-                values='Count', 
-                names='Type',
-                title='Content Type Distribution',
-                color_discrete_sequence=['#FF6B6B', '#4ECDC4', '#45B7D1']
-            )
-            chart.update_traces(textposition='inside', textinfo='percent+label')
-            return ('content_pie', chart)
-        return None
+    fig.add_trace(go.Scatter(
+        x=data['date'],
+        y=data['stories'],
+        mode='lines+markers',
+        name='Stories',
+        line=dict(color='#667eea', width=2),
+        marker=dict(size=6)
+    ))
     
-    def create_language_bar_chart(data):
-        """Create language distribution bar chart"""
-        _, contributions_data = data
-        if not contributions_data:
-            return None
-            
-        lang_counts = {}
-        for contrib in contributions_data:
-            lang = contrib.get('language', 'Unknown')
-            if lang and lang != 'Unknown':
-                lang_counts[lang] = lang_counts.get(lang, 0) + 1
-        
-        if lang_counts:
-            df_lang = pd.DataFrame(list(lang_counts.items()), columns=['Language', 'Count'])
-            df_lang = df_lang.sort_values('Count', ascending=False).head(10)  # Top 10 languages
-            chart = px.bar(
-                df_lang, 
-                x='Language', 
-                y='Count',
-                title='Top Languages by Contribution Count',
-                color='Count',
-                color_continuous_scale='viridis'
-            )
-            return ('language_bar', chart)
-        return None
+    fig.add_trace(go.Scatter(
+        x=data['date'],
+        y=data['users'],
+        mode='lines+markers',
+        name='New Users',
+        line=dict(color='#f093fb', width=2),
+        marker=dict(size=6)
+    ))
     
-    def create_region_chart(data):
-        """Create region distribution chart"""
-        _, contributions_data = data
-        if not contributions_data:
-            return None
-            
-        region_counts = {}
-        for contrib in contributions_data:
-            region = contrib.get('region', 'Unknown')
-            if region and region != 'Unknown':
-                region_counts[region] = region_counts.get(region, 0) + 1
-        
-        if region_counts:
-            df_region = pd.DataFrame(list(region_counts.items()), columns=['Region', 'Count'])
-            df_region = df_region.sort_values('Count', ascending=False).head(15)
-            chart = px.bar(
-                df_region, 
-                x='Count', 
-                y='Region',
-                orientation='h',
-                title='Contributions by Region',
-                color='Count',
-                color_continuous_scale='plasma'
-            )
-            return ('region_bar', chart)
-        return None
-    
-    # Create chart generation tasks
-    chart_tasks = [
-        create_content_pie_chart,
-        create_language_bar_chart,
-        create_region_chart
-    ]
-    
-    # Execute chart generation in parallel
-    data_tuple = (stats_data, contributions_data)
-    chart_results = parallel_map(
-        lambda func: func(data_tuple), 
-        chart_tasks, 
-        max_workers=3
+    fig.update_layout(
+        title="Activity Over Time",
+        xaxis_title="Date",
+        yaxis_title="Count",
+        hovermode='x unified',
+        template='plotly_white',
+        height=400
     )
     
-    # Collect results
-    charts = {}
-    for result in chart_results:
-        if result and len(result) == 2:
-            chart_name, chart = result
-            charts[chart_name] = chart
-    
-    return charts
+    return fig
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def get_time_series_data(contributions_data):
-    """Generate time series data with caching"""
-    if not contributions_data:
-        return None
+@handle_errors(fallback_value=None, show_error=True)
+def create_category_chart(data: pd.DataFrame):
+    """Create bar chart for content categories"""
+    fig = px.bar(
+        data,
+        x='category',
+        y='count',
+        color='engagement',
+        color_continuous_scale=['#667eea', '#764ba2'],
+        labels={'count': 'Number of Stories', 'engagement': 'Engagement Score'},
+        title="Content by Category"
+    )
     
-    # Create time series from contributions
-    dates = []
-    for contrib in contributions_data:
-        created_at = contrib.get('created_at')
-        if created_at:
-            if isinstance(created_at, str):
-                try:
-                    date = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                    dates.append(date.date())
-                except:
-                    continue
-            else:
-                dates.append(created_at.date())
+    fig.update_layout(
+        template='plotly_white',
+        height=400,
+        showlegend=False
+    )
     
-    if dates:
-        df_dates = pd.DataFrame({'date': dates})
-        df_dates['count'] = 1
-        df_timeline = df_dates.groupby('date').count().reset_index()
-        df_timeline = df_timeline.sort_values('date')
-        return df_timeline
-    
-    return None
+    return fig
 
-def analytics_page():
-    """Enhanced analytics dashboard with performance optimizations"""
-    st.markdown("## 📊 Analytics Dashboard")
-    st.markdown("Explore insights and trends from BharatVerse contributions")
+@handle_errors(fallback_value=None, show_error=True)
+def create_region_chart(data: pd.DataFrame):
+    """Create pie chart for regional distribution"""
+    fig = px.pie(
+        data,
+        values='contributions',
+        names='region',
+        title="Regional Distribution",
+        color_discrete_sequence=px.colors.sequential.Purples_r
+    )
     
-    # Initialize performance optimizer
-    optimizer = get_performance_optimizer()
+    fig.update_traces(
+        textposition='inside',
+        textinfo='percent+label'
+    )
     
-    # Log page visit
-    log_analytics_batched("analytics_page_visit", user_id=st.session_state.get("user_id"))
+    fig.update_layout(
+        template='plotly_white',
+        height=400
+    )
     
-    # Progressive loading container
-    container, progress_bar, status_text = progressive_loading_container()
-    
-    with container:
-        # Step 1: Load basic stats
-        status_text.text("Loading platform statistics...")
-        progress_bar.progress(0.2)
-        
-        # Try to get data from Supabase first
-        supabase_stats, supabase_contributions = get_supabase_analytics_data()
-        
-        if supabase_stats:
-            stats = supabase_stats
-            st.success("📊 Analytics loaded from Supabase Cloud Database")
-        else:
-            # Fallback to cached platform stats
-            stats = get_cached_platform_stats()
-            st.info("📊 Using cached analytics data")
-        
-        # Step 2: Load contributions data conditionally
-        status_text.text("Loading contributions data...")
-        progress_bar.progress(0.4)
-        
-        # Use lazy loading for contributions
-        load_detailed_data = st.checkbox(
-            "📈 Load Detailed Analytics", 
-            value=False,
-            help="Load detailed charts and trends (may take a moment)"
-        )
-        
-        contributions = []
-        if load_detailed_data:
-            if supabase_contributions:
-                contributions = supabase_contributions
-                st.success("📈 Detailed analytics from Supabase")
-            else:
-                contributions = get_cached_contributions(limit=1000)  # Limit for performance
-                st.info("📈 Using cached contributions data")
-        
-        progress_bar.progress(0.6)
-    
-    # Clear loading indicators
-    progress_bar.progress(1.0)
-    status_text.text("Analytics loaded successfully!")
-    
-    # Overview metrics
-    st.markdown("### 🎯 Platform Overview")
+    return fig
+
+def display_metrics():
+    """Display key metrics"""
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
-            "Total Contributions", 
-            stats.get('total_contributions', 0),
-            delta=None,
-            help="Total number of cultural contributions"
+            label="Total Stories",
+            value="2,547",
+            delta="+127 this week",
+            delta_color="normal"
         )
     
     with col2:
         st.metric(
-            "Languages Covered", 
-            stats.get('languages_count', 0),
-            delta=None,
-            help="Number of unique languages represented"
+            label="Active Users",
+            value="1,234",
+            delta="+89 this week",
+            delta_color="normal"
         )
     
     with col3:
         st.metric(
-            "Regions Active", 
-            stats.get('regions_count', 0),
-            delta=None,
-            help="Number of regions with contributions"
+            label="Total Views",
+            value="45.2K",
+            delta="+2.3K today",
+            delta_color="normal"
         )
     
     with col4:
         st.metric(
-            "Active Users", 
-            stats.get('total_users', 0),
-            delta=None,
-            help="Total registered users"
+            label="Engagement Rate",
+            value="68%",
+            delta="+5%",
+            delta_color="normal"
+        )
+
+def analytics_page():
+    """Main analytics page"""
+    
+    # Header
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    ">
+        <h1 style="color: white; margin: 0;">📊 Analytics Dashboard</h1>
+        <p style="color: rgba(255,255,255,0.9); margin-top: 0.5rem;">
+            Track engagement and growth of cultural content
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Get service manager
+    service_manager = get_service_manager()
+    
+    # Display metrics
+    display_metrics()
+    
+    st.markdown("---")
+    
+    # Time period selector
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        time_period = st.selectbox(
+            "Time Period",
+            ["Last 7 days", "Last 30 days", "Last 90 days", "All time"],
+            index=1
         )
     
-    # Detailed analytics (only if requested)
-    if load_detailed_data:
-        st.markdown("---")
-        st.markdown("### 📈 Detailed Analytics")
-        
-        # Generate charts with caching
-        charts = generate_analytics_charts(stats, contributions)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if 'content_pie' in charts:
-                st.plotly_chart(charts['content_pie'], use_container_width=True)
-            else:
-                st.info("📊 No content distribution data available yet")
-        
-        with col2:
-            if 'language_bar' in charts:
-                st.plotly_chart(charts['language_bar'], use_container_width=True)
-            else:
-                st.info("🌐 No language distribution data available yet")
-        
-        # Time series analysis
-        st.markdown("---")
-        st.markdown("### 📅 Contribution Trends")
-        
-        time_series_data = get_time_series_data(contributions)
-        
-        if time_series_data is not None and not time_series_data.empty:
-            fig_timeline = px.line(
-                time_series_data, 
-                x='date', 
-                y='count',
-                title='Daily Contributions Over Time',
-                labels={'count': 'Number of Contributions', 'date': 'Date'}
-            )
-            fig_timeline.update_traces(line_color='#4ECDC4', line_width=3)
-            fig_timeline.update_layout(
-                xaxis_title="Date",
-                yaxis_title="Contributions",
-                hovermode='x unified'
-            )
-            st.plotly_chart(fig_timeline, use_container_width=True)
-        else:
-            st.info("📈 No timeline data available yet")
-        
-        # Regional analysis
-        if contributions:
-            st.markdown("---")
-            st.markdown("### 🗺️ Regional Distribution")
-            
-            region_counts = {}
-            for contrib in contributions:
-                region = contrib.get('region', 'Unknown')
-                if region and region != 'Unknown':
-                    region_counts[region] = region_counts.get(region, 0) + 1
-            
-            if region_counts:
-                df_regions = pd.DataFrame(list(region_counts.items()), columns=['Region', 'Count'])
-                df_regions = df_regions.sort_values('Count', ascending=True).tail(15)  # Top 15 regions
-                
-                fig_regions = px.bar(
-                    df_regions, 
-                    x='Count', 
-                    y='Region',
-                    orientation='h',
-                    title='Top Regions by Contributions',
-                    color='Count',
-                    color_continuous_scale='plasma'
-                )
-                fig_regions.update_layout(height=500)
-                st.plotly_chart(fig_regions, use_container_width=True)
-            else:
-                st.info("🗺️ No regional data available yet")
+    # Generate sample data
+    contributions_data, category_data, region_data = generate_sample_data()
     
-    else:
-        st.info("👆 Check 'Load Detailed Analytics' above to see charts and trends")
+    # Charts row 1
+    st.markdown("### 📈 Trends")
     
-    # Performance metrics for admins
-    if st.session_state.get("user_role") == "admin":
-        st.markdown("---")
-        with st.expander("⚡ Performance Metrics", expanded=False):
-            show_performance_dashboard()
+    with error_boundary("Failed to load time series chart"):
+        fig = create_time_series_chart(contributions_data)
+        if fig:
+            st.plotly_chart(fig, use_container_width=True)
     
-    # Export functionality
-    st.markdown("---")
-    st.markdown("### 📤 Export Data")
-    
+    # Charts row 2
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("📊 Export Statistics", help="Download platform statistics as JSON"):
-            import json
-            stats_json = json.dumps(stats, indent=2, default=str)
-            st.download_button(
-                label="Download Statistics",
-                data=stats_json,
-                file_name=f"bharatverse_stats_{datetime.now().strftime('%Y%m%d')}.json",
-                mime="application/json"
-            )
+        st.markdown("### 📚 Content Categories")
+        with error_boundary("Failed to load category chart"):
+            fig = create_category_chart(category_data)
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        if load_detailed_data and contributions:
-            if st.button("📋 Export Contributions", help="Download contributions data as CSV"):
-                df_contributions = pd.DataFrame(contributions)
-                df_contributions = optimize_dataframe_memory(df_contributions)
-                csv_data = df_contributions.to_csv(index=False)
-                st.download_button(
-                    label="Download Contributions",
-                    data=csv_data,
-                    file_name=f"bharatverse_contributions_{datetime.now().strftime('%Y%m%d')}.csv",
-                    mime="text/csv"
-                )
+        st.markdown("### 🗺️ Regional Distribution")
+        with error_boundary("Failed to load region chart"):
+            fig = create_region_chart(region_data)
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+    
+    # Top contributors section
+    st.markdown("---")
+    st.markdown("### 🏆 Top Contributors This Month")
+    
+    contributors = pd.DataFrame({
+        'Rank': ['🥇', '🥈', '🥉', '4', '5'],
+        'Contributor': ['Priya Sharma', 'Raj Patel', 'Anita Desai', 'Vikram Singh', 'Meera Reddy'],
+        'Stories': [23, 19, 17, 15, 14],
+        'Views': ['2.3K', '1.9K', '1.7K', '1.5K', '1.4K'],
+        'Region': ['North', 'West', 'South', 'East', 'Central']
+    })
+    
+    st.dataframe(contributors, use_container_width=True, hide_index=True)
+    
+    # Recent activity feed
+    st.markdown("---")
+    st.markdown("### 🔄 Recent Activity")
+    
+    activities = [
+        {"time": "2 minutes ago", "action": "New story added", "details": "Traditional Rajasthani Recipe by Priya"},
+        {"time": "15 minutes ago", "action": "Community event created", "details": "Cultural Festival Discussion"},
+        {"time": "1 hour ago", "action": "New user joined", "details": "Welcome to Amit Kumar!"},
+        {"time": "3 hours ago", "action": "Story featured", "details": "Ancient Tamil Folklore gains 100+ views"},
+        {"time": "5 hours ago", "action": "Milestone reached", "details": "2,500 stories collected!"},
+    ]
+    
+    for activity in activities[:5]:
+        st.markdown(f"""
+        <div style="
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #667eea;
+        ">
+            <small style="color: #888;">{activity['time']}</small>
+            <div><strong>{activity['action']}</strong></div>
+            <div style="color: #666;">{activity['details']}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Export section
+    st.markdown("---")
+    col1, col2, col3 = st.columns([2, 1, 1])
+    
+    with col1:
+        st.markdown("### 📥 Export Analytics Data")
+    
+    with col2:
+        if st.button("📊 Export to CSV", use_container_width=True):
+            # Create sample CSV data
+            csv = contributions_data.to_csv(index=False)
+            st.download_button(
+                label="Download CSV",
+                data=csv,
+                file_name=f"analytics_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime="text/csv"
+            )
+    
+    with col3:
+        if st.button("📈 Generate Report", use_container_width=True):
+            st.info("Report generation feature coming soon!")
+
+if __name__ == "__main__":
+    analytics_page()

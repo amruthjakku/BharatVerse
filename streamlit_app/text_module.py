@@ -7,28 +7,7 @@ import time
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-# Performance optimization imports
-from utils.performance_optimizer import get_performance_optimizer
-# Safe memory manager import
-try:
-    from utils.memory_manager import get_memory_manager, MemoryTracker, show_memory_dashboard
-except ImportError:
-    from utils.fallback_memory import (
-        get_fallback_memory_manager as get_memory_manager, 
-        show_fallback_memory_dashboard as show_memory_dashboard,
-        FallbackMemoryTracker as MemoryTracker
-    )
-from utils.redis_cache import get_cache_manager
-
-# Initialize performance components
-@st.cache_resource
-def get_text_performance_components():
-    """Get cached performance components for text module"""
-    return {
-        'optimizer': get_performance_optimizer(),
-        'memory_manager': get_memory_manager(),
-        'cache_manager': get_cache_manager()
-    }
+# Simple configuration - no complex performance optimization
 
 @st.cache_data(ttl=1800, show_spinner=False)
 def get_text_processing_config():
@@ -77,19 +56,8 @@ def text_page():
     st.markdown("## 📝 Story Keeper")
     st.markdown("Document stories, proverbs, recipes, and wisdom from your culture.")
     
-    # Initialize performance components
-    perf_components = get_text_performance_components()
-    optimizer = perf_components['optimizer']
-    memory_manager = perf_components['memory_manager']
-    cache_manager = perf_components['cache_manager']
-    
     # Get text processing configuration
     text_config = get_text_processing_config()
-    
-    # Performance monitoring for admins
-    if st.session_state.get("user_role") == "admin":
-        with st.expander("🔧 Performance Monitoring"):
-            show_memory_dashboard()
     
     # Language selection
     st.markdown("### 🌐 Language Selection")
