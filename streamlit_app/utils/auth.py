@@ -440,22 +440,35 @@ def handle_oauth_callback():
     query_params = st.query_params
     
     if 'code' in query_params and 'state' in query_params:
+        # Show processing message instead of "Page not found"
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem auto;
+            max-width: 600px;
+        ">
+            <h2 style="color: white; margin: 0;">🔐 Processing Authentication...</h2>
+            <p style="color: rgba(255,255,255,0.9); margin-top: 0.5rem;">Please wait while we complete your GitLab login</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         # Get code and state from query parameters
         code = query_params['code']
         state = query_params['state']
-        
-        # Debug information (can be removed in production)
-        # st.info(f"OAuth callback received - Code: {code[:10]}..., State: {state[:10]}...")
-        # st.info(f"Current session state keys: {list(st.session_state.keys())}")
         
         auth = GitLabAuth()
         
         try:
             # Exchange code for token
-            token_data = auth.exchange_code_for_token(code, state)
-            if not token_data:
-                st.error("Failed to exchange authorization code for token.")
-                return
+            with st.spinner("Authenticating with GitLab..."):
+                token_data = auth.exchange_code_for_token(code, state)
+                if not token_data:
+                    st.error("Failed to exchange authorization code for token.")
+                    st.stop()
+                    return
             
             # Store token information
             st.session_state.access_token = token_data['access_token']
@@ -468,32 +481,52 @@ def handle_oauth_callback():
             st.session_state.token_expires_at = expires_at.isoformat()
             
             # Get user information
-            user_info = auth.get_user_info(token_data['access_token'])
-            if user_info:
-                # Create or update user in database
-                db_user = user_manager.create_or_update_user(user_info)
-                
-                # Store both GitLab and database user info
-                st.session_state.user_info = user_info
-                st.session_state.db_user = db_user
-                
-                # Log login activity
-                user_manager.log_user_activity(
-                    db_user['id'], 
-                    'login', 
-                    {'method': 'gitlab_oauth', 'ip': 'unknown'}
-                )
-                
-                # Save persistent login (remember me is enabled by default)
-                auth.save_persistent_login()
-                
-                st.success(f"Successfully authenticated as {user_info.get('name', 'Unknown User')}!")
-                st.info("✅ Login will be remembered for 7 days")
-                # Clear query parameters using new API
-                st.query_params.clear()
-                st.rerun()
-            else:
-                st.error("Failed to get user information.")
+            with st.spinner("Loading your profile..."):
+                user_info = auth.get_user_info(token_data['access_token'])
+                if user_info:
+                    # Create or update user in database
+                    db_user = user_manager.create_or_update_user(user_info)
+                    
+                    # Store both GitLab and database user info
+                    st.session_state.user_info = user_info
+                    st.session_state.db_user = db_user
+                    
+                    # Log login activity
+                    user_manager.log_user_activity(
+                        db_user['id'], 
+                        'login', 
+                        {'method': 'gitlab_oauth', 'ip': 'unknown'}
+                    )
+                    
+                    # Save persistent login (remember me is enabled by default)
+                    auth.save_persistent_login()
+                    
+                    # Show success message with user info
+                    st.markdown(f"""
+                    <div style="
+                        background: linear-gradient(135deg, #4CAF50 0%, #45B049 100%);
+                        padding: 2rem;
+                        border-radius: 15px;
+                        text-align: center;
+                        margin: 2rem auto;
+                        max-width: 600px;
+                    ">
+                        <h2 style="color: white; margin: 0;">✅ Login Successful!</h2>
+                        <p style="color: rgba(255,255,255,0.95); margin-top: 0.5rem; font-size: 1.1rem;">Welcome back, {user_info.get('name', 'User')}!</p>
+                        <p style="color: rgba(255,255,255,0.85); margin-top: 0.5rem;">Redirecting to the app...</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Clear query parameters using new API
+                    st.query_params.clear()
+                    
+                    # Add a small delay so user can see the success message
+                    import time
+                    time.sleep(1.5)
+                    st.rerun()
+                else:
+                    st.error("Failed to get user information.")
+                    st.stop()
                 
         except Exception as e:
             st.error(f"Authentication error: {e}")
