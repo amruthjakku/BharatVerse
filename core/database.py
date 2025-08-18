@@ -10,10 +10,45 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 import logging
 
-# Database imports
-import psycopg2
-from psycopg2.extras import RealDictCursor, Json
-from psycopg2.pool import SimpleConnectionPool
+# Database imports - make optional (support both psycopg2 and psycopg3)
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor, Json
+    from psycopg2.pool import SimpleConnectionPool
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    # Try psycopg (v3) as fallback
+    try:
+        import psycopg
+        from psycopg.rows import dict_row
+        # Adapter classes for psycopg3 compatibility
+        psycopg2 = psycopg
+        class SimpleConnectionPool:
+            def __init__(self, minconn, maxconn, **kwargs):
+                self.conninfo = psycopg.conninfo.make_conninfo(**kwargs)
+                self.pool = []
+            def getconn(self):
+                return psycopg.connect(self.conninfo, row_factory=dict_row)
+            def putconn(self, conn):
+                if conn:
+                    conn.close()
+            def closeall(self):
+                pass
+        RealDictCursor = dict_row
+        class Json:
+            def __init__(self, data):
+                self.data = data
+        PSYCOPG2_AVAILABLE = True
+    except ImportError:
+        PSYCOPG2_AVAILABLE = False
+        # Dummy classes for when neither is available
+        class SimpleConnectionPool:
+            pass
+        class RealDictCursor:
+            pass
+        class Json:
+            def __init__(self, data):
+                self.data = data
 
 # Import the new clean architecture
 from .service_manager import get_service_manager
@@ -107,15 +142,39 @@ class DatabaseConfig:
         
         return value
     
-    # PostgreSQL - with safe fallbacks
+    # PostgreSQL - with safe fallbacks (supports DATABASE_URL)
     @classmethod
     def get_postgres_config(cls):
+        # Prefer DATABASE_URL if provided (e.g., Supabase)
+        db_url = os.getenv("DATABASE_URL")
+        if db_url and not cls._is_placeholder(db_url):
+            try:
+                # Expected forms:
+                # postgresql://user:pass@host:5432/db
+                # postgres://user:pass@host:5432/db
+                from urllib.parse import urlparse
+                parsed = urlparse(db_url)
+                host = parsed.hostname
+                port = parsed.port or 5432
+                user = parsed.username
+                password = parsed.password
+                database = parsed.path.lstrip("/") or "postgres"
+                return {
+                    'host': host,
+                    'port': str(port),
+                    'database': database,
+                    'user': user,
+                    'password': password,
+                }
+            except Exception:
+                # Fall back to explicit vars below if parsing fails
+                pass
         return {
             'host': cls._get_safe_config("POSTGRES_HOST"),
             'port': os.getenv("POSTGRES_PORT", "5432"),
             'database': cls._get_safe_config("POSTGRES_DB", "bharatverse"),
             'user': cls._get_safe_config("POSTGRES_USER", "postgres"),
-            'password': cls._get_safe_config("POSTGRES_PASSWORD")
+            'password': cls._get_safe_config("POSTGRES_PASSWORD"),
         }
     
     # MinIO - with safe fallbacks
@@ -142,8 +201,11 @@ class DatabaseConfig:
     @classmethod
     def is_postgres_configured(cls):
         """Check if PostgreSQL is properly configured"""
+        # Accept DATABASE_URL or POSTGRES_* combo
+        if os.getenv("DATABASE_URL") and not cls._is_placeholder(os.getenv("DATABASE_URL")):
+            return True
         config = cls.get_postgres_config()
-        return all([config['host'], config['password']])
+        return all([config.get('host'), config.get('password')])
     
     @classmethod
     def is_redis_configured(cls):
@@ -183,7 +245,7 @@ class DatabaseManager:
         """Initialize all database connections with graceful fallbacks"""
         
         # PostgreSQL connection pool
-        if self.config.is_postgres_configured():
+        if self.config.is_postgres_configured() and PSYCOPG2_AVAILABLE:
             try:
                 pg_config = self.config.get_postgres_config()
                 self._postgres_pool = SimpleConnectionPool(
@@ -202,9 +264,11 @@ class DatabaseManager:
             logger.info("PostgreSQL not configured - running without database persistence")
             self._postgres_pool = None
         
-        # MinIO client
+        # MinIO client (optional - skip if not needed)
         if self.config.is_minio_configured():
             try:
+                from minio import Minio
+                from minio.error import S3Error
                 minio_config = self.config.get_minio_config()
                 self._minio_client = Minio(
                     minio_config['host'],
@@ -215,16 +279,17 @@ class DatabaseManager:
                 # Initialize MinIO buckets
                 self._initialize_buckets()
                 logger.info("MinIO client initialized")
-            except Exception as e:
-                logger.error(f"Failed to initialize MinIO: {e}")
+            except (ImportError, Exception) as e:
+                logger.info(f"MinIO not available or not configured: {e}")
                 self._minio_client = None
         else:
             logger.info("MinIO not configured - running without file storage")
             self._minio_client = None
         
-        # Redis client
+        # Redis client (optional - skip if not needed)
         if self.config.is_redis_configured():
             try:
+                import redis
                 redis_config = self.config.get_redis_config()
                 if redis_config['url']:
                     self._redis_client = redis.from_url(
@@ -242,8 +307,8 @@ class DatabaseManager:
                 # Test connection
                 self._redis_client.ping()
                 logger.info("Redis client initialized")
-            except Exception as e:
-                logger.error(f"Failed to initialize Redis: {e}")
+            except (ImportError, Exception) as e:
+                logger.info(f"Redis not available or not configured: {e}")
                 self._redis_client = None
         else:
             logger.info("Redis not configured - running without external caching")
@@ -284,8 +349,8 @@ class DatabaseManager:
                 if not self._minio_client.bucket_exists(bucket):
                     self._minio_client.make_bucket(bucket)
                     logger.info(f"Created bucket: {bucket}")
-            except S3Error as e:
-                logger.error(f"Failed to create bucket {bucket}: {e}")
+            except Exception as e:
+                logger.info(f"Could not create bucket {bucket}: {e}")
     
     def _initialize_schema(self):
         """Initialize PostgreSQL schema"""

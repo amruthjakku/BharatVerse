@@ -19,3 +19,4 @@ sounddevice>=0.4.6
 soundfile>=0.12.1
 PyAudio>=0.2.11
 toml>=0.10.2
+dotenv

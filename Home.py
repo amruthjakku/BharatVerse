@@ -36,11 +36,19 @@ def main():
         if styling_module:
             styling_module.load_custom_css()
     
-    # Initialize authentication
+    # Initialize authentication and handle OAuth callback
     with error_boundary("Failed to initialize authentication", show_error=False):
         auth_module = safe_import("streamlit_app.utils.auth")
         if auth_module:
-            auth_module.init_auth()
+            # Check if this is an OAuth callback
+            if 'code' in st.query_params:
+                # Handle the OAuth callback first
+                auth_module.handle_oauth_callback()
+                # Stop execution here to prevent showing the home page
+                st.stop()
+            else:
+                # Normal authentication initialization
+                auth_module.init_auth()
     
     # Modern gradient header
     st.markdown("""

@@ -1,68 +1,44 @@
-import os
 import streamlit as st
-import psycopg2
-from psycopg2.extras import RealDictCursor
 from datetime import datetime
+from utils.supabase_db import DatabaseManager
 
-def get_postgres_connection():
-    """Get PostgreSQL database connection"""
-    try:
-        conn = psycopg2.connect(
-            host=os.getenv("POSTGRES_HOST", "localhost"),
-            port=os.getenv("POSTGRES_PORT", "5432"),
-            database=os.getenv("POSTGRES_DB", "bharatverse"),
-            user=os.getenv("POSTGRES_USER", "bharatverse_user"),
-            password=os.getenv("POSTGRES_PASSWORD", "secretpassword")
-        )
-        return conn
-    except Exception as e:
-        st.error(f"Failed to connect to PostgreSQL: {e}")
-        return None
+# Use Supabase/Postgres exclusively via DatabaseManager
+_db = None
 
-def get_contributions():
-    """Get contributions from PostgreSQL database"""
+def get_db():
+    global _db
+    if _db is None:
+        _db = DatabaseManager()
+    return _db
+
+def get_contributions(limit: int = 20):
+    """Get recent public contributions from Supabase/Postgres"""
     try:
-        conn = get_postgres_connection()
-        if not conn:
-            return []
-            
-        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-            # Get recent contributions with user info
-            cursor.execute("""
-                SELECT 
-                    c.id,
-                    c.title,
-                    c.description,
-                    c.content_type,
-                    c.language,
-                    c.region,
-                    c.created_at,
-                    u.full_name as contributor_name,
-                    u.username as contributor_username
-                FROM content_metadata c
-                LEFT JOIN users u ON c.user_id = u.id
-                ORDER BY c.created_at DESC
-                LIMIT 20
-            """)
-            
-            contributions = []
-            for row in cursor.fetchall():
-                contrib = {
-                    'id': str(row['id']),
-                    'title': row['title'],
-                    'description': row['description'] or '',
-                    'type': row['content_type'],
-                    'lang': row['language'] or 'Unknown',
-                    'region': row['region'] or 'Unknown',
-                    'time': row['created_at'].strftime('%Y-%m-%d %H:%M') if row['created_at'] else 'Unknown',
-                    'contributor': row['contributor_name'] or 'Anonymous',
-                    'username': row['contributor_username'] or 'unknown'
-                }
-                contributions.append(contrib)
-        
-        conn.close()
+        db = get_db()
+        rows = db.get_contributions(limit=limit)
+        contributions = []
+        for row in rows:
+            # Map to UI structure used by Home.py and pages
+            created_at = row.get('created_at')
+            # created_at may be datetime or string
+            if isinstance(created_at, str):
+                time_str = created_at.replace('T', ' ')[:16]
+            elif created_at:
+                time_str = created_at.strftime('%Y-%m-%d %H:%M')
+            else:
+                time_str = 'Unknown'
+            contributions.append({
+                'id': str(row.get('id')),
+                'title': row.get('title'),
+                'description': row.get('content') or '',
+                'type': row.get('content_type'),
+                'lang': row.get('language') or 'Unknown',
+                'region': row.get('region') or 'Unknown',
+                'time': time_str,
+                'contributor': row.get('full_name') or row.get('username') or 'Anonymous',
+                'username': row.get('username') or 'unknown',
+            })
         return contributions
-        
     except Exception as e:
         st.error(f"Failed to fetch contributions: {e}")
         return []

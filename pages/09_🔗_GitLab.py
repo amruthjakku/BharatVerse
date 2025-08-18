@@ -27,6 +27,15 @@ def main():
         layout="wide"
     )
     
+    # Handle OAuth callback first if present
+    if 'code' in st.query_params:
+        try:
+            from streamlit_app.utils.auth import handle_oauth_callback
+            handle_oauth_callback()
+            st.stop()
+        except Exception as e:
+            st.error(f"OAuth callback error: {e}")
+    
     # Apply enhanced styling if available
     if STYLING_AVAILABLE:
         try:

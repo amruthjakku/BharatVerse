@@ -26,8 +26,8 @@ class GitLabAuth:
             self.scopes = None
             return
         
-        # Detect environment and set appropriate redirect URI
-        self.redirect_uri = self._detect_redirect_uri()
+        # Detect environment and set appropriate redirect URI (prefer explicit config)
+        self.redirect_uri = os.getenv('GITLAB_REDIRECT_URI') or self._detect_redirect_uri()
         
         # Try to get from Streamlit secrets first, then environment variables
         try:
@@ -54,6 +54,9 @@ class GitLabAuth:
             
             self.base_url = st.secrets.get("gitlab", {}).get("base_url") or os.getenv('GITLAB_BASE_URL', 'https://code.swecha.org')
             self.scopes = st.secrets.get("gitlab", {}).get("scopes") or os.getenv('GITLAB_SCOPES', 'api read_user profile email')
+            # Final fallback for redirect URI if still missing
+            if not self.redirect_uri:
+                self.redirect_uri = st.secrets.get("gitlab", {}).get("redirect_uri") or os.getenv('GITLAB_REDIRECT_URI') or self._detect_redirect_uri()
         except Exception:
             # Fallback to environment variables only
             self.client_id = os.getenv('GITLAB_CLIENT_ID')
