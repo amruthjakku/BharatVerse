@@ -1,14 +1,8 @@
-# System packages required for BharatVerse
-# These will be installed by Streamlit Cloud
-
-# Audio processing
 ffmpeg
 libsndfile1
 libportaudio2
 portaudio19-dev
 python3-pyaudio
 libasound2-dev
-
-# Additional libraries for ML
 libgomp1
 libglib2.0-0
