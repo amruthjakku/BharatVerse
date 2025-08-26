@@ -28,29 +28,6 @@ cryptography>=41.0.0
 psycopg2-binary>=2.9.0
 sqlalchemy>=2.0.23
 
-# ==================== Storage & Cloud ====================
-minio>=7.2.0
-boto3>=1.34.0
-redis>=5.0.0
-
-# ==================== Audio Processing ====================
-sounddevice>=0.4.6
-soundfile>=0.12.1
-librosa>=0.10.1
-pydub>=0.25.1
-
-# ==================== AI/ML Models ====================
-transformers>=4.36.0
-torch>=2.1.0
-torchvision>=0.16.0
-torchaudio>=2.1.0
-sentence-transformers>=2.2.2
-openai-whisper>=20231117
-
-# ==================== Computer Vision ====================
-opencv-python-headless>=4.8.0  # Use headless version for cloud
-scikit-image>=0.21.0
-
 # ==================== NLP & Text Processing ====================
 langdetect>=1.0.9
 textstat>=0.7.3
