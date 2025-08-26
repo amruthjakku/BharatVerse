@@ -1,0 +1,77 @@
+# BharatVerse - Streamlit Cloud Requirements
+# Optimized for deployment with minimal dependencies
+
+# ==================== Core Framework ====================
+streamlit>=1.29.0
+streamlit-option-menu>=0.3.6
+streamlit-extras>=0.3.6
+streamlit-lottie>=0.0.5
+
+# ==================== Data & Visualization ====================
+pandas>=2.0.0
+numpy>=1.24.0
+plotly>=5.18.0
+altair>=5.1.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+Pillow>=10.1.0
+
+# ==================== Authentication & Security ====================
+PyJWT>=2.8.0
+bcrypt>=4.1.2
+authlib>=1.2.1
+httpx>=0.25.0
+python-jose[cryptography]>=3.3.0
+cryptography>=41.0.0
+
+# ==================== Database ====================
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.23
+
+# ==================== Storage & Cloud ====================
+minio>=7.2.0
+boto3>=1.34.0
+redis>=5.0.0
+
+# ==================== Audio Processing ====================
+sounddevice>=0.4.6
+soundfile>=0.12.1
+librosa>=0.10.1
+pydub>=0.25.1
+
+# ==================== AI/ML Models ====================
+transformers>=4.36.0
+torch>=2.1.0
+torchvision>=0.16.0
+torchaudio>=2.1.0
+sentence-transformers>=2.2.2
+openai-whisper>=20231117
+
+# ==================== Computer Vision ====================
+opencv-python-headless>=4.8.0  # Use headless version for cloud
+scikit-image>=0.21.0
+
+# ==================== NLP & Text Processing ====================
+langdetect>=1.0.9
+textstat>=0.7.3
+nltk>=3.8.1
+wordcloud>=1.9.0
+
+# ==================== API & Web ====================
+fastapi>=0.104.1
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+markdown>=3.5.0
+
+# ==================== Utilities ====================
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+diskcache>=5.6.0
+psutil>=5.9.0
+toml>=0.10.2
+
+# ==================== Performance ====================
+accelerate>=0.25.0
+optimum>=1.16.0

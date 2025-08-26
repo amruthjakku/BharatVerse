@@ -1,52 +1,47 @@
-[global]
-# Performance optimizations
-developmentMode = false
-showWarningOnDirectExecution = false
-
 [theme]
-primaryColor = "#FF6B6B"
+# BharatVerse theme configuration
+primaryColor = "#FF6B35"
 backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0F2F6"
-textColor = "#2D3436"
+textColor = "#262730"
 font = "sans serif"
 
 [server]
-# Server optimizations
+# Server configuration for Streamlit Cloud
 headless = true
-runOnSave = false
-allowRunOnSave = false
-enableCORS = false
-enableXsrfProtection = true
-maxUploadSize = 200
-maxMessageSize = 200
+maxUploadSize = 100
+maxMessageSize = 100
 enableWebsocketCompression = true
+enableCORS = true
+enableXsrfProtection = true
 
 [browser]
-# Browser optimizations
+# Browser configuration
 gatherUsageStats = false
-showErrorDetails = false
+serverAddress = ""
+serverPort = 8501
 
 [client]
-# Client optimizations
+# Client configuration
 caching = true
 displayEnabled = true
+showErrorDetails = true
 toolbarMode = "minimal"
 
 [runner]
-# Runner optimizations
+# Runner configuration
 magicEnabled = true
 installTracer = false
 fixMatplotlib = true
 postScriptGC = true
 fastReruns = true
-enforceSerializableSessionState = false
 
 [logger]
-# Logging optimizations
+# Logging configuration
 level = "INFO"
 messageFormat = "%(asctime)s %(message)s"
 
 [deprecation]
-# Disable deprecation warnings for performance
+# Deprecation warnings
 showPyplotGlobalUse = false
 showfileUploaderEncoding = false
