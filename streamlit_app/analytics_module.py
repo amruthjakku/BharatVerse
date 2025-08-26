@@ -8,8 +8,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from datetime import datetime
 import random
 
 from core.service_manager import get_service_manager
@@ -177,7 +176,7 @@ def analytics_page():
     """, unsafe_allow_html=True)
     
     # Get service manager
-    service_manager = get_service_manager()
+    get_service_manager()
     
     # Display metrics
     display_metrics()

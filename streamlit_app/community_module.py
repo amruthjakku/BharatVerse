@@ -4,7 +4,6 @@ Community Module for BharatVerse - Complete Implementation
 import streamlit as st
 from streamlit_extras.colored_header import colored_header
 from streamlit_option_menu import option_menu
-from datetime import datetime
 
 def community_page():
     """Main community page"""

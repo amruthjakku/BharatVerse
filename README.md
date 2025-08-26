@@ -35,19 +35,22 @@
 
 ## 🚀 **Quick Access**
 
-> Simplified Edition (Finalised Version of BharatVerse)
+> **🏗️ Current Architecture & Backend**
 > 
-> The app is now optimized to be easy, simple, and fast. The following features are disabled/removed for this release:
-> - Audio features
-> - Visual heritage
-> - Performance tab
-> - Complex AI features (Enhanced AI, Real-time AI Analytics)
-> - Role-based access control (RBAC) checks are temporarily disabled
+> BharatVerse is built with a modern, scalable architecture:
+> - **🐘 Supabase (PostgreSQL)** - Primary database for all data storage
+> - **🔐 GitLab OAuth** - Authentication and user management
+> - **🤖 Corpus API** - Cultural content API integration
+> - **✨ Gemini AI** - Advanced AI processing capabilities
+> - **🚀 Streamlit Cloud** - Frontend hosting and deployment
 >
-> Available core features:
-> - Text Stories, Discover, Analytics
-> - Community (with built-in Collaboration tab)
-> - GitLab integration and a simple profile page
+> **Core Features:**
+> - 📝 Text Stories & Cultural Documentation
+> - 🔍 Discover & Search Heritage Content
+> - 📊 Analytics & Insights Dashboard
+> - 🤝 Community Hub with Collaboration
+> - 🔗 GitLab Integration (OAuth & Repository)
+> - 👤 User Profiles & Dashboard
 
 <div align="center">
 
@@ -160,15 +163,15 @@ graph TD
 └────────────────────────┼───────────────────────────────────────┘
                          │
 ┌────────────────────────▼───────────────────────────────────────┐
-│                   ⚡ Processing Layer                          │
+│                   ⚡ Backend Services                          │
 │                                                               │
 │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌───────────┐│
-│ │🔮 Inference │ │⚡ Redis     │ │🐘 PostgreSQL │ │🪣 R2      ││
-│ │  Manager    │ │  Cache      │ │  Database   │ │  Storage  ││
+│ │🐘 Supabase  │ │🔐 GitLab    │ │🤖 Corpus API│ │✨ Gemini   ││
+│ │  PostgreSQL │ │  OAuth      │ │  Service    │ │  AI        ││
 │ │             │ │             │ │             │ │           ││
-│ │• API Calls  │ │• AI Results │ │• User Data  │ │• Files    ││
-│ │• Processing │ │• Rate Limit │ │• Analytics  │ │• Media    ││
-│ │• Validation │ │• Sessions   │ │• Metadata   │ │• Backups  ││
+│ │• User Data  │ │• Auth Flow  │ │• Content    │ │• Advanced ││
+│ │• Analytics  │ │• User Mgmt  │ │• Cultural   │ │• Process  ││
+│ │• Storage    │ │• SSO        │ │• API        │ │• Analysis ││
 │ └─────────────┘ └─────────────┘ └─────────────┘ └───────────┘│
 └───────────────────────┬───────────────────────────────────────┘
                         │
@@ -189,23 +192,23 @@ graph TD
 
 ---
 
-## ☁️ **Free Cloud Deployment**
+## ☁️ **Deployment & Infrastructure**
 
-Deploy BharatVerse with **zero infrastructure costs** using our cloud-native architecture!
+Deploy BharatVerse using our integrated cloud services architecture!
 
 <div align="center">
 
-### 🎯 **5-Minute Deployment**
+### 🎯 **Current Production Stack**
 
-| Step | Service | Action | Cost |
+| Step | Service | Purpose | Status |
 |:---:|:---:|:---:|:---:|
-| 1️⃣ | **Streamlit Cloud** | Deploy frontend | 🆓 Free |
-| 2️⃣ | **Supabase** | PostgreSQL database | 🆓 500MB |
-| 3️⃣ | **Upstash** | Redis caching | 🆓 10K req/day |
-| 4️⃣ | **Cloudflare R2** | Object storage | 🆓 10GB |
-| 5️⃣ | **HuggingFace** | AI processing | 🆓 API calls |
+| 1️⃣ | **Streamlit Cloud** | Frontend Hosting | ✅ Active |
+| 2️⃣ | **Supabase** | PostgreSQL Database | ✅ Active |
+| 3️⃣ | **GitLab OAuth** | Authentication | ✅ Active |
+| 4️⃣ | **Corpus API** | Cultural Content | ✅ Active |
+| 5️⃣ | **Gemini AI** | AI Processing | ✅ Active |
 
-**💰 Total Monthly Cost: $0**
+**🚀 Production-Ready Architecture**
 
 </div>
 
@@ -293,6 +296,17 @@ git push
 ---
 
 ## 🛠️ **Development & Contributing**
+
+### **Code Quality & Performance**
+
+#### 🎯 **Recent Optimizations**
+The codebase has undergone significant performance optimization:
+- **73 unused imports removed** - Reduced memory footprint
+- **Test files separated** - Cleaner production deployment
+- **Module loading optimized** - Faster startup times
+- **Dependencies streamlined** - Improved load performance
+
+See [OPTIMIZATION_REPORT.md](./OPTIMIZATION_REPORT.md) for detailed optimization metrics.
 
 ### **Modern Python Toolchain**
 
@@ -544,11 +558,12 @@ graph TD
 
 #### ⚡ **Backend Layer**
 ```python
-☁️ Cloud Services (Free Tier)
-├── 🐘 Supabase (Database)
-├── ⚡ Upstash (Cache)
-├── 🪣 Cloudflare R2 (Storage)
-└── 🔧 Config Validation
+☁️ Current Backend Stack
+├── 🐘 Supabase (PostgreSQL Database)
+├── 🔐 GitLab OAuth (Authentication)
+├── 🤖 Corpus API (Cultural Content)
+├── ✨ Gemini AI (Advanced Processing)
+└── 🔧 Service Manager (Orchestration)
 ```
 
 #### 🔧 **DevOps Layer**
@@ -570,11 +585,11 @@ graph TD
 
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![GitLab](https://img.shields.io/badge/GitLab-FCA121?style=for-the-badge&logo=gitlab&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![HuggingFace](https://img.shields.io/badge/🤗_Transformers-FFD21E?style=for-the-badge&logoColor=black)
-![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
 
 </div>
 

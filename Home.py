@@ -1,6 +1,5 @@
 import streamlit as st
 import sys
-import os
 from pathlib import Path
 
 # Add the project root to Python path
@@ -28,7 +27,7 @@ def main():
     )
     
     # Initialize service manager
-    service_manager = get_service_manager()
+    get_service_manager()
     
     # Apply styling if available
     with error_boundary("Failed to load styling", show_error=False):

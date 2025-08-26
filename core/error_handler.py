@@ -5,7 +5,7 @@ Replaces scattered try/except blocks with consistent error handling
 
 import streamlit as st
 import logging
-from typing import Optional, Callable, Any, Dict
+from typing import Any
 from functools import wraps
 from contextlib import contextmanager
 
@@ -13,15 +13,12 @@ logger = logging.getLogger(__name__)
 
 class BharatVerseError(Exception):
     """Base exception for BharatVerse"""
-    pass
 
 class ServiceUnavailableError(BharatVerseError):
     """Raised when a required service is unavailable"""
-    pass
 
 class ConfigurationError(BharatVerseError):
     """Raised when configuration is invalid"""
-    pass
 
 def handle_errors(
     fallback_value: Any = None,

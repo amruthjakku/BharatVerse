@@ -2,7 +2,6 @@ import streamlit as st
 from datetime import datetime
 import sys
 from pathlib import Path
-import time
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
@@ -32,14 +31,12 @@ except ImportError:
 
 # Database imports
 try:
-    from utils.supabase_db import get_database_manager
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
 
 # Authentication imports
 try:
-    from streamlit_app.utils.auth import get_auth_manager
     AUTH_AVAILABLE = True
 except ImportError:
     AUTH_AVAILABLE = False
@@ -47,7 +44,6 @@ except ImportError:
 # Database utility imports
 try:
     from streamlit_app.utils.database import add_contribution
-    from core.database import DatabaseManager, ContentRepository
     DATABASE_AVAILABLE = True
 except ImportError:
     DATABASE_AVAILABLE = False
@@ -57,7 +53,7 @@ def text_page():
     st.markdown("Document stories, proverbs, recipes, and wisdom from your culture.")
     
     # Get text processing configuration
-    text_config = get_text_processing_config()
+    get_text_processing_config()
     
     # Language selection
     st.markdown("### 🌐 Language Selection")

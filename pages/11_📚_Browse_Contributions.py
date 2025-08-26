@@ -17,7 +17,6 @@ except ImportError:
 
 # Authentication imports
 try:
-    from streamlit_app.utils.auth import get_auth_manager
     AUTH_AVAILABLE = True
 except ImportError:
     AUTH_AVAILABLE = False

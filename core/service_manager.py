@@ -4,10 +4,10 @@ Replaces the scattered *_AVAILABLE flags with a clean service registry
 """
 
 import logging
-from typing import Dict, Any, Optional, Type
+from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
-from .module_loader import CommonModules, load_module, get_function, get_class
+from .module_loader import CommonModules, get_function
 
 logger = logging.getLogger(__name__)
 

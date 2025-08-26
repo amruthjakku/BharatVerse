@@ -1,10 +1,4 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 def collaboration_page():
     st.markdown("## 🤝 Collaboration Hub")
@@ -50,9 +44,9 @@ def active_projects_section():
     st.markdown("#### 🚀 Start a New Project")
     
     with st.form("new_project_form"):
-        project_title = st.text_input("Project Title")
-        project_description = st.text_area("Project Description")
-        project_type = st.selectbox("Project Type", ["Documentation", "Preservation", "Research", "Education"])
+        st.text_input("Project Title")
+        st.text_area("Project Description")
+        st.selectbox("Project Type", ["Documentation", "Preservation", "Research", "Education"])
         
         if st.form_submit_button("Create Project"):
             st.success("🎉 Project creation feature coming soon!")
@@ -66,13 +60,13 @@ def active_projects_section():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        project_status = st.selectbox("Status", ["All", "Active", "Planning", "Review", "Completed"])
+        st.selectbox("Status", ["All", "Active", "Planning", "Review", "Completed"])
     
     with col2:
-        project_type = st.selectbox("Type", ["All", "Documentation", "Preservation", "Research", "Education"])
+        st.selectbox("Type", ["All", "Documentation", "Preservation", "Research", "Education"])
     
     with col3:
-        sort_by = st.selectbox("Sort by", ["Recent", "Priority", "Progress", "Team Size"])
+        st.selectbox("Sort by", ["Recent", "Priority", "Progress", "Team Size"])
     
     # Get real projects from database
     # TODO: Replace with actual database query when collaboration system is implemented
@@ -145,14 +139,14 @@ def active_projects_section():
         col1, col2 = st.columns(2)
         
         with col1:
-            new_title = st.text_input("Project Title")
-            new_description = st.text_area("Project Description")
-            new_type = st.selectbox("Project Type", ["Documentation", "Preservation", "Research", "Education"])
+            st.text_input("Project Title")
+            st.text_area("Project Description")
+            st.selectbox("Project Type", ["Documentation", "Preservation", "Research", "Education"])
         
         with col2:
-            new_priority = st.selectbox("Priority", ["Low", "Medium", "High", "Critical"])
-            new_deadline = st.date_input("Target Deadline")
-            new_tags = st.text_input("Tags (comma-separated)")
+            st.selectbox("Priority", ["Low", "Medium", "High", "Critical"])
+            st.date_input("Target Deadline")
+            st.text_input("Tags (comma-separated)")
         
         if st.button("🚀 Create Project", type="primary"):
             st.success("Project created successfully! Team members will be notified.")

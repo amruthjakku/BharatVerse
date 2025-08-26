@@ -7,7 +7,7 @@ import streamlit as st
 import sys
 from pathlib import Path
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -20,19 +20,15 @@ STYLING_AVAILABLE = False
 SUPABASE_AVAILABLE = False
 
 try:
-    from streamlit_app.utils.auth import get_auth_manager, GitLabAuth
+    from streamlit_app.utils.auth import get_auth_manager
     AUTH_AVAILABLE = True
 except ImportError as e:
     AUTH_AVAILABLE = False
     # Store error for later display
     AUTH_ERROR = str(e)
 
-try:
-    from streamlit_app.utils.database import get_db_connection
-    DATABASE_AVAILABLE = True
-except ImportError as e:
-    DATABASE_AVAILABLE = False
-    DATABASE_ERROR = str(e)
+# Database disabled for simplified version
+DATABASE_AVAILABLE = False
 
 try:
     from streamlit_app.utils.main_styling import load_custom_css
@@ -41,13 +37,8 @@ except ImportError as e:
     STYLING_AVAILABLE = False
     STYLING_ERROR = str(e)
 
-# Database imports
-try:
-    from utils.supabase_db import get_database_manager
-    SUPABASE_AVAILABLE = True
-except ImportError as e:
-    SUPABASE_AVAILABLE = False
-    SUPABASE_ERROR = str(e)
+# Database disabled for simplified version
+SUPABASE_AVAILABLE = False
 
 def check_user_access():
     """Check if user is authenticated"""

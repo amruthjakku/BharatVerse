@@ -1,37 +1,28 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-from datetime import datetime
-import json
 import sys
 from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-from streamlit_app.utils.data_handler import get_contributions
 
 # Try to import enhanced AI models and database
 try:
-    from core.ai_models import ai_manager
     AI_MODELS_AVAILABLE = True
 except ImportError:
     AI_MODELS_AVAILABLE = False
 
 try:
-    from core.database import DatabaseManager, ContentRepository
     DATABASE_AVAILABLE = True
 except ImportError:
     DATABASE_AVAILABLE = False
 
 try:
-    from langdetect import detect
     LANGDETECT_AVAILABLE = True
 except ImportError:
     LANGDETECT_AVAILABLE = False
 
 try:
-    import plotly.express as px
     PLOTLY_AVAILABLE = True
 except ImportError:
     PLOTLY_AVAILABLE = False
@@ -94,8 +85,8 @@ def search_page():
                 )
             
             with col2:
-                quality_filter = st.slider("Minimum Quality Score", 0, 100, 0)
-                has_translation = st.checkbox("Has English Translation")
+                st.slider("Minimum Quality Score", 0, 100, 0)
+                st.checkbox("Has English Translation")
             
             with col3:
                 sort_by = st.selectbox(

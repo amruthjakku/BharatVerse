@@ -6,10 +6,8 @@ Personal user dashboard and profile management
 import streamlit as st
 from streamlit_app.utils.auth import GitLabAuth, require_auth
 from streamlit_app.utils.user_manager import user_manager
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 
 @require_auth

@@ -6,12 +6,11 @@ Handles OAuth flow with GitLab instance at code.swecha.org
 import os
 import streamlit as st
 import requests
-import json
-from urllib.parse import urlencode, parse_qs, urlparse
+from urllib.parse import urlencode
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 import secrets
-from .user_manager import user_manager
+# User manager removed - simplified auth
 
 class GitLabAuth:
     def __init__(self):
@@ -150,7 +149,7 @@ APP_ENV=render
             # Default fallback
             return "http://localhost:8501/callback"
             
-        except Exception as e:
+        except Exception:
             # If detection fails, return None to use fallback from env/secrets
             return None
     
@@ -484,19 +483,10 @@ def handle_oauth_callback():
             with st.spinner("Loading your profile..."):
                 user_info = auth.get_user_info(token_data['access_token'])
                 if user_info:
-                    # Create or update user in database
-                    db_user = user_manager.create_or_update_user(user_info)
-                    
-                    # Store both GitLab and database user info
+                    # Store GitLab user info
                     st.session_state.user_info = user_info
-                    st.session_state.db_user = db_user
-                    
-                    # Log login activity
-                    user_manager.log_user_activity(
-                        db_user['id'], 
-                        'login', 
-                        {'method': 'gitlab_oauth', 'ip': 'unknown'}
-                    )
+                    # Simplified - no database storage
+                    st.session_state.db_user = user_info
                     
                     # Save persistent login (remember me is enabled by default)
                     auth.save_persistent_login()
@@ -666,36 +656,7 @@ def render_user_info():
                 st.success("Logged out and login forgotten!")
                 st.rerun()
         
-        # Admin panel for admins only
-        if auth.is_admin():
-            st.markdown("---")
-            st.markdown("### 🛡️ Admin Panel")
-            
-            # Quick admin stats
-            try:
-                from utils.database_viewer import get_sqlite_user_stats
-                stats = get_sqlite_user_stats()
-                
-                if 'error' not in stats:
-                    st.metric("Total Users", stats['total_users'])
-                    st.metric("Active Users", stats['active_users'])
-                else:
-                    st.caption("Stats unavailable")
-                    
-            except Exception as e:
-                st.caption("Stats loading...")
-            
-            # Admin dashboard button
-            if st.button("🛡️ Admin Dashboard", use_container_width=True, type="primary"):
-                st.switch_page("pages/08_🛡️_Admin_Dashboard.py")
-            
-            # Quick admin links
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🗄️ Database", use_container_width=True):
-                    st.switch_page("pages/07_🗄️_Database_Admin.py")
-            with col2:
-                st.caption("Performance page disabled")
+        # Admin features disabled - simplified version
 
 
 def require_auth(func):
