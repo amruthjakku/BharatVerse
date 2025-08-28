@@ -35,10 +35,11 @@ ENV/
 # Streamlit
 .streamlit/secrets.toml
 
-# Local files
-*.env
-.env.local
-.env.production
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.template
 
 # Logs
 *.log
