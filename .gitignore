@@ -30,7 +30,7 @@ ENV/
 .venv/
 
 # uv
-uv.lock
+# uv.lock is tracked for reproducible builds
 
 # Streamlit
 .streamlit/secrets.toml
