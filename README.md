@@ -21,14 +21,6 @@
   <img src="https://img.shields.io/badge/💰_Cost-$0/month-00C851?style=for-the-badge&logo=dollar" alt="Free Deployment">
 </p>
 
-<p>
-  <img src="https://img.shields.io/github/license/bharatverse/bharatverse?style=flat-square" alt="License">
-  <img src="https://img.shields.io/github/stars/bharatverse/bharatverse?style=flat-square" alt="Stars">
-  <img src="https://img.shields.io/github/forks/bharatverse/bharatverse?style=flat-square" alt="Forks">
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
-  <img src="https://img.shields.io/badge/Python-3.10+-blue.svg?style=flat-square&logo=python" alt="Python">
-</p>
-
 </div>
 
 ---
