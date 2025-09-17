@@ -1,7 +1,7 @@
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
 
-Copyright (C) 2024 BharatVerse Contributors
+Copyright (C) 2025 BharatVerse Contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -49,19 +49,19 @@ This software includes the following third-party components with their respectiv
    Copyright 2018 The Hugging Face team
 
 3. **Streamlit** - Apache License 2.0
-   Copyright 2019-2024 Streamlit Inc.
+   Copyright 2019-2025 Streamlit Inc.
 
 4. **FastAPI** - MIT License
    Copyright (c) 2018 Sebastián Ramírez
 
 5. **PostgreSQL** - PostgreSQL License
-   Copyright (c) 1996-2024, PostgreSQL Global Development Group
+   Copyright (c) 1996-2025, PostgreSQL Global Development Group
 
 6. **Redis** - BSD 3-Clause License
-   Copyright (c) 2006-2024, Redis Ltd.
+   Copyright (c) 2006-2025, Redis Ltd.
 
 7. **MinIO** - GNU Affero General Public License v3.0
-   Copyright (c) 2015-2024 MinIO, Inc.
+   Copyright (c) 2015-2025 MinIO, Inc.
 
 For complete third-party license information, see the THIRD_PARTY_LICENSES.md file.
 
